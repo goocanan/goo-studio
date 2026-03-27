@@ -11,6 +11,7 @@ export default function ProjectDetail({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ ...project });
+  const [showPartModal, setShowPartModal] = useState(false);
   const [viewerUrl, setViewerUrl] = useState(null);
   const [partPreviews, setPartPreviews] = useState({});
   const [isUploading, setIsUploading] = useState(false);
