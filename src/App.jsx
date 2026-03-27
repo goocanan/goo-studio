@@ -165,53 +165,38 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-void relative overflow-hidden">
-        {/* Background Glows */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-cyan/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="loading-screen">
+        <div className="loading-glow-1" />
+        <div className="loading-glow-2" />
 
-        <div className="relative flex flex-col items-center animate-in fade-in zoom-in duration-500">
-          <div className="relative mb-12">
-            {/* Outer Rotating Ring */}
-            <div className="absolute -inset-4 border-2 border-dashed border-primary/20 rounded-full animate-spin-slow" />
-            
-            {/* Logo Container */}
-            <div className="w-24 h-24 bg-surface border border-white/10 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(139,92,246,0.15)] relative z-10 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-cyan/10" />
-              <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain relative z-20" />
-              
-              {/* Internal Pulse */}
-              <div className="absolute inset-0 bg-primary/20 animate-pulse" />
+        <div className="loading-center">
+          <div className="loading-logo-wrapper">
+            <div className="loading-ring" />
+            <div className="loading-logo-box">
+              <div className="loading-logo-gradient" />
+              <img src="/logo.png" alt="GOO-Studio" className="loading-logo-img" />
+              <div className="loading-logo-pulse" />
             </div>
-
-            {/* Orbiting particles */}
-            <div className="absolute top-0 left-1/2 -ml-1 w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_var(--accent-primary)] animate-ping" />
+            <div className="loading-particle" />
           </div>
 
-          <div className="flex flex-col items-center gap-4">
-            <h2 className="heading-md gradient-text text-center tracking-tight">GOO-STUDIO</h2>
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex gap-1.5">
-                {[0,1,2].map(i => (
-                  <div 
-                    key={i} 
-                    className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" 
-                    style={{ animationDelay: `${i * 0.15}s` }}
-                  />
-                ))}
-              </div>
-              <p className="text-xs text-dim font-medium uppercase tracking-[0.2em] mt-2 opacity-70">
-                {getLoadingMessage()}
-              </p>
-              <p className="text-[10px] text-muted max-w-[200px] text-center mt-4">
-                Tip: Render servers take a moment to wake up from hibernation.
-              </p>
+          <div className="loading-info">
+            <h2 className="loading-title gradient-text">GOO-STUDIO</h2>
+            <div className="loading-dots">
+              <div className="loading-dot" />
+              <div className="loading-dot" />
+              <div className="loading-dot" />
             </div>
+            <p className="loading-message">{getLoadingMessage()}</p>
+            <p className="loading-tip">
+              Tip: Render servers take a moment to wake up from hibernation.
+            </p>
           </div>
         </div>
       </div>
     );
   }
+
 
   return (
     <div className="app-container">
