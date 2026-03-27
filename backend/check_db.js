@@ -8,12 +8,10 @@ const client = new Client({
 
 client.connect()
   .then(async () => {
-    // Delete from all auth tables to clear partial states
-    await client.query("DELETE FROM \"session\"");
-    await client.query("DELETE FROM \"account\"");
-    await client.query("DELETE FROM \"verification\"");
-    await client.query("DELETE FROM \"user\"");
-    console.log('Cleared all auth tables.');
+    const resU = await client.query("SELECT * FROM \"user\"");
+    const resA = await client.query("SELECT * FROM \"account\"");
+    console.log('Users:', resU.rows);
+    console.log('Accounts:', resA.rows);
     client.end();
   })
   .catch(err => {

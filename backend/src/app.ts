@@ -25,7 +25,15 @@ import { userRouter } from "./routes/user.routes";
 
 import { toNodeHandler } from "better-auth/node";
 
-app.all(/\/api\/auth\/.*/, toNodeHandler(auth));
+const authHandler = toNodeHandler(auth);
+app.all(/\/api\/auth\/.*/, async (req, res, next) => {
+  try {
+    return authHandler(req as any, res as any);
+  } catch (err) {
+    console.error('AUTH_ERROR:', err);
+    next(err);
+  }
+});
 app.use("/api/projects", projectRouter);
 app.use("/api/spools", spoolRouter);
 app.use("/api/batches", batchRouter);
