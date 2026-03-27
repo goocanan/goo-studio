@@ -123,6 +123,8 @@ export default function App() {
           <Settings 
             settings={settings} 
             spools={spools}
+            onAddSpool={addSpool}
+            onDeleteSpool={deleteSpool}
             onUpdateSettings={updateSettings}
             onResetAll={resetAll}
             onExportData={exportData}

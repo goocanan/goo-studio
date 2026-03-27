@@ -1,8 +1,37 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Database, Upload, Download, AlertTriangle, Cylinder } from 'lucide-react';
+import { Settings as SettingsIcon, Database, Upload, Download, AlertTriangle, Cylinder, Plus, X, Trash2 } from 'lucide-react';
+import { MATERIALS } from '../lib/constants';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Settings({ settings, spools, onUpdateSettings, onResetAll, onExportData, onImportData }) {
+export default function Settings({ settings, spools, onAddSpool, onUpdateSettings, onUpdateSpool, onDeleteSpool, onResetAll, onExportData, onImportData }) {
   const [confirmReset, setConfirmReset] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  // New Spool Form State
+  const [newSpool, setNewSpool] = useState({
+    brand: '',
+    materialType: 'PLA',
+    color: '',
+    colorHex: '#3b82f6',
+    initialWeight: 1000,
+    currentWeight: 1000,
+    reelWeight: 180
+  });
+
+  const handleAddSpool = async (e) => {
+    e.preventDefault();
+    await onAddSpool(newSpool);
+    setShowAddModal(false);
+    setNewSpool({
+      brand: '',
+      materialType: 'PLA',
+      color: '',
+      colorHex: '#3b82f6',
+      initialWeight: 1000,
+      currentWeight: 1000,
+      reelWeight: 180
+    });
+  };
 
   const handleExport = () => {
     const data = onExportData();
@@ -47,9 +76,14 @@ export default function Settings({ settings, spools, onUpdateSettings, onResetAl
 
       {/* Filament Inventory List */}
       <div className="section mb-8">
-        <div className="section-header">
-          <Cylinder style={{ width: 16, height: 16 }} />
-          <span>Filament Inventory</span>
+        <div className="section-header flex-between">
+          <div className="flex items-center gap-2">
+            <Cylinder style={{ width: 16, height: 16 }} />
+            <span>Filament Inventory</span>
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={() => setShowAddModal(true)}>
+            <Plus size={14} /> Add Filament
+          </button>
         </div>
 
         <div className="glass-card overflow-hidden">
@@ -61,6 +95,7 @@ export default function Settings({ settings, spools, onUpdateSettings, onResetAl
                   <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Type</th>
                   <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Color</th>
                   <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim text-right">Available</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim text-right font-bold">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -82,11 +117,19 @@ export default function Settings({ settings, spools, onUpdateSettings, onResetAl
                     <td className="p-4 text-sm text-right font-mono text-primary">
                       {spool.currentWeight || spool.remainingWeight}g
                     </td>
+                    <td className="p-4 text-right">
+                      <button 
+                        className="btn-icon text-error p-1 hover:bg-error/10 rounded"
+                        onClick={() => onDeleteSpool(spool.id)}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {spools.length === 0 && (
                   <tr>
-                    <td colSpan="4" className="p-8 text-center text-dim italic text-sm">
+                    <td colSpan="5" className="p-8 text-center text-dim italic text-sm">
                       Belum ada data filament yang terdaftar.
                     </td>
                   </tr>
@@ -97,7 +140,96 @@ export default function Settings({ settings, spools, onUpdateSettings, onResetAl
         </div>
       </div>
 
-      {/* Display Preferences */}
+      {/* Add Spool Modal */}
+      <AnimatePresence>
+        {showAddModal && (
+          <div className="modal-overlay">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="glass-card modal-content max-w-md w-full p-6 relative overflow-hidden"
+            >
+              <div className="flex-between mb-6">
+                <h2 className="heading-md m-0 flex items-center gap-2">
+                  <Cylinder size={20} className="text-primary" />
+                  Add New Filament
+                </h2>
+                <button className="btn-icon" onClick={() => setShowAddModal(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAddSpool} className="flex-col gap-4">
+                <div className="form-group">
+                  <label className="form-label">Brand</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    required 
+                    placeholder="e.g. eSUN"
+                    value={newSpool.brand}
+                    onChange={e => setNewSpool({...newSpool, brand: e.target.value})}
+                  />
+                </div>
+
+                <div className="form-grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Material</label>
+                    <select 
+                      className="form-input"
+                      value={newSpool.materialType}
+                      onChange={e => setNewSpool({...newSpool, materialType: e.target.value})}
+                    >
+                      {MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Color Name</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      required 
+                      placeholder="e.g. Fire Red"
+                      value={newSpool.color}
+                      onChange={e => setNewSpool({...newSpool, color: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-grid-2">
+                   <div className="form-group">
+                    <label className="form-label">Pick Color</label>
+                    <input 
+                      type="color" 
+                      className="form-input h-10 p-1 bg-transparent border-subtle" 
+                      value={newSpool.colorHex}
+                      onChange={e => setNewSpool({...newSpool, colorHex: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Current Weight (g)</label>
+                    <input 
+                      type="number" 
+                      className="form-input" 
+                      required
+                      value={newSpool.currentWeight}
+                      onChange={e => setNewSpool({...newSpool, currentWeight: Number(e.target.value)})}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex-end gap-3 mt-6">
+                  <button type="button" className="btn btn-ghost" onClick={() => setShowAddModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Save Filament</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* General Preferences */}
       <div className="section mb-8">
         <div className="section-header">
           <SettingsIcon style={{ width: 16, height: 16 }} />
