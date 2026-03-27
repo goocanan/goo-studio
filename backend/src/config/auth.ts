@@ -22,6 +22,7 @@ export const auth = betterAuth({
   trustedOrigins: [
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://goo-studio.onrender.com",
     process.env.FRONTEND_URL || "",
   ].filter(Boolean),
 });
