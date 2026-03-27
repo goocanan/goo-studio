@@ -1,10 +1,11 @@
 import React, { Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stage, useSTLLoader } from '@react-three/drei';
+import { Canvas, useLoader } from '@react-three/fiber';
+import { OrbitControls, Stage } from '@react-three/drei';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader';
 import * as THREE from 'three';
 
 function Model({ url }) {
-  const geom = useSTLLoader(url);
+  const geom = useLoader(STLLoader, url);
   return (
     <mesh geometry={geom}>
       <meshStandardMaterial color="#8b5cf6" roughness={0.3} metalness={0.8} />
