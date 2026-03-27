@@ -24,14 +24,35 @@ export class ProjectService {
       priority: data.priority || "medium",
       notes: data.notes || "",
     };
+    
     await db.insert(projects).values(newProject);
+    
+    // Save parts if present
+    const projectParts: any[] = [];
+    if (data.parts && Array.isArray(data.parts)) {
+      for (const partData of data.parts) {
+        const partId = `PART-${Math.random().toString(36).substring(2, 6)}`;
+        const newPart = {
+          id: partId,
+          projectId: id,
+          name: partData.name,
+          material: partData.material,
+          color: partData.color,
+          weight: partData.weight,
+          quantity: partData.quantity || 1,
+          status: partData.status || "pending"
+        };
+        await db.insert(parts).values(newPart);
+        projectParts.push(newPart);
+      }
+    }
     
     await db.insert(activityLog).values({
       userId,
       message: `Proyek baru dibuat: ${newProject.name}`
     });
     
-    return newProject;
+    return { ...newProject, parts: projectParts };
   }
 
   static async updateProject(userId: string, id: string, data: any) {
