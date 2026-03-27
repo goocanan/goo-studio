@@ -28,7 +28,8 @@ export default function App() {
     spools, settings, activity, stats: spoolStats, 
     addSpool, deleteSpool,
     updateSettings, resetAll, exportData, importData,
-    addActivity 
+    addActivity,
+    isLoading: isLoadingSpools
   } = useSpools();
 
   const {
@@ -40,6 +41,7 @@ export default function App() {
   } = useProjects();
 
   const isLoading = isPending || isLoadingProjects || isLoadingSpools;
+
   const [loadingStep, setLoadingStep] = useState(0);
 
   useEffect(() => {
