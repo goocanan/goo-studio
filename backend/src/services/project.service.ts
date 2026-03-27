@@ -41,7 +41,8 @@ export class ProjectService {
           color: partData.color,
           weight: partData.weight,
           quantity: partData.quantity || 1,
-          status: partData.status || "pending"
+          status: partData.status || "pending",
+          path: partData.path || null
         };
         await db.insert(parts).values(newPart);
         projectParts.push(newPart);

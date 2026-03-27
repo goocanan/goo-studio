@@ -113,6 +113,7 @@ export const parts = pgTable("parts", {
   weight: integer("weight").notNull(),
   quantity: integer("quantity").notNull().default(1),
   status: text("status").notNull().default("pending"), // pending, ready, printing, done
+  path: text("path"),
   batchId: text("batchId").references(() => batches.id, { onDelete: "set null" }),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
