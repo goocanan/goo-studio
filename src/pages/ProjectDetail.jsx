@@ -297,24 +297,7 @@ export default function ProjectDetail({
           <h3 className="heading-sm mb-6 flex items-center gap-2"><Settings size={20} /> Project Configuration & Notes</h3>
           
           <div className="form-grid-2">
-            <div className="form-group">
-              <label className="text-xs text-dim block mb-2 font-bold uppercase tracking-wider">Project Status</label>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(PROJECT_STATUSES).map(([key, val]) => (
-                  <button 
-                    key={val}
-                    className={`btn btn-sm text-left ${project.status === val ? 'btn-primary' : 'btn-ghost'}`}
-                    style={{ justifyContent: 'flex-start', padding: '0.6rem 0.75rem' }}
-                    onClick={() => onUpdate(project.id, { status: val })}
-                  >
-                    {project.status === val ? <CheckCircle size={12} className="mr-2" /> : <div className="w-3 mr-2" />}
-                    {key}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <div className="form-group">
+            <div className="form-group col-span-2">
               <label className="text-xs text-dim block mb-2 font-bold uppercase tracking-wider">Notes & Instructions</label>
               {isEditing ? (
                 <textarea 
