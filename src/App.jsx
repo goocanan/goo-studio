@@ -26,6 +26,7 @@ export default function App() {
 
   const { 
     spools, settings, activity, stats: spoolStats, 
+    addSpool, deleteSpool,
     updateSettings, resetAll, exportData, importData,
     addActivity 
   } = useSpools();
