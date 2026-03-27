@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Zap, Package, CheckCircle, AlertCircle, ChevronRight } from 'lucide-react';
+import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Scale, Box, MoreHorizontal } from 'lucide-react';
 import { formatWeight } from '../lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Batching({ 
   suggestedGroups, batches, spools, createBatch, completeBatch, onNavigate 
 }) {
   const [selectedSpools, setSelectedSpools] = useState({});
+  const [activeTab, setActiveTab] = useState('suggested');
 
   const handleCreateBatch = (group, key) => {
     const spoolId = selectedSpools[key];
@@ -20,7 +22,8 @@ export default function Batching({
   const completedBatches = batches.filter(b => b.status === 'completed');
 
   return (
-    <div className="animate-in">
+    <div className="animate-in batching-page">
+      {/* Header */}
       <div className="page-header">
         <div className="page-header-left">
           <h1 className="heading-xl gradient-text">⚡ Smart Batching</h1>
@@ -28,51 +31,144 @@ export default function Batching({
         </div>
       </div>
 
-      <div className="batching-grid">
-        <section className="batch-section">
-          <h2 className="heading-lg mb-4">Suggested Groups</h2>
-          {suggestedGroups.length === 0 ? (
-            <div className="glass-card empty-mini">
-              <Package size={32} className="text-dim mb-2" />
-              <p>Tidak ada komponen "Pending" untuk di-batch.</p>
-            </div>
-          ) : (
-            <div className="batch-groups-grid">
-              {suggestedGroups.map((group) => {
+      {/* Stats Overview */}
+      <div className="batching-stats">
+        <div className="batching-stat-card">
+          <div className="batching-stat-icon" style={{ background: 'var(--accent-primary-soft)', color: 'var(--accent-primary)' }}>
+            <Layers size={20} />
+          </div>
+          <div className="batching-stat-info">
+            <span className="batching-stat-value">{suggestedGroups.length}</span>
+            <span className="batching-stat-label">Suggested Groups</span>
+          </div>
+        </div>
+        <div className="batching-stat-card">
+          <div className="batching-stat-icon" style={{ background: 'var(--accent-cyan-soft)', color: 'var(--accent-cyan)' }}>
+            <Printer size={20} />
+          </div>
+          <div className="batching-stat-info">
+            <span className="batching-stat-value">{activeBatches.length}</span>
+            <span className="batching-stat-label">Active Batches</span>
+          </div>
+        </div>
+        <div className="batching-stat-card">
+          <div className="batching-stat-icon" style={{ background: 'var(--accent-emerald-soft)', color: 'var(--accent-emerald)' }}>
+            <CheckCircle size={20} />
+          </div>
+          <div className="batching-stat-info">
+            <span className="batching-stat-value">{completedBatches.length}</span>
+            <span className="batching-stat-label">Completed</span>
+          </div>
+        </div>
+        <div className="batching-stat-card">
+          <div className="batching-stat-icon" style={{ background: 'var(--accent-amber-soft)', color: 'var(--accent-amber)' }}>
+            <Scale size={20} />
+          </div>
+          <div className="batching-stat-info">
+            <span className="batching-stat-value">
+              {formatWeight(suggestedGroups.reduce((sum, g) => sum + (Number(g.totalWeight) || 0), 0))}
+            </span>
+            <span className="batching-stat-label">Pending Weight</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="batching-tabs">
+        <button 
+          className={`batching-tab ${activeTab === 'suggested' ? 'active' : ''}`}
+          onClick={() => setActiveTab('suggested')}
+        >
+          <Layers size={16} />
+          Suggested Groups
+          {suggestedGroups.length > 0 && <span className="batching-tab-count">{suggestedGroups.length}</span>}
+        </button>
+        <button 
+          className={`batching-tab ${activeTab === 'active' ? 'active' : ''}`}
+          onClick={() => setActiveTab('active')}
+        >
+          <Printer size={16} />
+          Active Batches
+          {activeBatches.length > 0 && <span className="batching-tab-count">{activeBatches.length}</span>}
+        </button>
+        <button 
+          className={`batching-tab ${activeTab === 'completed' ? 'active' : ''}`}
+          onClick={() => setActiveTab('completed')}
+        >
+          <CheckCircle size={16} />
+          Completed
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="batching-content">
+        {/* Suggested Groups */}
+        {activeTab === 'suggested' && (
+          <div className="batching-groups-grid">
+            {suggestedGroups.length === 0 ? (
+              <div className="batching-empty">
+                <Package size={48} />
+                <h3>No Groups Available</h3>
+                <p>Tambahkan komponen dengan status "Pending" untuk melihat saran pengelompokan otomatis.</p>
+                <button className="btn btn-secondary" onClick={() => onNavigate('projects')}>
+                  <ChevronRight size={16} /> Lihat Projects
+                </button>
+              </div>
+            ) : (
+              suggestedGroups.map((group) => {
                 const key = `${group.material}-${group.color}`;
                 const sortedSpools = [...spools].sort((a, b) => {
                   const aMatch = a.material === group.material && a.colorName === group.color;
                   const bMatch = b.material === group.material && b.colorName === group.color;
                   if (aMatch && !bMatch) return -1;
                   if (!aMatch && bMatch) return 1;
-                  const aMatMatch = a.material === group.material;
-                  const bMatMatch = b.material === group.material;
-                  if (aMatMatch && !bMatMatch) return -1;
-                  if (!aMatMatch && bMatMatch) return 1;
                   return 0;
                 });
 
+                const selectedSpool = spools.find(s => s.id === selectedSpools[key]);
+                const materialMismatch = selectedSpool && selectedSpool.material !== group.material;
+                const weightInsufficient = selectedSpool && selectedSpool.remainingWeight < group.totalWeight;
+
                 return (
-                  <div key={key} className="glass-card batch-group-card">
-                    <div className="batch-group-header">
-                      <div className="batch-group-tag">
-                        <span className="dot" style={{ background: 'var(--accent-primary)' }}></span>
-                        {group.material} {group.color}
+                  <motion.div 
+                    key={key} 
+                    className="batching-group-card glass-card"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {/* Card Header */}
+                    <div className="batching-group-header">
+                      <div className="batching-group-tag">
+                        <span className="batching-group-dot" />
+                        <span className="batching-group-label">{group.material}</span>
+                        <span className="batching-group-color">{group.color}</span>
                       </div>
-                      <span className="text-bold">{formatWeight(group.totalWeight)}</span>
+                      <div className="batching-group-weight">
+                        <Scale size={12} />
+                        {formatWeight(group.totalWeight)}
+                      </div>
                     </div>
 
-                    <div className="batch-parts-list">
+                    {/* Parts List */}
+                    <div className="batching-parts-list">
+                      <div className="batching-parts-header">
+                        <span>{group.parts.length} Components</span>
+                      </div>
                       {group.parts.map(part => (
-                        <div key={part.id} className="batch-part-item">
-                          <span>{part.projectName} <ChevronRight size={12} className="inline" /> {part.name}</span>
-                          <span className="text-dim">{part.weight}g x{part.quantity || 1}</span>
+                        <div key={part.id} className="batching-part-row">
+                          <div className="batching-part-info">
+                            <span className="batching-part-project">{part.projectName}</span>
+                            <ChevronRight size={10} />
+                            <span className="batching-part-name">{part.name}</span>
+                          </div>
+                          <span className="batching-part-weight">{part.weight}g ×{part.quantity || 1}</span>
                         </div>
                       ))}
                     </div>
 
-                    <div className="batch-spool-selector">
-                      <label className="text-xs text-dim">Pilih Spool Tersedia:</label>
+                    {/* Spool Selector */}
+                    <div className="batching-spool-select">
+                      <label>Assign Spool</label>
                       <select 
                         className="form-input"
                         value={selectedSpools[key] || ''}
@@ -85,73 +181,130 @@ export default function Batching({
                           </option>
                         ))}
                       </select>
-                      {selectedSpools[key] && spools.find(s => s.id === selectedSpools[key])?.material !== group.material && (
-                        <p className="text-error text-xs mt-1">
-                          <AlertCircle size={12} className="inline" /> Material tidak cocok!
-                        </p>
+
+                      {materialMismatch && (
+                        <div className="batching-warning">
+                          <AlertCircle size={12} /> Material tidak cocok!
+                        </div>
                       )}
-                      {selectedSpools[key] && spools.find(s => s.id === selectedSpools[key])?.remainingWeight < group.totalWeight && (
-                        <p className="text-error text-xs mt-1">
-                          <AlertCircle size={12} className="inline" /> Stok tidak mencukupi!
-                        </p>
+                      {weightInsufficient && (
+                        <div className="batching-warning">
+                          <AlertCircle size={12} /> Stok tidak mencukupi!
+                        </div>
                       )}
                     </div>
 
+                    {/* Action */}
                     <button 
-                      className="btn btn-primary btn-full mt-4"
+                      className="btn btn-primary batching-action-btn"
                       disabled={!selectedSpools[key] || sortedSpools.length === 0}
                       onClick={() => handleCreateBatch(group, key)}
                     >
                       <Zap size={16} /> Generate Print Batch
                     </button>
-                  </div>
+                  </motion.div>
                 );
-              })}
-            </div>
-          )}
-        </section>
+              })
+            )}
+          </div>
+        )}
 
-        <section className="batch-section mt-8">
-          <h2 className="heading-lg mb-4">Active Batches</h2>
-          {activeBatches.length === 0 ? (
-            <p className="text-dim italic">Belum ada proses cetak aktif.</p>
-          ) : (
-            <div className="batch-list-horizontal">
-              {activeBatches.map(batch => (
-                <div key={batch.id} className="glass-card active-batch-card">
-                  <div className="flex-between mb-2">
-                    <span className="text-bold">{batch.id}</span>
-                    <span className="tag tag-primary">{batch.status.toUpperCase()}</span>
+        {/* Active Batches */}
+        {activeTab === 'active' && (
+          <div className="batching-active-grid">
+            {activeBatches.length === 0 ? (
+              <div className="batching-empty">
+                <Printer size={48} />
+                <h3>No Active Batches</h3>
+                <p>Generate print batch dari tab Suggested Groups untuk memulai proses cetak.</p>
+              </div>
+            ) : (
+              activeBatches.map((batch, index) => (
+                <motion.div 
+                  key={batch.id} 
+                  className="batching-active-card glass-card"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <div className="batching-active-header">
+                    <div className="batching-active-id">
+                      <Printer size={14} />
+                      <span>{batch.id.substring(0, 12)}...</span>
+                    </div>
+                    <span className={`batching-status-tag status-${batch.status}`}>
+                      {batch.status.toUpperCase()}
+                    </span>
                   </div>
-                  <div className="text-sm text-dim mb-3">
-                    {batch.material} {batch.color} | {batch.parts.length} parts
+
+                  <div className="batching-active-meta">
+                    <span className="batching-meta-chip">
+                      <Box size={12} /> {batch.material}
+                    </span>
+                    <span className="batching-meta-chip">
+                      {batch.color}
+                    </span>
+                    <span className="batching-meta-chip">
+                      <Package size={12} /> {batch.parts?.length || 0} parts
+                    </span>
                   </div>
                   
-                  <div className="batch-parts-mini-list mb-4">
-                    {batch.parts.map((pt, i) => (
-                      <div key={i} className="text-xxs text-dim flex items-center gap-1 mb-1">
-                        <ChevronRight size={10} className="text-primary" />
-                        <span className="truncate"><strong>{pt.projectName}</strong>: {pt.name} (x{pt.quantity || 1})</span>
+                  <div className="batching-active-parts">
+                    {(batch.parts || []).map((pt, i) => (
+                      <div key={i} className="batching-active-part-row">
+                        <ChevronRight size={10} />
+                        <span><strong>{pt.projectName}</strong>: {pt.name}</span>
+                        <span className="batching-active-part-qty">×{pt.quantity || 1}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex-between align-end">
-                    <div className="text-xs">
-                      Spool: <span className="text-primary">{batch.spoolId}</span>
+                  <div className="batching-active-footer">
+                    <div className="batching-spool-info">
+                      <span>Spool:</span>
+                      <span className="batching-spool-id">{batch.spoolId?.substring(0, 10)}...</span>
                     </div>
                     <button 
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-primary btn-sm"
                       onClick={() => completeBatch(batch.id)}
                     >
-                      <CheckCircle size={14} /> Selesai
+                      <CheckCircle size={14} /> Mark Done
                     </button>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                </motion.div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Completed Batches */}
+        {activeTab === 'completed' && (
+          <div className="batching-completed-grid">
+            {completedBatches.length === 0 ? (
+              <div className="batching-empty">
+                <CheckCircle size={48} />
+                <h3>No Completed Batches Yet</h3>
+                <p>Batch yang sudah selesai akan ditampilkan di sini sebagai histori.</p>
+              </div>
+            ) : (
+              completedBatches.map((batch, index) => (
+                <motion.div 
+                  key={batch.id} 
+                  className="batching-completed-card glass-card"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: index * 0.03 }}
+                >
+                  <div className="batching-completed-header">
+                    <CheckCircle size={16} style={{ color: 'var(--accent-emerald)' }} />
+                    <span>{batch.material} {batch.color}</span>
+                    <span className="batching-completed-parts">{batch.parts?.length || 0} parts</span>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
