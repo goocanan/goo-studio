@@ -1,6 +1,6 @@
 import React from 'react';
-import { LayoutDashboard, Folder, Zap, Cylinder, ChevronRight, CheckCircle } from 'lucide-react';
-import { formatWeight, formatRelativeDate, getWeightColor } from '../lib/utils';
+import { LayoutDashboard, Folder, Zap, ChevronRight, CheckCircle, List } from 'lucide-react';
+import { formatWeight, formatRelativeDate } from '../lib/utils';
 
 export default function Dashboard({ spoolStats, projectStats, activity, onNavigate }) {
   return (
@@ -37,13 +37,13 @@ export default function Dashboard({ spoolStats, projectStats, activity, onNaviga
           </div>
         </div>
 
-        <div className="glass-card stat-card" onClick={() => onNavigate('filament')}>
+        <div className="glass-card stat-card" onClick={() => onNavigate('settings')}>
           <div className="stat-icon" style={{ background: 'var(--accent-amber-soft)', color: 'var(--accent-amber)' }}>
-            <Cylinder />
+            <List />
           </div>
           <div className="stat-info">
-            <div className="stat-value">{spoolStats.lowStockCount}</div>
-            <div className="stat-label">Low Filament</div>
+            <div className="stat-value">{spoolStats.totalSpools}</div>
+            <div className="stat-label">Total Spools</div>
           </div>
         </div>
 
@@ -120,15 +120,15 @@ export default function Dashboard({ spoolStats, projectStats, activity, onNaviga
 
           <section className="section">
             <div className="section-header">
-              <span>🧶</span> Filament Status
+              <span>🧶</span> Filament Inventory
             </div>
             <div className="glass-card p-4">
               <div className="stat-row flex-between mb-2">
                 <span className="text-sm">Total Stok</span>
                 <span className="text-sm font-bold">{formatWeight(spoolStats.totalWeight)}</span>
               </div>
-              <button className="btn btn-secondary btn-full btn-sm" onClick={() => onNavigate('filament')}>
-                Inventory <ChevronRight size={14} />
+              <button className="btn btn-secondary btn-full btn-sm" onClick={() => onNavigate('settings')}>
+                Manage Inventory <ChevronRight size={14} />
               </button>
             </div>
           </section>

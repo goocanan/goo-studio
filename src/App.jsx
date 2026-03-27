@@ -7,22 +7,18 @@ import { useFileManager } from './hooks/useFileManager';
 import { useSession } from './lib/auth-client';
 
 // Pages
-import Dashboard from './pages/Dashboard';
+表达表达Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import AddProject from './pages/AddProject';
 import Batching from './pages/Batching';
-import SpoolInventory from './pages/SpoolInventory';
 import Settings from './pages/Settings';
-import SpoolDetail from './pages/SpoolDetail';
 import FileManager from './pages/FileManager';
-import Login from './pages/Login';
 
 export default function App() {
   const { data: session, isPending } = useSession();
   
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const [selectedSpoolId, setSelectedSpoolId] = useState(null);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [fileImportData, setFileImportData] = useState(null);
   
@@ -30,7 +26,6 @@ export default function App() {
 
   const { 
     spools, settings, activity, stats: spoolStats, 
-    addSpool, updateSpool, deleteSpool, adjustWeight, 
     updateSettings, resetAll, exportData, importData,
     addActivity 
   } = useSpools();
@@ -42,12 +37,10 @@ export default function App() {
     createBatch, completeBatch
   } = useProjects();
 
-  // Common props for sidebar/bottomnav
   const navProps = {
     currentPage,
     onNavigate: (page) => {
       setCurrentPage(page);
-      setSelectedSpoolId(null);
       if (page !== 'add-project') setFileImportData(null);
     }
   };
@@ -125,41 +118,11 @@ export default function App() {
             onImportProject={handleImportProject} 
           />
         );
-      case 'filament':
-        return (
-          <SpoolInventory 
-            spools={spools} 
-            onAdd={async (spool) => {
-              const newSpool = await addSpool(spool);
-              if (newSpool) {
-                setSelectedSpoolId(newSpool.id);
-                setCurrentPage('spool-detail');
-              }
-            }}
-            onViewDetail={(id) => {
-              setSelectedSpoolId(id);
-              setCurrentPage('spool-detail');
-            }}
-          />
-        );
-      case 'spool-detail':
-        const spool = spools.find(s => s.id === selectedSpoolId);
-        return spool ? (
-          <SpoolDetail 
-            spool={spool} 
-            onUpdate={updateSpool} 
-            onDelete={(id) => {
-              deleteSpool(id);
-              setCurrentPage('filament');
-            }}
-            onAdjustWeight={adjustWeight}
-            onBack={() => setCurrentPage('filament')} 
-          />
-        ) : <SpoolInventory spools={spools} onAdd={addSpool} />;
       case 'settings':
         return (
           <Settings 
             settings={settings} 
+            spools={spools}
             onUpdateSettings={updateSettings}
             onResetAll={resetAll}
             onExportData={exportData}
@@ -171,9 +134,7 @@ export default function App() {
     }
   };
 
-  // Determine activePage for nav highlight
-  const activePage = (currentPage === 'spool-detail') ? 'filament' : 
-                    (currentPage === 'project-detail') ? 'projects' : 
+  const activePage = (currentPage === 'project-detail') ? 'projects' : 
                     currentPage;
 
   if (isPending) {
@@ -185,7 +146,6 @@ export default function App() {
       </div>
     );
   }
-
 
   return (
     <div className="app-container">

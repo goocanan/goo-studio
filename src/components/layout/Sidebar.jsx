@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FolderKanban, Zap, Cylinder, Settings, FolderSearch, LogOut } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Zap, Settings, FolderSearch, LogOut } from 'lucide-react';
 import { signOut } from '../../lib/auth-client';
 
 const NAV_ITEMS = [
@@ -7,7 +7,6 @@ const NAV_ITEMS = [
   { id: 'projects', label: 'Projects', icon: FolderKanban },
   { id: 'batching', label: 'Batching', icon: Zap },
   { id: 'files', label: 'Files', icon: FolderSearch },
-  { id: 'filament', label: 'Filament', icon: Cylinder },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

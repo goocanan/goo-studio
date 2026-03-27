@@ -1,11 +1,10 @@
 import React from 'react';
-import { LayoutDashboard, FolderKanban, Zap, Cylinder, Settings } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Zap, Settings } from 'lucide-react';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
   { id: 'projects', label: 'Projects', icon: FolderKanban },
   { id: 'batching', label: 'Batch', icon: Zap },
-  { id: 'filament', label: 'Filament', icon: Cylinder },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Palette, Database, Upload, Download, AlertTriangle } from 'lucide-react';
-import { BRANDS, MATERIALS, DEFAULT_BRAND_PRESETS } from '../lib/constants';
+import { Settings as SettingsIcon, Database, Upload, Download, AlertTriangle, Cylinder } from 'lucide-react';
 
-export default function Settings({ settings, onUpdateSettings, onResetAll, onExportData, onImportData }) {
+export default function Settings({ settings, spools, onUpdateSettings, onResetAll, onExportData, onImportData }) {
   const [confirmReset, setConfirmReset] = useState(false);
 
   const handleExport = () => {
@@ -42,58 +41,70 @@ export default function Settings({ settings, onUpdateSettings, onResetAll, onExp
       <div className="page-header">
         <div className="page-header-left">
           <h1 className="heading-xl gradient-text">⚙️ Settings</h1>
-          <p className="page-subtitle">Configure your inventory preferences</p>
+          <p className="page-subtitle">Configure your inventory and management preferences</p>
         </div>
       </div>
 
-      {/* Brand Presets */}
-      <div className="section">
+      {/* Filament Inventory List */}
+      <div className="section mb-8">
         <div className="section-header">
-          <Palette style={{ width: 16, height: 16 }} />
-          <span>Brand Presets</span>
+          <Cylinder style={{ width: 16, height: 16 }} />
+          <span>Filament Inventory</span>
         </div>
 
-        <div className="settings-card">
-          {Object.entries(DEFAULT_BRAND_PRESETS).map(([brand, materials]) => (
-            <div key={brand} className="settings-row">
-              <div>
-                <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{brand}</div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
-                  {Object.entries(materials).map(([mat, temps]) =>
-                    `${mat}: ${temps.nozzleMin}–${temps.nozzleMax}/${temps.bedMin}–${temps.bedMax}°C`
-                  ).join(' · ')}
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '0.35rem' }}>
-                <button className="btn-icon" title="Edit" style={{ padding: '0.4rem' }}>✏️</button>
-              </div>
-            </div>
-          ))}
+        <div className="glass-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-subtle bg-white/5">
+                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Brand</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Type</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Color</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim text-right">Available</th>
+                </tr>
+              </thead>
+              <tbody>
+                {spools.map((spool, idx) => (
+                  <tr key={spool.id || idx} className="border-b border-subtle hover:bg-white/5 transition-colors">
+                    <td className="p-4 text-sm font-semibold">{spool.brand}</td>
+                    <td className="p-4 text-sm">
+                      <span className="badge badge-secondary">{spool.material || spool.materialType}</span>
+                    </td>
+                    <td className="p-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full border border-white/20" 
+                          style={{ background: spool.colorHex || '#ccc' }}
+                        />
+                        {spool.color || spool.colorName}
+                      </div>
+                    </td>
+                    <td className="p-4 text-sm text-right font-mono text-primary">
+                      {spool.currentWeight || spool.remainingWeight}g
+                    </td>
+                  </tr>
+                ))}
+                {spools.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="p-8 text-center text-dim italic text-sm">
+                      Belum ada data filament yang terdaftar.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       {/* Display Preferences */}
-      <div className="section">
+      <div className="section mb-8">
         <div className="section-header">
           <SettingsIcon style={{ width: 16, height: 16 }} />
-          <span>Display Preferences</span>
+          <span>General Preferences</span>
         </div>
 
         <div className="settings-card">
-          <div className="settings-row">
-            <span className="settings-row-label">Low Stock Threshold</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="number"
-                className="form-input"
-                value={settings.lowStockThreshold}
-                onChange={e => onUpdateSettings({ lowStockThreshold: Number(e.target.value) })}
-                style={{ width: 80, textAlign: 'center', padding: '0.5rem' }}
-              />
-              <span className="text-dim" style={{ fontSize: '0.85rem' }}>gram</span>
-            </div>
-          </div>
-
           <div className="settings-row">
             <span className="settings-row-label">Default Reel Weight</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -111,7 +122,7 @@ export default function Settings({ settings, onUpdateSettings, onResetAll, onExp
           <div className="settings-row">
             <span className="settings-row-label">Weight Unit</span>
             <div className="radio-group">
-              <label>
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="weightUnit"
@@ -119,9 +130,9 @@ export default function Settings({ settings, onUpdateSettings, onResetAll, onExp
                   checked={settings.weightUnit === 'gram'}
                   onChange={() => onUpdateSettings({ weightUnit: 'gram' })}
                 />
-                gram
+                <span className="text-sm">gram</span>
               </label>
-              <label>
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="weightUnit"
@@ -129,7 +140,7 @@ export default function Settings({ settings, onUpdateSettings, onResetAll, onExp
                   checked={settings.weightUnit === 'kg'}
                   onChange={() => onUpdateSettings({ weightUnit: 'kg' })}
                 />
-                kg
+                <span className="text-sm">kg</span>
               </label>
             </div>
           </div>
