@@ -48,11 +48,23 @@ export default function AddProject({ onAdd, onBack, initialData }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    let finalImage = image;
+    
+    // If image is a File object, convert it to base64 for the database
+    if (image instanceof File) {
+      finalImage = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(image);
+      });
+    }
+
     onAdd({
       name,
-      image,
+      image: finalImage,
       notes,
       priority,
       status: parts.length > 0 ? 'ready' : 'idea',
