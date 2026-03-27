@@ -7,7 +7,7 @@ import { useFileManager } from './hooks/useFileManager';
 import { useSession } from './lib/auth-client';
 
 // Pages
-表达表达Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import AddProject from './pages/AddProject';
