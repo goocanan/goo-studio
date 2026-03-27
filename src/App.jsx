@@ -186,9 +186,6 @@ export default function App() {
     );
   }
 
-  if (!session) {
-    return <Login />;
-  }
 
   return (
     <div className="app-container">
