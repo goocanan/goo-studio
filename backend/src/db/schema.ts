@@ -87,6 +87,7 @@ export const projects = pgTable("projects", {
   status: text("status").notNull().default("idea"), // idea, ready, printing, done
   priority: text("priority").notNull().default("medium"),
   notes: text("notes"),
+  image: text("image"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });

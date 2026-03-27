@@ -23,6 +23,7 @@ export class ProjectService {
       status: data.status || "idea",
       priority: data.priority || "medium",
       notes: data.notes || "",
+      image: data.image || null,
     };
     
     await db.insert(projects).values(newProject);

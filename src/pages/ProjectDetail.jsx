@@ -11,9 +11,9 @@ export default function ProjectDetail({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ ...project });
-  const [showPartModal, setShowPartModal] = useState(false);
   const [viewerUrl, setViewerUrl] = useState(null);
   const [partPreviews, setPartPreviews] = useState({});
+  const [isUploading, setIsUploading] = useState(false);
 
   // Pre-load previews for parts that have a path
   useEffect(() => {
@@ -56,6 +56,21 @@ export default function ProjectDetail({
   const handleSaveProject = () => {
     onUpdate(project.id, editForm);
     setIsEditing(false);
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result;
+      onUpdate(project.id, { image: base64String });
+      setEditForm(prev => ({ ...prev, image: base64String }));
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleAddPart = (e) => {
@@ -297,7 +312,36 @@ export default function ProjectDetail({
           <h3 className="heading-sm mb-6 flex items-center gap-2"><Settings size={20} /> Project Configuration & Notes</h3>
           
           <div className="form-grid-2">
-            <div className="form-group col-span-2">
+            <div className="form-group">
+              <label className="text-xs text-dim block mb-2 font-bold uppercase tracking-wider">Project Photo</label>
+              <div className="flex items-center gap-4">
+                <div className="w-24 h-24 rounded-xl overflow-hidden border border-subtle bg-surface/30">
+                  {project.image ? (
+                    <img src={project.image} className="w-full h-full object-cover" alt="Preview" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-dim text-xxs">No Photo</div>
+                  )}
+                </div>
+                <div className="flex-col gap-2">
+                  <input 
+                    type="file" 
+                    id="project-image-upload" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
+                  <label 
+                    htmlFor="project-image-upload" 
+                    className={`btn btn-secondary btn-sm ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                  >
+                    {isUploading ? 'Uploading...' : 'Change Photo'}
+                  </label>
+                  <p className="text-xxs text-dim mt-1">Recommended: 16:9 Aspect Ratio</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
               <label className="text-xs text-dim block mb-2 font-bold uppercase tracking-wider">Notes & Instructions</label>
               {isEditing ? (
                 <textarea 
