@@ -14,6 +14,7 @@ import AddProject from './pages/AddProject';
 import Batching from './pages/Batching';
 import Settings from './pages/Settings';
 import FileManager from './pages/FileManager';
+import { useEffect, useState } from 'react';
 
 export default function App() {
   const { data: session, isPending } = useSession();
@@ -35,8 +36,31 @@ export default function App() {
     projects, batches, suggestedGroups, stats: projectStats,
     addProject, updateProject, deleteProject,
     addPart, updatePart, deletePart,
-    createBatch, completeBatch
+    createBatch, completeBatch,
+    isLoading: isLoadingProjects
   } = useProjects();
+
+  const isLoading = isPending || isLoadingProjects || isLoadingSpools;
+  const [loadingStep, setLoadingStep] = useState(0);
+
+  useEffect(() => {
+    if (isLoading) {
+      const timer = setInterval(() => {
+        setLoadingStep(prev => (prev + 1) % 4);
+      }, 3000);
+      return () => clearInterval(timer);
+    }
+  }, [isLoading]);
+
+  const getLoadingMessage = () => {
+    const messages = [
+      "Awakening our servers...",
+      "Connecting to Supabase...",
+      "Retrieving your 3D Projects...",
+      "Almost there, finalizing GOO-Studio..."
+    ];
+    return messages[loadingStep];
+  };
 
   const navProps = {
     currentPage,
@@ -140,11 +164,51 @@ export default function App() {
   const activePage = (currentPage === 'project-detail') ? 'projects' : 
                     currentPage;
 
-  if (isPending) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(var(--color-primary),0.3)] animate-pulse">
-            <span className="text-3xl font-bold text-primary">G</span>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-void relative overflow-hidden">
+        {/* Background Glows */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-cyan/5 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="relative flex flex-col items-center animate-in fade-in zoom-in duration-500">
+          <div className="relative mb-12">
+            {/* Outer Rotating Ring */}
+            <div className="absolute -inset-4 border-2 border-dashed border-primary/20 rounded-full animate-spin-slow" />
+            
+            {/* Logo Container */}
+            <div className="w-24 h-24 bg-surface border border-white/10 rounded-2xl flex items-center justify-center shadow-[0_0_50px_rgba(139,92,246,0.15)] relative z-10 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-cyan/10" />
+              <span className="text-5xl font-black text-white relative z-20 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] select-none">G</span>
+              
+              {/* Internal Pulse */}
+              <div className="absolute inset-0 bg-primary/20 animate-pulse" />
+            </div>
+
+            {/* Orbiting particles */}
+            <div className="absolute top-0 left-1/2 -ml-1 w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_var(--accent-primary)] animate-ping" />
+          </div>
+
+          <div className="flex flex-col items-center gap-4">
+            <h2 className="heading-md gradient-text text-center tracking-tight">GOO-STUDIO</h2>
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex gap-1.5">
+                {[0,1,2].map(i => (
+                  <div 
+                    key={i} 
+                    className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" 
+                    style={{ animationDelay: `${i * 0.15}s` }}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-dim font-medium uppercase tracking-[0.2em] mt-2 opacity-70">
+                {getLoadingMessage()}
+              </p>
+              <p className="text-[10px] text-muted max-w-[200px] text-center mt-4">
+                Tip: Render servers take a moment to wake up from hibernation.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
