@@ -122,7 +122,7 @@ export function useProjects() {
     const payload = {
       material: group.material,
       color: group.color,
-      parts: group.parts,
+      partIds: group.parts.map(p => p.id),
       totalWeight: group.totalWeight,
       spoolId: spoolId
     };
