@@ -8,8 +8,12 @@ const client = new Client({
 
 client.connect()
   .then(async () => {
-    const res = await client.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'account'");
-    console.log('Columns in account:', res.rows.map(r => `${r.column_name} (${r.data_type})`));
+    // Delete from all auth tables to clear partial states
+    await client.query("DELETE FROM \"session\"");
+    await client.query("DELETE FROM \"account\"");
+    await client.query("DELETE FROM \"verification\"");
+    await client.query("DELETE FROM \"user\"");
+    console.log('Cleared all auth tables.');
     client.end();
   })
   .catch(err => {
