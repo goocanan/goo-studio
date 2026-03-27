@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { ArrowLeft, Plus, Trash2, CheckCircle, Clock, Play, Save, Package, Scale, Settings, MoreVertical, Edit3, Box, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PROJECT_STATUSES, PART_STATUSES, MATERIALS } from '../lib/constants';
-import { formatWeight } from '../lib/utils';
+import { formatWeight, optimizeImage } from '../lib/utils';
 import ThreeDViewer from '../components/ui/ThreeDViewer';
 import ModelPreview from '../components/ui/ModelPreview';
 
@@ -58,19 +58,21 @@ export default function ProjectDetail({
     setIsEditing(false);
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setIsUploading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result;
-      onUpdate(project.id, { image: base64String });
-      setEditForm(prev => ({ ...prev, image: base64String }));
+    try {
+      // Optimize image before sending to DB (max 1200px, 0.8 quality)
+      const optimizedBase64 = await optimizeImage(file);
+      onUpdate(project.id, { image: optimizedBase64 });
+      setEditForm(prev => ({ ...prev, image: optimizedBase64 }));
+    } catch (error) {
+      console.error('Image optimization failed:', error);
+    } finally {
       setIsUploading(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleAddPart = (e) => {

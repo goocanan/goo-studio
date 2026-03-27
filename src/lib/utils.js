@@ -163,6 +163,50 @@ export function groupPartsByColorMaterial(projects) {
       });
     });
   });
-
   return Object.values(groups).sort((a, b) => b.totalWeight - a.totalWeight);
+}
+
+/**
+ * Compresses and resizes an image before uploading/saving to DB.
+ * Max width/height 1200px, JPEG quality 0.8
+ */
+export async function optimizeImage(fileOrBase64, maxWidth = 1200, maxHeight = 1200) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      // Calculate new dimensions maintain aspect ratio
+      if (width > height) {
+        if (width > maxWidth) {
+          height *= maxWidth / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width *= maxHeight / height;
+          height = maxHeight;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert to compressed jpeg
+      const optimizedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+      resolve(optimizedBase64);
+    };
+
+    if (typeof fileOrBase64 === 'string') {
+      img.src = fileOrBase64;
+    } else {
+      const reader = new FileReader();
+      reader.onload = (e) => { img.src = e.target.result; };
+      reader.readAsDataURL(fileOrBase64);
+    }
+  });
 }

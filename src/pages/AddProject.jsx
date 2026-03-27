@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Plus, Trash2, Save, Package, Info, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MATERIALS } from '../lib/constants';
+import { optimizeImage } from '../lib/utils';
 
 export default function AddProject({ onAdd, onBack, initialData }) {
   const [name, setName] = useState(initialData?.name || '');
@@ -53,13 +54,13 @@ export default function AddProject({ onAdd, onBack, initialData }) {
     
     let finalImage = image;
     
-    // If image is a File object, convert it to base64 for the database
-    if (image instanceof File) {
-      finalImage = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(image);
-      });
+    // If image is a File or an unoptimized base64 string, compress it
+    if (image instanceof File || (typeof image === 'string' && image.length > 200000)) {
+      try {
+        finalImage = await optimizeImage(image);
+      } catch (error) {
+        console.error('Failed to optimize image in AddProject:', error);
+      }
     }
 
     onAdd({
