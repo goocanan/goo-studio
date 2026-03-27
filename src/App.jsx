@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/layout/Sidebar';
 import BottomNav from './components/layout/BottomNav';
 import { useSpools } from './hooks/useSpools';
@@ -14,7 +14,6 @@ import AddProject from './pages/AddProject';
 import Batching from './pages/Batching';
 import Settings from './pages/Settings';
 import FileManager from './pages/FileManager';
-import { useEffect, useState } from 'react';
 
 export default function App() {
   const { data: session, isPending } = useSession();
