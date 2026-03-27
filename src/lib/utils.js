@@ -135,23 +135,27 @@ export function groupPartsByColorMaterial(projects) {
   const groups = {};
 
   projects.forEach(project => {
-    // Only batch parts that are 'ready' or 'pending' if project is 'ready' or 'idea'
-    if (project.status === 'done') return;
+    // Collect all parts from any project that isn't 'done'
+    if (project.status === 'done' || !project.parts) return;
 
     project.parts.forEach(part => {
+      // Only batch parts that are NOT 'done'
       if (part.status === 'done') return;
 
-      const key = `${part.material}|${part.color}`;
+      const key = `${part.material || part.materialType}|${part.color || part.colorName}`;
       if (!groups[key]) {
         groups[key] = {
-          material: part.material,
-          color: part.color,
+          material: part.material || part.materialType,
+          color: part.color || part.colorName,
           totalWeight: 0,
           parts: [],
         };
       }
 
-      groups[key].totalWeight += (Number(part.weight) || 0) * (Number(part.quantity) || 1);
+      const weight = Number(part.weight) || 0;
+      const quantity = Number(part.quantity) || 1;
+      
+      groups[key].totalWeight += weight * quantity;
       groups[key].parts.push({
         ...part,
         projectName: project.name,
