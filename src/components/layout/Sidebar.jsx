@@ -13,9 +13,9 @@ const NAV_ITEMS = [
 export default function Sidebar({ activePage, onNavigate }) {
   return (
     <aside className="sidebar flex flex-col h-full">
-      <div className="sidebar-logo">
-        <div className="sidebar-logo-icon">G</div>
-        <span className="sidebar-logo-text">GOO-Studio</span>
+      <div className="sidebar-logo flex items-center gap-3 px-2 mb-8 cursor-pointer" onClick={() => onNavigate('dashboard')}>
+        <img src="/logo.png" alt="GOO-Studio Logo" className="w-9 h-9 object-contain rounded-lg" />
+        <span className="sidebar-logo-text text-xl font-bold tracking-tight">GOO-Studio</span>
       </div>
 
       <nav className="sidebar-nav flex-1">

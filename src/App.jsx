@@ -177,9 +177,9 @@ export default function App() {
             <div className="absolute -inset-4 border-2 border-dashed border-primary/20 rounded-full animate-spin-slow" />
             
             {/* Logo Container */}
-            <div className="w-24 h-24 bg-surface border border-white/10 rounded-2xl flex items-center justify-center shadow-[0_0_50px_rgba(139,92,246,0.15)] relative z-10 overflow-hidden">
+            <div className="w-24 h-24 bg-surface border border-white/10 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(139,92,246,0.15)] relative z-10 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-cyan/10" />
-              <span className="text-5xl font-black text-white relative z-20 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] select-none">G</span>
+              <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain relative z-20" />
               
               {/* Internal Pulse */}
               <div className="absolute inset-0 bg-primary/20 animate-pulse" />
