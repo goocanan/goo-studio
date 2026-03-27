@@ -17,21 +17,24 @@ app.use(cors({
 
 app.use(express.json());
 
-import { authRouter } from "./routes/auth.routes";
+import { auth } from "./config/auth";
 import { projectRouter } from "./routes/project.routes";
 import { spoolRouter } from "./routes/spool.routes";
 import { batchRouter } from "./routes/batch.routes";
 import { userRouter } from "./routes/user.routes";
 
-app.use("/api/auth", authRouter);
+import { toNodeHandler } from "better-auth/node";
+
+app.all(/\/api\/auth\/.*/, toNodeHandler(auth));
 app.use("/api/projects", projectRouter);
 app.use("/api/spools", spoolRouter);
 app.use("/api/batches", batchRouter);
 app.use("/api/user", userRouter);
 
-// Basic health check route
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
+// Error handler
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error('SERVER_ERROR:', err);
+  res.status(500).json({ error: err.message || "Internal Server Error" });
 });
 
 export default app;
