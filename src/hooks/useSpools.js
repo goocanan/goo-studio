@@ -74,7 +74,12 @@ export function useSpools() {
   }, [addActivityMutation]);
 
   const addSpool = useCallback(async (spool) => {
-    return await addSpoolMutation.mutateAsync(spool);
+    try {
+      return await addSpoolMutation.mutateAsync(spool);
+    } catch (e) {
+      alert('Error saving filament: ' + (e.response?.data?.error || e.message));
+      throw e;
+    }
   }, [addSpoolMutation]);
 
   const updateSpool = useCallback((id, updates) => {
