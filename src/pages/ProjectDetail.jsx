@@ -12,6 +12,7 @@ export default function ProjectDetail({
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ ...project });
   const [showPartModal, setShowPartModal] = useState(false);
+  const [editingPart, setEditingPart] = useState(null);
   const [viewerUrl, setViewerUrl] = useState(null);
   const [partPreviews, setPartPreviews] = useState({});
   const [isUploading, setIsUploading] = useState(false);
@@ -79,16 +80,33 @@ export default function ProjectDetail({
   const handleAddPart = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const newPart = {
+    const partData = {
       name: formData.get('name'),
       material: formData.get('material'),
       color: formData.get('color'),
       weight: parseFloat(formData.get('weight')) || 0,
       quantity: parseInt(formData.get('quantity')) || 1,
-      status: PART_STATUSES.PENDING
+      status: editingPart ? editingPart.status : PART_STATUSES.PENDING
     };
-    onAddPart(project.id, newPart);
+    
+    if (editingPart) {
+      onUpdatePart(project.id, editingPart.id, partData);
+    } else {
+      onAddPart(project.id, partData);
+    }
+    
     setShowPartModal(false);
+    setEditingPart(null);
+  };
+
+  const openEditPartModal = (part) => {
+    setEditingPart(part);
+    setShowPartModal(true);
+  };
+
+  const openAddPartModal = () => {
+    setEditingPart(null);
+    setShowPartModal(true);
   };
 
   return (
@@ -225,7 +243,7 @@ export default function ProjectDetail({
       <div className="detail-section mb-12">
         <div className="section-header flex-between mb-4">
           <h2 className="heading-md flex items-center gap-2"><Package size={20} /> Project Components</h2>
-          <button className="btn btn-primary btn-sm" onClick={() => setShowPartModal(true)}>
+          <button className="btn btn-primary btn-sm" onClick={openAddPartModal}>
             <Plus size={14} /> Add Part
           </button>
         </div>
@@ -237,7 +255,7 @@ export default function ProjectDetail({
                 <div className="mb-4 opacity-50"><Package size={48} className="mx-auto" /></div>
                 <h3 className="heading-sm text-dim">No components yet</h3>
                 <p className="text-muted text-xs mb-4">Add your first printable file to start tracking progress.</p>
-                <button className="btn btn-secondary btn-sm" onClick={() => setShowPartModal(true)}>
+                <button className="btn btn-secondary btn-sm" onClick={openAddPartModal}>
                   <Plus size={14} /> Add First Component
                 </button>
               </div>
@@ -277,9 +295,14 @@ export default function ProjectDetail({
                   <div className="part-card-body p-4">
                     <div className="part-card-header mb-2">
                       <h4 className="part-card-name truncate">{part.name}</h4>
-                      <button className="btn-icon xs hover:text-error" onClick={() => onDeletePart(project.id, part.id)}>
-                        <Trash2 size={12} />
-                      </button>
+                      <div className="flex gap-1">
+                        <button className="btn-icon xs hover:text-primary" onClick={() => openEditPartModal(part)}>
+                          <Edit3 size={12} />
+                        </button>
+                        <button className="btn-icon xs hover:text-error" onClick={() => onDeletePart(project.id, part.id)}>
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
                     </div>
                     
                     <div className="part-card-meta mb-3">
@@ -364,44 +387,44 @@ export default function ProjectDetail({
         </div>
       </div>
 
-      {/* Add Part Modal */}
+      {/* Add/Edit Part Modal */}
       {showPartModal && (
         <div className="modal-overlay" onClick={() => setShowPartModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title">Add Component</h2>
+              <h2 className="modal-title">{editingPart ? 'Edit Component' : 'Add Component'}</h2>
               <button className="btn-icon" onClick={() => setShowPartModal(false)}>✕</button>
             </div>
             <form onSubmit={handleAddPart} className="modal-form">
               <div className="form-group">
                 <label className="form-label">Component Name</label>
-                <input name="name" type="text" required placeholder="e.g. Panel R" className="form-input" />
+                <input name="name" type="text" required placeholder="e.g. Panel R" className="form-input" defaultValue={editingPart?.name || ''} />
               </div>
               <div className="form-grid-2">
                 <div className="form-group">
                   <label className="form-label">Material</label>
-                  <select name="material" className="form-input">
+                  <select name="material" className="form-input" defaultValue={editingPart?.material || 'PLA'}>
                     {MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Color</label>
-                  <input name="color" type="text" placeholder="e.g. Red" className="form-input" />
+                  <input name="color" type="text" placeholder="e.g. Red" className="form-input" defaultValue={editingPart?.color || ''} />
                 </div>
               </div>
               <div className="form-grid-2">
                 <div className="form-group">
                   <label className="form-label">Weight (g)</label>
-                  <input name="weight" type="number" required defaultValue="50" className="form-input" />
+                  <input name="weight" type="number" required defaultValue={editingPart?.weight || 50} className="form-input" />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Quantity</label>
-                  <input name="quantity" type="number" required defaultValue="1" className="form-input" />
+                  <input name="quantity" type="number" required defaultValue={editingPart?.quantity || 1} className="form-input" />
                 </div>
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn btn-ghost" onClick={() => setShowPartModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Add Component</button>
+                <button type="submit" className="btn btn-primary">{editingPart ? 'Save Changes' : 'Add Component'}</button>
               </div>
             </form>
           </div>
