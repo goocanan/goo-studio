@@ -47,7 +47,7 @@ export default function App() {
 
   const { 
     spools, settings, activity, stats: spoolStats, 
-    addSpool, deleteSpool,
+    addSpool, updateSpool, deleteSpool,
     updateSettings, resetAll, exportData, importData,
     addActivity,
     isLoading: isLoadingSpools
