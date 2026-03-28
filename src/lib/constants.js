@@ -1,6 +1,11 @@
 export const MATERIALS = ['PLA', 'PLA+', 'PLA+ 2.0', 'PLA PRO', 'PETG', 'ABS', 'TPU', 'ASA', 'Nylon'];
 
-export const BRANDS = ['eSUN', 'Sunlu', 'PolyMaker', 'Bambu Lab', 'Hatchbox', 'Overture', 'Creality'];
+export const BRANDS = [
+  'eSUN', 'Sunlu', 'PolyMaker', 'Bambu Lab', 'Hatchbox', 'Overture', 'Creality',
+  'Anycubic', 'Prusament', 'Eryone', 'MatterHackers', 'Amolen', 'FlashForge',
+  'ZIRO', 'SainSmart', 'Fillamentum', 'ColorFabb', 'FormFutura', 'Geeetech',
+  'Kingroon', 'Kexcelled', 'Elegoo', 'Inland', 'Duramic 3D', '3D Solutech'
+].sort();
 
 export const DEFAULT_BRAND_PRESETS = {
   'eSUN': {

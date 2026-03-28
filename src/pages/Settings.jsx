@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Settings as SettingsIcon, Database, Upload, Download, AlertTriangle, Cylinder, Plus, X, Trash2, Pencil } from 'lucide-react';
-import { MATERIALS } from '../lib/constants';
+import { MATERIALS, BRANDS } from '../lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Settings({ settings, spools, onAddSpool, onUpdateSettings, onUpdateSpool, onDeleteSpool, onResetAll, onExportData, onImportData }) {
@@ -201,10 +201,17 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                     type="text" 
                     className="form-input" 
                     required 
-                    placeholder="e.g. eSUN"
+                    list="brand-options"
+                    autoComplete="off"
+                    placeholder="e.g. eSUN (Pilih atau Ketik)"
                     value={newSpool.brand}
                     onChange={e => setNewSpool({...newSpool, brand: e.target.value})}
                   />
+                  <datalist id="brand-options">
+                    {BRANDS.map(b => (
+                      <option key={b} value={b} />
+                    ))}
+                  </datalist>
                 </div>
 
                 <div className="form-grid-2">
