@@ -134,12 +134,12 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                       <span className="badge badge-secondary">{spool.material || spool.materialType}</span>
                     </td>
                     <td className="p-4 text-sm">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <div 
-                          className="w-3 h-3 rounded-full border border-white/20" 
-                          style={{ background: spool.colorHex || '#ccc' }}
+                          className="w-6 h-6 rounded-md shadow-sm border border-white/20" 
+                          style={{ backgroundColor: spool.colorHex || '#ccc' }}
                         />
-                        {spool.color || spool.colorName}
+                        <span className="font-medium">{spool.color || spool.colorName}</span>
                       </div>
                     </td>
 
