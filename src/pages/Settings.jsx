@@ -136,8 +136,14 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                     <td className="p-4 text-sm">
                       <div className="flex items-center gap-3">
                         <div 
-                          className="w-6 h-6 rounded-md shadow-sm border border-white/20" 
-                          style={{ backgroundColor: spool.colorHex || '#ccc' }}
+                          style={{ 
+                            width: '24px', 
+                            height: '24px', 
+                            borderRadius: '6px',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                            backgroundColor: spool.colorHex || '#ccc' 
+                          }}
                         />
                         <span className="font-medium">{spool.color || spool.colorName}</span>
                       </div>
