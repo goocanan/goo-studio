@@ -60,17 +60,6 @@ export default function Batching({
             <span className="batching-stat-label">Completed</span>
           </div>
         </div>
-        <div className="batching-stat-card">
-          <div className="batching-stat-icon" style={{ background: 'var(--accent-amber-soft)', color: 'var(--accent-amber)' }}>
-            <Scale size={20} />
-          </div>
-          <div className="batching-stat-info">
-            <span className="batching-stat-value">
-              {formatWeight(suggestedGroups.reduce((sum, g) => sum + (Number(g.totalWeight) || 0), 0))}
-            </span>
-            <span className="batching-stat-label">Pending Weight</span>
-          </div>
-        </div>
       </div>
 
       {/* Tab Navigation */}
@@ -143,10 +132,6 @@ export default function Batching({
                         <span className="batching-group-label">{group.material}</span>
                         <span className="batching-group-color">{group.color}</span>
                       </div>
-                      <div className="batching-group-weight">
-                        <Scale size={12} />
-                        {formatWeight(group.totalWeight)}
-                      </div>
                     </div>
 
                     {/* Parts List */}
@@ -161,7 +146,7 @@ export default function Batching({
                             <ChevronRight size={10} />
                             <span className="batching-part-name">{part.name}</span>
                           </div>
-                          <span className="batching-part-weight">{part.weight}g ×{part.quantity || 1}</span>
+                          <span className="batching-part-qty">×{part.quantity || 1}</span>
                         </div>
                       ))}
                     </div>
@@ -177,7 +162,7 @@ export default function Batching({
                         <option value="">-- Pilih Spool --</option>
                         {sortedSpools.map(s => (
                           <option key={s.id} value={s.id}>
-                            {s.colorName} - {s.brand} {s.material} ({formatWeight(s.remainingWeight)})
+                            {s.colorName} - {s.brand} {s.material}
                           </option>
                         ))}
                       </select>

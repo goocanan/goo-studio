@@ -39,6 +39,7 @@ export function weightPercent(remaining, initial) {
  * Format weight as human-readable string.
  */
 export function formatWeight(grams) {
+  if (grams === undefined || grams === null || isNaN(grams)) return '0g';
   if (grams >= 1000) {
     return `${(grams / 1000).toFixed(1)}kg`;
   }

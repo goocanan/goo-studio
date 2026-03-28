@@ -156,7 +156,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                 </button>
               </div>
 
-              <form onSubmit={handleAddSpool} className="flex-col gap-4">
+              <form onSubmit={handleAddSpool} className="flex flex-col gap-4">
                 <div className="form-group">
                   <label className="form-label">Brand</label>
                   <input 
