@@ -44,7 +44,7 @@ export const PART_STATUSES = {
 };
 
 export const DEFAULT_LOW_STOCK_THRESHOLD = 200; // gram
-export const DEFAULT_REEL_WEIGHT = 180; // gram
+
 export const DEFAULT_INITIAL_WEIGHT = 1000; // gram
 
 export const SAMPLE_SPOOLS = [
@@ -56,7 +56,7 @@ export const SAMPLE_SPOOLS = [
     colorHex: '#e53935',
     version: 'V2',
     initialWeight: 1000,
-    reelWeight: 180,
+
     remainingWeight: 820,
     status: 'available',
     createdAt: '2026-03-20T08:00:00Z',
@@ -69,7 +69,6 @@ export const SAMPLE_SPOOLS = [
     colorHex: '#1a1a2e',
     version: 'V1.1',
     initialWeight: 1000,
-    reelWeight: 180,
     remainingWeight: 150,
     status: 'low',
     createdAt: '2026-03-15T10:00:00Z',
@@ -82,7 +81,6 @@ export const SAMPLE_SPOOLS = [
     colorHex: '#e0e7ef',
     version: 'V3',
     initialWeight: 1000,
-    reelWeight: 180,
     remainingWeight: 1000,
     status: 'new',
     createdAt: '2026-03-25T09:00:00Z',

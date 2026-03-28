@@ -15,7 +15,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
     colorHex: '#3b82f6',
     initialWeight: 1000,
     currentWeight: 1000,
-    reelWeight: 180
+
   });
 
   const handleAddSpool = async (e) => {
@@ -29,7 +29,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
       colorHex: '#3b82f6',
       initialWeight: 1000,
       currentWeight: 1000,
-      reelWeight: 180
+
     });
   };
 
@@ -237,19 +237,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
         </div>
 
         <div className="settings-card">
-          <div className="settings-row">
-            <span className="settings-row-label">Default Reel Weight</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="number"
-                className="form-input"
-                value={settings.defaultReelWeight}
-                onChange={e => onUpdateSettings({ defaultReelWeight: Number(e.target.value) })}
-                style={{ width: 80, textAlign: 'center', padding: '0.5rem' }}
-              />
-              <span className="text-dim" style={{ fontSize: '0.85rem' }}>gram</span>
-            </div>
-          </div>
+
 
           <div className="settings-row">
             <span className="settings-row-label">Weight Unit</span>

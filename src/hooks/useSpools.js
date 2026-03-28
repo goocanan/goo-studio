@@ -24,7 +24,7 @@ export function useSpools() {
   // Provide defaults
   const settings = settingsData || {
     lowStockThreshold: 200,
-    defaultReelWeight: 180,
+
     weightUnit: 'gram'
   };
   const activity = activityData || [];

@@ -20,7 +20,7 @@ export default function SpoolDetail({ spool, onBack, onUpdate, onDelete, onAdjus
       colorHex: form.colorHex,
       version: form.version,
       initialWeight: Number(form.initialWeight),
-      reelWeight: Number(form.reelWeight),
+
       remainingWeight: Number(form.remainingWeight),
       nozzleTempMin: Number(form.nozzleTempMin),
       nozzleTempMax: Number(form.nozzleTempMax),
@@ -179,25 +179,14 @@ export default function SpoolDetail({ spool, onBack, onUpdate, onDelete, onAdjus
 
           {/* Weight Fields */}
           <div className="modal-form" style={{ gap: '1rem' }}>
-            <div className="modal-form-row">
-              <div className="form-group">
-                <label className="form-label">Initial Weight (g)</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={form.initialWeight}
-                  onChange={e => setForm(f => ({ ...f, initialWeight: Number(e.target.value) }))}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Reel Weight (g)</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={form.reelWeight}
-                  onChange={e => setForm(f => ({ ...f, reelWeight: Number(e.target.value) }))}
-                />
-              </div>
+            <div className="form-group">
+              <label className="form-label">Initial Weight (g)</label>
+              <input
+                type="number"
+                className="form-input"
+                value={form.initialWeight}
+                onChange={e => setForm(f => ({ ...f, initialWeight: Number(e.target.value) }))}
+              />
             </div>
             <div className="form-group">
               <label className="form-label">Remaining Weight (g)</label>

@@ -48,7 +48,7 @@ export const settings = pgTable("settings", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade" }),
   lowStockThreshold: integer("lowStockThreshold").notNull().default(200),
-  defaultReelWeight: integer("defaultReelWeight").notNull().default(180),
+
   weightUnit: text("weightUnit").notNull().default("gram"),
 });
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Save } from 'lucide-react';
-import { BRANDS, MATERIALS, DEFAULT_INITIAL_WEIGHT, DEFAULT_REEL_WEIGHT } from '../../lib/constants';
+import { BRANDS, MATERIALS, DEFAULT_INITIAL_WEIGHT } from '../../lib/constants';
 import { generateSpoolId } from '../../lib/utils';
 
 export default function SpoolFormModal({ spools, onSave, onClose }) {
@@ -11,7 +11,7 @@ export default function SpoolFormModal({ spools, onSave, onClose }) {
     colorHex: '#8b5cf6',
     version: 'V1',
     initialWeight: DEFAULT_INITIAL_WEIGHT,
-    reelWeight: DEFAULT_REEL_WEIGHT,
+
     nozzleTempMin: 200,
     nozzleTempMax: 220,
     bedTempMin: 55,
@@ -30,7 +30,7 @@ export default function SpoolFormModal({ spools, onSave, onClose }) {
       id: generatedId,
       remainingWeight: form.initialWeight,
       initialWeight: Number(form.initialWeight),
-      reelWeight: Number(form.reelWeight),
+
       nozzleTempMin: Number(form.nozzleTempMin),
       nozzleTempMax: Number(form.nozzleTempMax),
       bedTempMin: Number(form.bedTempMin),
@@ -109,25 +109,14 @@ export default function SpoolFormModal({ spools, onSave, onClose }) {
             </div>
           </div>
 
-          <div className="modal-form-row">
-            <div className="form-group">
-              <label className="form-label">Initial Weight (g)</label>
-              <input
-                type="number"
-                className="form-input"
-                value={form.initialWeight}
-                onChange={e => setForm(f => ({ ...f, initialWeight: e.target.value }))}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Reel Weight (g)</label>
-              <input
-                type="number"
-                className="form-input"
-                value={form.reelWeight}
-                onChange={e => setForm(f => ({ ...f, reelWeight: e.target.value }))}
-              />
-            </div>
+          <div className="form-group">
+            <label className="form-label">Initial Weight (g)</label>
+            <input
+              type="number"
+              className="form-input"
+              value={form.initialWeight}
+              onChange={e => setForm(f => ({ ...f, initialWeight: e.target.value }))}
+            />
           </div>
 
           <div className="modal-form-row">
