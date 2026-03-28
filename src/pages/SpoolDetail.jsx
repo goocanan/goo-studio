@@ -143,71 +143,7 @@ export default function SpoolDetail({ spool, onBack, onUpdate, onDelete, onAdjus
         </div>
       </div>
 
-      {/* Section B: Weight Tracking */}
-      <div className="detail-section">
-        <div className="section-header">
-          <Weight style={{ width: 16, height: 16 }} />
-          <span>Weight Tracking</span>
-        </div>
-        <div className="detail-weight-layout">
-          {/* Donut Gauge */}
-          <div className="weight-gauge">
-            <svg width="140" height="140" viewBox="0 0 140 140">
-              <circle
-                cx="70" cy="70" r={radius}
-                fill="none"
-                stroke="rgba(255,255,255,0.06)"
-                strokeWidth="12"
-              />
-              <circle
-                cx="70" cy="70" r={radius}
-                fill="none"
-                stroke={barColor}
-                strokeWidth="12"
-                strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={dashOffset}
-                transform="rotate(-90 70 70)"
-                style={{ transition: 'stroke-dashoffset 0.6s ease' }}
-              />
-            </svg>
-            <div className="weight-gauge-text">
-              <div className="weight-gauge-value">{pct}%</div>
-              <div className="weight-gauge-label">{formatWeight(form.remainingWeight)}</div>
-            </div>
-          </div>
 
-          {/* Weight Fields */}
-          <div className="modal-form" style={{ gap: '1rem' }}>
-            <div className="form-group">
-              <label className="form-label">Initial Weight (g)</label>
-              <input
-                type="number"
-                className="form-input"
-                value={form.initialWeight}
-                onChange={e => setForm(f => ({ ...f, initialWeight: Number(e.target.value) }))}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Remaining Weight (g)</label>
-              <input
-                type="number"
-                className="form-input"
-                value={form.remainingWeight}
-                onChange={e => setForm(f => ({ ...f, remainingWeight: Math.max(0, Number(e.target.value)) }))}
-              />
-            </div>
-            <div>
-              <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Quick Adjust</label>
-              <div className="quick-adjust">
-                <button className="quick-adjust-btn" onClick={() => handleQuickAdjust(50)}>-50g</button>
-                <button className="quick-adjust-btn" onClick={() => handleQuickAdjust(100)}>-100g</button>
-                <button className="quick-adjust-btn" onClick={() => handleQuickAdjust(200)}>-200g</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Section C: Recommended Settings */}
       <div className="detail-section">

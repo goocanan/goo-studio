@@ -10,7 +10,7 @@ export default function SpoolFormModal({ spools, onSave, onClose }) {
     colorName: '',
     colorHex: '#8b5cf6',
     version: 'V1',
-    initialWeight: DEFAULT_INITIAL_WEIGHT,
+
 
     nozzleTempMin: 200,
     nozzleTempMax: 220,
@@ -28,8 +28,8 @@ export default function SpoolFormModal({ spools, onSave, onClose }) {
     onSave({
       ...form,
       id: generatedId,
-      remainingWeight: form.initialWeight,
-      initialWeight: Number(form.initialWeight),
+      remainingWeight: 0,
+      initialWeight: 0,
 
       nozzleTempMin: Number(form.nozzleTempMin),
       nozzleTempMax: Number(form.nozzleTempMax),
@@ -109,15 +109,7 @@ export default function SpoolFormModal({ spools, onSave, onClose }) {
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Initial Weight (g)</label>
-            <input
-              type="number"
-              className="form-input"
-              value={form.initialWeight}
-              onChange={e => setForm(f => ({ ...f, initialWeight: e.target.value }))}
-            />
-          </div>
+
 
           <div className="modal-form-row">
             <div className="form-group">

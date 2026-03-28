@@ -13,8 +13,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
     materialType: 'PLA',
     color: '',
     colorHex: '#3b82f6',
-    initialWeight: 1000,
-    currentWeight: 1000,
+
 
   });
 
@@ -27,8 +26,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
       materialType: 'PLA',
       color: '',
       colorHex: '#3b82f6',
-      initialWeight: 1000,
-      currentWeight: 1000,
+
 
     });
   };
@@ -94,7 +92,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                   <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Brand</th>
                   <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Type</th>
                   <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Color</th>
-                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim text-right">Available</th>
+
                   <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim text-right font-bold">Actions</th>
                 </tr>
               </thead>
@@ -114,9 +112,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                         {spool.color || spool.colorName}
                       </div>
                     </td>
-                    <td className="p-4 text-sm text-right font-mono text-primary">
-                      {spool.currentWeight || spool.remainingWeight}g
-                    </td>
+
                     <td className="p-4 text-right">
                       <button 
                         className="btn-icon text-error p-1 hover:bg-error/10 rounded"
@@ -129,7 +125,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                 ))}
                 {spools.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="p-8 text-center text-dim italic text-sm">
+                    <td colSpan="4" className="p-8 text-center text-dim italic text-sm">
                       Belum ada data filament yang terdaftar.
                     </td>
                   </tr>
@@ -207,16 +203,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                       onChange={e => setNewSpool({...newSpool, colorHex: e.target.value})}
                     />
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Current Weight (g)</label>
-                    <input 
-                      type="number" 
-                      className="form-input" 
-                      required
-                      value={newSpool.currentWeight}
-                      onChange={e => setNewSpool({...newSpool, currentWeight: Number(e.target.value)})}
-                    />
-                  </div>
+
                 </div>
 
                 <div className="flex-end gap-3 mt-6">

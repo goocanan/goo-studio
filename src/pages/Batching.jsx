@@ -127,7 +127,7 @@ export default function Batching({
 
                 const selectedSpool = spools.find(s => s.id === selectedSpools[key]);
                 const materialMismatch = selectedSpool && selectedSpool.material !== group.material;
-                const weightInsufficient = selectedSpool && selectedSpool.remainingWeight < group.totalWeight;
+                const weightInsufficient = false;
 
                 return (
                   <motion.div 
@@ -187,11 +187,7 @@ export default function Batching({
                           <AlertCircle size={12} /> Material tidak cocok!
                         </div>
                       )}
-                      {weightInsufficient && (
-                        <div className="batching-warning">
-                          <AlertCircle size={12} /> Stok tidak mencukupi!
-                        </div>
-                      )}
+                      {/* Weight check removed */}
                     </div>
 
                     {/* Action */}

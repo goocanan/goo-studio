@@ -55,9 +55,7 @@ export const SAMPLE_SPOOLS = [
     colorName: 'Fire Red',
     colorHex: '#e53935',
     version: 'V2',
-    initialWeight: 1000,
 
-    remainingWeight: 820,
     status: 'available',
     createdAt: '2026-03-20T08:00:00Z',
   },
@@ -68,8 +66,7 @@ export const SAMPLE_SPOOLS = [
     colorName: 'Matte Black',
     colorHex: '#1a1a2e',
     version: 'V1.1',
-    initialWeight: 1000,
-    remainingWeight: 150,
+
     status: 'low',
     createdAt: '2026-03-15T10:00:00Z',
   },
@@ -80,8 +77,7 @@ export const SAMPLE_SPOOLS = [
     colorName: 'Clear',
     colorHex: '#e0e7ef',
     version: 'V3',
-    initialWeight: 1000,
-    remainingWeight: 1000,
+
     status: 'new',
     createdAt: '2026-03-25T09:00:00Z',
   }

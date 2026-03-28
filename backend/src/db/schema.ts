@@ -68,8 +68,7 @@ export const inventory = pgTable("inventory", {
   version: text("version"),
   materialType: text("material_type").notNull(), // Assuming string instead of enum for simplicity
   color: text("color").notNull(),
-  currentWeight: integer("current_weight").notNull(),
-  initialWeight: integer("initial_weight").notNull(),
+
   pricePerGram: integer("price_per_gram").notNull().default(0), // Using integer for simplicity (cents/units) or double if needed
   imageUrl: text("image_url"),
   lowStockThreshold: integer("low_stock_threshold").default(100),
