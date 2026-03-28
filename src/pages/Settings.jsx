@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Database, Upload, Download, AlertTriangle, Cylinder, Plus, X, Trash2, Edit2 } from 'lucide-react';
+import { Settings as SettingsIcon, Database, Upload, Download, AlertTriangle, Cylinder, Plus, X, Trash2, Pencil } from 'lucide-react';
 import { MATERIALS } from '../lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -149,7 +149,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                           className="btn-icon text-primary p-1 hover:bg-primary/10 rounded"
                           onClick={() => openEditModal(spool)}
                         >
-                          <Edit2 size={14} />
+                          <Pencil size={14} />
                         </button>
                         <button 
                           className="btn-icon text-error p-1 hover:bg-error/10 rounded"
