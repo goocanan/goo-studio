@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Database, Upload, Download, AlertTriangle, Cylinder, Plus, X, Trash2 } from 'lucide-react';
+import { Settings as SettingsIcon, Database, Upload, Download, AlertTriangle, Cylinder, Plus, X, Trash2, Edit2 } from 'lucide-react';
 import { MATERIALS } from '../lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Settings({ settings, spools, onAddSpool, onUpdateSettings, onUpdateSpool, onDeleteSpool, onResetAll, onExportData, onImportData }) {
   const [confirmReset, setConfirmReset] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
-  // New Spool Form State
+  // Spool Form State
   const [newSpool, setNewSpool] = useState({
     brand: '',
     materialType: 'PLA',
@@ -19,16 +20,45 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
 
   const handleAddSpool = async (e) => {
     e.preventDefault();
-    await onAddSpool(newSpool);
+    if (editingId) {
+      await onUpdateSpool(editingId, newSpool);
+    } else {
+      await onAddSpool(newSpool);
+    }
+    closeModal();
+  };
+
+  const closeModal = () => {
     setShowAddModal(false);
+    setEditingId(null);
     setNewSpool({
       brand: '',
       materialType: 'PLA',
       color: '',
       colorHex: '#3b82f6',
-
-
     });
+  };
+
+  const openAddModal = () => {
+    setEditingId(null);
+    setNewSpool({
+      brand: '',
+      materialType: 'PLA',
+      color: '',
+      colorHex: '#3b82f6',
+    });
+    setShowAddModal(true);
+  };
+
+  const openEditModal = (spool) => {
+    setEditingId(spool.id);
+    setNewSpool({
+      brand: spool.brand,
+      materialType: spool.material || spool.materialType,
+      color: spool.color || spool.colorName,
+      colorHex: spool.colorHex || '#3b82f6',
+    });
+    setShowAddModal(true);
   };
 
   const handleExport = () => {
@@ -79,7 +109,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
             <Cylinder style={{ width: 16, height: 16 }} />
             <span>Filament Inventory</span>
           </div>
-          <button className="btn btn-primary btn-sm" onClick={() => setShowAddModal(true)}>
+          <button className="btn btn-primary btn-sm" onClick={openAddModal}>
             <Plus size={14} /> Add Filament
           </button>
         </div>
@@ -113,7 +143,13 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                       </div>
                     </td>
 
-                    <td className="p-4 text-right">
+                    <td className="p-4 text-right whitespace-nowrap">
+                      <button 
+                        className="btn-icon text-primary p-1 hover:bg-primary/10 rounded mr-2"
+                        onClick={() => openEditModal(spool)}
+                      >
+                        <Edit2 size={14} />
+                      </button>
                       <button 
                         className="btn-icon text-error p-1 hover:bg-error/10 rounded"
                         onClick={() => onDeleteSpool(spool.id)}
@@ -149,9 +185,9 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
               <div className="flex-between mb-6">
                 <h2 className="heading-md m-0 flex items-center gap-2">
                   <Cylinder size={20} className="text-primary" />
-                  Add New Filament
+                  {editingId ? 'Edit Filament' : 'Add New Filament'}
                 </h2>
-                <button className="btn-icon" onClick={() => setShowAddModal(false)}>
+                <button className="btn-icon" onClick={closeModal}>
                   <X size={20} />
                 </button>
               </div>
@@ -207,8 +243,8 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                 </div>
 
                 <div className="flex-end gap-3 mt-6">
-                  <button type="button" className="btn btn-ghost" onClick={() => setShowAddModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary">Save Filament</button>
+                  <button type="button" className="btn btn-ghost" onClick={closeModal}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">{editingId ? 'Save Changes' : 'Save Filament'}</button>
                 </div>
               </form>
             </motion.div>

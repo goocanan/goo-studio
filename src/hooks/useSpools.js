@@ -82,8 +82,13 @@ export function useSpools() {
     }
   }, [addSpoolMutation]);
 
-  const updateSpool = useCallback((id, updates) => {
-    updateSpoolMutation.mutate({ id, updates });
+  const updateSpool = useCallback(async (id, updates) => {
+    try {
+      return await updateSpoolMutation.mutateAsync({ id, updates });
+    } catch (e) {
+      alert('Error updating filament: ' + (e.response?.data?.error || e.message));
+      throw e;
+    }
   }, [updateSpoolMutation]);
 
   const deleteSpool = useCallback((id) => {

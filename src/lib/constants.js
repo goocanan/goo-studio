@@ -1,4 +1,4 @@
-export const MATERIALS = ['PLA', 'PLA+', 'PETG', 'ABS', 'TPU', 'ASA', 'Nylon'];
+export const MATERIALS = ['PLA', 'PLA+', 'PLA+ 2.0', 'PLA PRO', 'PETG', 'ABS', 'TPU', 'ASA', 'Nylon'];
 
 export const BRANDS = ['eSUN', 'Sunlu', 'PolyMaker', 'Bambu Lab', 'Hatchbox', 'Overture', 'Creality'];
 
