@@ -150,6 +150,7 @@ export default function App() {
             settings={settings} 
             spools={spools}
             onAddSpool={addSpool}
+            onUpdateSpool={updateSpool}
             onDeleteSpool={deleteSpool}
             onUpdateSettings={updateSettings}
             onResetAll={resetAll}

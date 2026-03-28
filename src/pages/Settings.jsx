@@ -144,18 +144,20 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                     </td>
 
                     <td className="p-4 text-right whitespace-nowrap">
-                      <button 
-                        className="btn-icon text-primary p-1 hover:bg-primary/10 rounded mr-2"
-                        onClick={() => openEditModal(spool)}
-                      >
-                        <Edit2 size={14} />
-                      </button>
-                      <button 
-                        className="btn-icon text-error p-1 hover:bg-error/10 rounded"
-                        onClick={() => onDeleteSpool(spool.id)}
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <div className="flex justify-end items-center gap-2">
+                        <button 
+                          className="btn-icon text-primary p-1 hover:bg-primary/10 rounded"
+                          onClick={() => openEditModal(spool)}
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button 
+                          className="btn-icon text-error p-1 hover:bg-error/10 rounded"
+                          onClick={() => onDeleteSpool(spool.id)}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
