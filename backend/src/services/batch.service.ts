@@ -35,10 +35,7 @@ export class BatchService {
         .where(inArray(parts.id, data.partIds));
     }
 
-    await db.insert(activityLog).values({
-      userId,
-      message: `Batch print dibuat: ${id} (${data.partIds?.length || 0} parts, ${data.totalWeight}g)`
-    });
+      message: `Batch print dibuat: ${id} (${data.partIds?.length || 0} parts)`
 
     return newBatch;
   }
@@ -57,21 +54,11 @@ export class BatchService {
       .set({ status: "done", updatedAt: new Date() })
       .where(eq(parts.batchId, id));
 
-    // 3. Deduct weight from inventory if one is linked
-    if (batch.spoolId) {
-      const [item] = await db.select().from(inventory).where(eq(inventory.id, batch.spoolId));
-      if (item) {
-        const newWeight = Math.max(0, item.currentWeight - batch.totalWeight);
-        
-        await db.update(inventory)
-          .set({ currentWeight: newWeight, updatedAt: new Date() })
-          .where(eq(inventory.id, batch.spoolId));
-      }
-    }
+
 
     await db.insert(activityLog).values({
       userId,
-      message: `Batch ${id} selesai. ${batch.totalWeight}g telah dipotong dari stok ${batch.spoolId || 'Unknown'}`
+      message: `Batch ${id} selesai.`
     });
 
     return { success: true };

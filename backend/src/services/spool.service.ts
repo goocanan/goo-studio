@@ -18,8 +18,7 @@ export class SpoolService {
       color: data.color || data.colorName,
       type: data.type,
       version: data.version,
-      initialWeight: data.initialWeight || 1000,
-      currentWeight: data.currentWeight ?? (data.initialWeight || 1000),
+
       pricePerGram: data.pricePerGram || 0,
       colorHex: data.colorHex,
       imageUrl: data.imageUrl,
@@ -51,22 +50,5 @@ export class SpoolService {
     return true;
   }
 
-  static async adjustWeight(userId: string, id: string, amount: number) {
-    const [item] = await db.select().from(inventory).where(eq(inventory.id, id));
-    if (!item) throw new Error("Inventory item not found");
 
-    const newWeight = Math.max(0, item.currentWeight - amount);
-    
-    await db.update(inventory).set({ 
-      currentWeight: newWeight, 
-      updatedAt: new Date() 
-    }).where(eq(inventory.id, id));
-
-    await db.insert(activityLog).values({
-      userId,
-      message: `Stok ${item.brand} ${item.color} dikurangi ${amount}g (sisa: ${newWeight}g)`
-    });
-
-    return { ...item, currentWeight: newWeight };
-  }
 }

@@ -30,13 +30,4 @@ spoolRouter.delete("/:id", async (req, res) => {
   res.json({ success: true });
 });
 
-spoolRouter.put("/:id/adjust", async (req, res) => {
-  const userId = (req as any).user.id;
-  const { amount } = req.body;
-  try {
-    const data = await SpoolService.adjustWeight(userId, req.params.id, amount);
-    res.json(data);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
-});
+
