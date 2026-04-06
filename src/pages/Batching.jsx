@@ -1,5 +1,4 @@
-import React, { useState, useMemo } from 'react';
-import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Scale, Box, MoreHorizontal, Check, Square } from 'lucide-react';
+import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Scale, Box, MoreHorizontal, Check, Square, XCircle } from 'lucide-react';
 import { formatWeight } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -165,20 +164,20 @@ export default function Batching({
                     <div className="batching-parts-list">
                       <div className="batching-parts-header flex-between">
                         <span>{group.parts.length} Components ({groupSelectedParts.length} selected)</span>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1.5">
                           <button 
                             type="button" 
-                            className="text-xxs uppercase tracking-wider text-primary font-bold hover:underline"
-                            onClick={() => toggleGroupSelection(group, true)}
+                            className="batching-selection-btn all"
+                            onClick={(e) => { e.stopPropagation(); toggleGroupSelection(group, true); }}
                           >
-                            All
+                            <CheckCircle size={10} /> All
                           </button>
                           <button 
                             type="button" 
-                            className="text-xxs uppercase tracking-wider text-dim font-bold hover:underline"
-                            onClick={() => toggleGroupSelection(group, false)}
+                            className="batching-selection-btn none"
+                            onClick={(e) => { e.stopPropagation(); toggleGroupSelection(group, false); }}
                           >
-                            None
+                            <XCircle size={10} /> None
                           </button>
                         </div>
                       </div>
