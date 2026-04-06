@@ -117,8 +117,8 @@ export default function ProjectDetail({
   };
 
   return (
-    <div className="animate-in">
-      {/* 3D Viewer Modal */}
+    <>
+      {/* Modals outside transformed container to avoid 'position: fixed' bugs */}
       {viewerUrl && (
         <ThreeDViewer 
           url={viewerUrl} 
@@ -128,268 +128,7 @@ export default function ProjectDetail({
           }} 
         />
       )}
-      {/* Navigation Header */}
-      <div className="page-header mb-2">
-        <div className="page-header-left">
-          <button className="btn-text" onClick={onBack}>
-            <ArrowLeft size={16} /> Back to Projects
-          </button>
-        </div>
-        <div className="flex gap-2">
-          {!isEditing ? (
-            <button className="btn btn-secondary btn-sm" onClick={() => setIsEditing(true)}>
-              <Edit3 size={14} /> Edit Project
-            </button>
-          ) : (
-            <button className="btn btn-primary btn-sm" onClick={handleSaveProject}>
-              <Save size={14} /> Save Changes
-            </button>
-          )}
-          <button className="btn btn-ghost btn-sm text-error" onClick={() => {
-            if(confirm('Hapus proyek ini secara permanen?')) {
-              onDelete(project.id);
-              onBack();
-            }
-          }}>
-            <Trash2 size={14} />
-          </button>
-        </div>
-      </div>
 
-      {/* Project Hero Section */}
-      <div className="project-hero aesthetic-hero">
-        <div className="hero-backdrop" style={{ 
-          backgroundImage: project.image ? `url(${typeof project.image === 'string' ? project.image : URL.createObjectURL(project.image)})` : 'none' 
-        }}></div>
-        <div className="project-hero-content-row relative z-10">
-          {project.image && (
-            <div className="project-hero-image-wrapper premium-frame">
-              <img 
-                src={typeof project.image === 'string' ? project.image : (project.image instanceof File ? URL.createObjectURL(project.image) : '')} 
-                className="project-hero-image" 
-                alt={project.name} 
-              />
-            </div>
-          )}
-          <div className="flex-1">
-            <div className="project-hero-header mb-6">
-              <div className="flex-col">
-                <div className="flex items-center gap-4">
-                  {isEditing ? (
-                    <input 
-                      className="heading-xl bg-transparent border-b border-dashed border-white/30 outline-none text-white w-full"
-                      value={editForm.name}
-                      onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                      autoFocus
-                    />
-                  ) : (
-                    <h1 className="heading-xl gradient-text-hero leading-tight mb-1">{project.name}</h1>
-                  )}
-                </div>
-                <div className="flex gap-3 items-center">
-                  <span className={`tag tag-glass status-${project.status}`}>
-                    {project.status.toUpperCase()}
-                  </span>
-                  {project.priority && (
-                    <span className={`tag tag-glass priority-${project.priority}`}>
-                      {project.priority.toUpperCase()}
-                    </span>
-                  )}
-                  <span className="text-xxs text-dim ml-2 flex items-center gap-1">
-                     <Clock size={10} /> Created on {new Date(project.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="flex-col align-end">
-                <div className="text-xxs text-dim uppercase mb-1 font-bold">Project Status</div>
-                <select 
-                  className="form-input bg-surface/50 border-subtle text-xs py-1"
-                  style={{ width: 'auto' }}
-                  value={project.status}
-                  onChange={(e) => onUpdate(project.id, { status: e.target.value })}
-                >
-                  {Object.entries(PROJECT_STATUSES).map(([key, val]) => (
-                    <option key={val} value={val}>{key}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="project-hero-stats">
-              <div className="hero-stat-item">
-                <span className="hero-stat-label">Components</span>
-                <span className="hero-stat-value">{stats.doneParts}/{stats.totalParts} <span className="text-xs text-dim">({stats.totalUnits}u)</span></span>
-              </div>
-              <div className="hero-stat-item">
-                <span className="hero-stat-label">Progress</span>
-                <span className="hero-stat-value">{stats.progress}%</span>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <div className="progress-bar lg">
-                <motion.div 
-                  className="progress-bar-fill" 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${stats.progress}%` }}
-                  transition={{ duration: 1 }}
-                  style={{ background: 'linear-gradient(90deg, var(--accent-primary), var(--accent-cyan))' }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Components Section */}
-      <div className="detail-section mb-12">
-        <div className="section-header flex-between mb-4">
-          <h2 className="heading-md flex items-center gap-2"><Package size={20} /> Project Components</h2>
-          <button className="btn btn-primary btn-sm" onClick={openAddPartModal}>
-            <Plus size={14} /> Add Part
-          </button>
-        </div>
-        
-        <div className="parts-grid">
-          <AnimatePresence>
-            {project.parts.length === 0 ? (
-              <div className="glass-card p-12 text-center w-full col-span-full">
-                <div className="mb-4 opacity-50"><Package size={48} className="mx-auto" /></div>
-                <h3 className="heading-sm text-dim">No components yet</h3>
-                <p className="text-muted text-xs mb-4">Add your first printable file to start tracking progress.</p>
-                <button className="btn btn-secondary btn-sm" onClick={openAddPartModal}>
-                  <Plus size={14} /> Add First Component
-                </button>
-              </div>
-            ) : (
-              project.parts.map((part, index) => (
-                <motion.div 
-                  key={part.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="part-card premium-part-card"
-                >
-                  <div className="part-card-visual">
-                    {partPreviews[part.id] ? (
-                      <ModelPreview url={partPreviews[part.id]} />
-                    ) : (
-                      <div className="part-card-visual-placeholder">
-                        <Box size={32} className="opacity-20" />
-                        <span className="text-xxs opacity-30 mt-2">No 3D Preview</span>
-                      </div>
-                    )}
-                    <button 
-                      className="part-card-expand-btn"
-                      onClick={() => {
-                        if (partPreviews[part.id]) {
-                          setViewerUrl(partPreviews[part.id]);
-                        } else {
-                          alert('Hubungkan kembali library di File Manager untuk melihat file 3D ini.');
-                        }
-                      }}
-                      title="Expand 3D Viewer"
-                    >
-                      <Zap size={14} />
-                    </button>
-                  </div>
-
-                  <div className="part-card-body p-4">
-                    <div className="part-card-header mb-2">
-                      <h4 className="part-card-name truncate">{part.name}</h4>
-                      <div className="flex gap-1">
-                        <button className="btn-icon xs hover:text-primary" onClick={() => openEditPartModal(part)}>
-                          <Edit3 size={12} />
-                        </button>
-                        <button className="btn-icon xs hover:text-error" onClick={() => onDeletePart(project.id, part.id)}>
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="part-card-meta mb-3">
-                      <span className="tag-glass text-xxs px-2">{part.material}</span>
-                      <span className="tag-glass text-xxs px-2">{part.color || 'Default'}</span>
-                    </div>
-
-                    <div className="flex-between items-center text-xs text-dim">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="flex items-center gap-1"><Package size={10} /> Qty: {part.quantity || 1}</span>
-                      </div>
-                      <button 
-                         className={`badge clickable ${part.status === PART_STATUSES.DONE ? 'badge-success' : 'badge-primary'}`}
-                         onClick={() => onUpdatePart(project.id, part.id, { 
-                           status: part.status === PART_STATUSES.DONE ? PART_STATUSES.PENDING : PART_STATUSES.DONE 
-                         })}
-                      >
-                        {part.status?.toUpperCase()}
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* Details & Configuration Section */}
-      <div className="detail-section pt-8 border-t border-subtle">
-        <div className="glass-card p-6">
-          <h3 className="heading-sm mb-6 flex items-center gap-2"><Settings size={20} /> Project Configuration & Notes</h3>
-          
-          <div className="form-grid-2">
-            <div className="form-group">
-              <label className="text-xs text-dim block mb-2 font-bold uppercase tracking-wider">Project Photo</label>
-              <div className="flex items-center gap-4">
-                <div className="w-24 h-24 rounded-xl overflow-hidden border border-subtle bg-surface/30">
-                  {project.image ? (
-                    <img src={project.image} className="w-full h-full object-cover" alt="Preview" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-dim text-xxs">No Photo</div>
-                  )}
-                </div>
-                <div className="flex-col gap-2">
-                  <input 
-                    type="file" 
-                    id="project-image-upload" 
-                    className="hidden" 
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
-                  <label 
-                    htmlFor="project-image-upload" 
-                    className={`btn btn-secondary btn-sm ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
-                  >
-                    {isUploading ? 'Uploading...' : 'Change Photo'}
-                  </label>
-                  <p className="text-xxs text-dim mt-1">Recommended: 16:9 Aspect Ratio</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="text-xs text-dim block mb-2 font-bold uppercase tracking-wider">Notes & Instructions</label>
-              {isEditing ? (
-                <textarea 
-                  className="form-input text-sm"
-                  rows="5"
-                  placeholder="Add specific assembly instructions or print settings..."
-                  value={editForm.notes}
-                  onChange={(e) => setEditForm({...editForm, notes: e.target.value})}
-                ></textarea>
-              ) : (
-                <p className="text-sm text-muted bg-surface/30 p-4 rounded-xl border border-subtle min-h-[120px]">
-                  {project.notes || 'No instructions added yet.'}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Add/Edit Part Modal */}
       {showPartModal && (
         <div className="modal-overlay" onClick={() => setShowPartModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -433,6 +172,269 @@ export default function ProjectDetail({
           </div>
         </div>
       )}
-    </div>
+
+      <div className="animate-in">
+        {/* Navigation Header */}
+        <div className="page-header mb-2">
+          <div className="page-header-left">
+            <button className="btn-text" onClick={onBack}>
+              <ArrowLeft size={16} /> Back to Projects
+            </button>
+          </div>
+          <div className="flex gap-2">
+            {!isEditing ? (
+              <button className="btn btn-secondary btn-sm" onClick={() => setIsEditing(true)}>
+                <Edit3 size={14} /> Edit Project
+              </button>
+            ) : (
+              <button className="btn btn-primary btn-sm" onClick={handleSaveProject}>
+                <Save size={14} /> Save Changes
+              </button>
+            )}
+            <button className="btn btn-ghost btn-sm text-error" onClick={() => {
+              if(confirm('Hapus proyek ini secara permanen?')) {
+                onDelete(project.id);
+                onBack();
+              }
+            }}>
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+
+        {/* Project Hero Section */}
+        <div className="project-hero aesthetic-hero">
+          <div className="hero-backdrop" style={{ 
+            backgroundImage: project.image ? `url(${typeof project.image === 'string' ? project.image : URL.createObjectURL(project.image)})` : 'none' 
+          }}></div>
+          <div className="project-hero-content-row relative z-10">
+            {project.image && (
+              <div className="project-hero-image-wrapper premium-frame">
+                <img 
+                  src={typeof project.image === 'string' ? project.image : (project.image instanceof File ? URL.createObjectURL(project.image) : '')} 
+                  className="project-hero-image" 
+                  alt={project.name} 
+                />
+              </div>
+            )}
+            <div className="flex-1">
+              <div className="project-hero-header mb-6">
+                <div className="flex-col">
+                  <div className="flex items-center gap-4">
+                    {isEditing ? (
+                      <input 
+                        className="heading-xl bg-transparent border-b border-dashed border-white/30 outline-none text-white w-full"
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                        autoFocus
+                      />
+                    ) : (
+                      <h1 className="heading-xl gradient-text-hero leading-tight mb-1">{project.name}</h1>
+                    )}
+                  </div>
+                  <div className="flex gap-3 items-center">
+                    <span className={`tag tag-glass status-${project.status}`}>
+                      {project.status.toUpperCase()}
+                    </span>
+                    {project.priority && (
+                      <span className={`tag tag-glass priority-${project.priority}`}>
+                        {project.priority.toUpperCase()}
+                      </span>
+                    )}
+                    <span className="text-xxs text-dim ml-2 flex items-center gap-1">
+                       <Clock size={10} /> Created on {new Date(project.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="flex-col align-end">
+                  <div className="text-xxs text-dim uppercase mb-1 font-bold">Project Status</div>
+                  <select 
+                    className="form-input bg-surface/50 border-subtle text-xs py-1"
+                    style={{ width: 'auto' }}
+                    value={project.status}
+                    onChange={(e) => onUpdate(project.id, { status: e.target.value })}
+                  >
+                    {Object.entries(PROJECT_STATUSES).map(([key, val]) => (
+                      <option key={val} value={val}>{key}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="project-hero-stats">
+                <div className="hero-stat-item">
+                  <span className="hero-stat-label">Components</span>
+                  <span className="hero-stat-value">{stats.doneParts}/{stats.totalParts} <span className="text-xs text-dim">({stats.totalUnits}u)</span></span>
+                </div>
+                <div className="hero-stat-item">
+                  <span className="hero-stat-label">Progress</span>
+                  <span className="hero-stat-value">{stats.progress}%</span>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <div className="progress-bar lg">
+                  <motion.div 
+                    className="progress-bar-fill" 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${stats.progress}%` }}
+                    transition={{ duration: 1 }}
+                    style={{ background: 'linear-gradient(90deg, var(--accent-primary), var(--accent-cyan))' }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Components Section */}
+        <div className="detail-section mb-12">
+          <div className="section-header flex-between mb-4">
+            <h2 className="heading-md flex items-center gap-2"><Package size={20} /> Project Components</h2>
+            <button className="btn btn-primary btn-sm" onClick={openAddPartModal}>
+              <Plus size={14} /> Add Part
+            </button>
+          </div>
+          
+          <div className="parts-grid">
+            <AnimatePresence>
+              {project.parts.length === 0 ? (
+                <div className="glass-card p-12 text-center w-full col-span-full">
+                  <div className="mb-4 opacity-50"><Package size={48} className="mx-auto" /></div>
+                  <h3 className="heading-sm text-dim">No components yet</h3>
+                  <p className="text-muted text-xs mb-4">Add your first printable file to start tracking progress.</p>
+                  <button className="btn btn-secondary btn-sm" onClick={openAddPartModal}>
+                    <Plus size={14} /> Add First Component
+                  </button>
+                </div>
+              ) : (
+                project.parts.map((part, index) => (
+                  <motion.div 
+                    key={part.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="part-card premium-part-card"
+                  >
+                    <div className="part-card-visual">
+                      {partPreviews[part.id] ? (
+                        <ModelPreview url={partPreviews[part.id]} />
+                      ) : (
+                        <div className="part-card-visual-placeholder">
+                          <Box size={32} className="opacity-20" />
+                          <span className="text-xxs opacity-30 mt-2">No 3D Preview</span>
+                        </div>
+                      )}
+                      <button 
+                        className="part-card-expand-btn"
+                        onClick={() => {
+                          if (partPreviews[part.id]) {
+                            setViewerUrl(partPreviews[part.id]);
+                          } else {
+                            alert('Hubungkan kembali library di File Manager untuk melihat file 3D ini.');
+                          }
+                        }}
+                        title="Expand 3D Viewer"
+                      >
+                        <Zap size={14} />
+                      </button>
+                    </div>
+
+                    <div className="part-card-body p-4">
+                      <div className="part-card-header mb-2">
+                        <h4 className="part-card-name truncate">{part.name}</h4>
+                        <div className="flex gap-1">
+                          <button className="btn-icon xs hover:text-primary" onClick={() => openEditPartModal(part)}>
+                            <Edit3 size={12} />
+                          </button>
+                          <button className="btn-icon xs hover:text-error" onClick={() => onDeletePart(project.id, part.id)}>
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="part-card-meta mb-3">
+                        <span className="tag-glass text-xxs px-2">{part.material}</span>
+                        <span className="tag-glass text-xxs px-2">{part.color || 'Default'}</span>
+                      </div>
+
+                      <div className="flex-between items-center text-xs text-dim">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="flex items-center gap-1"><Package size={10} /> Qty: {part.quantity || 1}</span>
+                        </div>
+                        <button 
+                           className={`badge clickable ${part.status === PART_STATUSES.DONE ? 'badge-success' : 'badge-primary'}`}
+                           onClick={() => onUpdatePart(project.id, part.id, { 
+                             status: part.status === PART_STATUSES.DONE ? PART_STATUSES.PENDING : PART_STATUSES.DONE 
+                           })}
+                        >
+                          {part.status?.toUpperCase()}
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Details & Configuration Section */}
+        <div className="detail-section pt-8 border-t border-subtle">
+          <div className="glass-card p-6">
+            <h3 className="heading-sm mb-6 flex items-center gap-2"><Settings size={20} /> Project Configuration & Notes</h3>
+            
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label className="text-xs text-dim block mb-2 font-bold uppercase tracking-wider">Project Photo</label>
+                <div className="flex items-center gap-4">
+                  <div className="w-24 h-24 rounded-xl overflow-hidden border border-subtle bg-surface/30">
+                    {project.image ? (
+                      <img src={project.image} className="w-full h-full object-cover" alt="Preview" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-dim text-xxs">No Photo</div>
+                    )}
+                  </div>
+                  <div className="flex-col gap-2">
+                    <input 
+                      type="file" 
+                      id="project-image-upload" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                    />
+                    <label 
+                      htmlFor="project-image-upload" 
+                      className={`btn btn-secondary btn-sm ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                      {isUploading ? 'Uploading...' : 'Change Photo'}
+                    </label>
+                    <p className="text-xxs text-dim mt-1">Recommended: 16:9 Aspect Ratio</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="text-xs text-dim block mb-2 font-bold uppercase tracking-wider">Notes & Instructions</label>
+                {isEditing ? (
+                  <textarea 
+                    className="form-input text-sm"
+                    rows="5"
+                    placeholder="Add specific assembly instructions or print settings..."
+                    value={editForm.notes}
+                    onChange={(e) => setEditForm({...editForm, notes: e.target.value})}
+                  ></textarea>
+                ) : (
+                  <p className="text-sm text-muted bg-surface/30 p-4 rounded-xl border border-subtle min-h-[120px]">
+                    {project.notes || 'No instructions added yet.'}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

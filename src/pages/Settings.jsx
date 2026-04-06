@@ -94,93 +94,8 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
   };
 
   return (
-    <div className="animate-in">
-      <div className="page-header">
-        <div className="page-header-left">
-          <h1 className="heading-xl gradient-text">⚙️ Settings</h1>
-          <p className="page-subtitle">Configure your inventory and management preferences</p>
-        </div>
-      </div>
-
-      {/* Filament Inventory List */}
-      <div className="section mb-8">
-        <div className="section-header flex-between">
-          <div className="flex items-center gap-2">
-            <Cylinder style={{ width: 16, height: 16 }} />
-            <span>Filament Inventory</span>
-          </div>
-          <button className="btn btn-primary btn-sm" onClick={openAddModal}>
-            <Plus size={14} /> Add Filament
-          </button>
-        </div>
-
-        <div className="glass-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-subtle bg-white/5">
-                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Brand</th>
-                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Type</th>
-                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Color</th>
-
-                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim text-right font-bold">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {spools.map((spool, idx) => (
-                  <tr key={spool.id || idx} className="border-b border-subtle hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-sm font-semibold">{spool.brand}</td>
-                    <td className="p-4 text-sm">
-                      <span className="badge badge-secondary">{spool.material || spool.materialType}</span>
-                    </td>
-                    <td className="p-4 text-sm">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          style={{ 
-                            width: '24px', 
-                            height: '24px', 
-                            borderRadius: '6px',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                            backgroundColor: spool.colorHex || '#ccc' 
-                          }}
-                        />
-                        <span className="font-medium">{spool.color || spool.colorName}</span>
-                      </div>
-                    </td>
-
-                    <td className="p-4 text-right whitespace-nowrap">
-                      <div className="flex justify-end items-center gap-2">
-                        <button 
-                          className="btn-icon text-primary p-1 hover:bg-primary/10 rounded"
-                          onClick={() => openEditModal(spool)}
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button 
-                          className="btn-icon text-error p-1 hover:bg-error/10 rounded"
-                          onClick={() => onDeleteSpool(spool.id)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {spools.length === 0 && (
-                  <tr>
-                    <td colSpan="4" className="p-8 text-center text-dim italic text-sm">
-                      Belum ada data filament yang terdaftar.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Add Spool Modal */}
+    <>
+      {/* Add Spool Modal outside animate-in to avoid transform issues */}
       <AnimatePresence>
         {showAddModal && (
           <div className="modal-overlay">
@@ -254,7 +169,6 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
                       onChange={e => setNewSpool({...newSpool, colorHex: e.target.value})}
                     />
                   </div>
-
                 </div>
 
                 <div className="flex-end gap-3 mt-6">
@@ -267,78 +181,161 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
         )}
       </AnimatePresence>
 
-      {/* General Preferences */}
-      <div className="section mb-8">
-        <div className="section-header">
-          <SettingsIcon style={{ width: 16, height: 16 }} />
-          <span>General Preferences</span>
+      <div className="animate-in">
+        <div className="page-header">
+          <div className="page-header-left">
+            <h1 className="heading-xl gradient-text">⚙️ Settings</h1>
+            <p className="page-subtitle">Configure your inventory and management preferences</p>
+          </div>
         </div>
 
-        <div className="settings-card">
+        {/* Filament Inventory List */}
+        <div className="section mb-8">
+          <div className="section-header flex-between">
+            <div className="flex items-center gap-2">
+              <Cylinder style={{ width: 16, height: 16 }} />
+              <span>Filament Inventory</span>
+            </div>
+            <button className="btn btn-primary btn-sm" onClick={openAddModal}>
+              <Plus size={14} /> Add Filament
+            </button>
+          </div>
 
+          <div className="glass-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-subtle bg-white/5">
+                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Brand</th>
+                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Type</th>
+                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim">Color</th>
+                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-dim text-right font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {spools.map((spool, idx) => (
+                    <tr key={spool.id || idx} className="border-b border-subtle hover:bg-white/5 transition-colors">
+                      <td className="p-4 text-sm font-semibold">{spool.brand}</td>
+                      <td className="p-4 text-sm">
+                        <span className="badge badge-secondary">{spool.material || spool.materialType}</span>
+                      </td>
+                      <td className="p-4 text-sm">
+                        <div className="flex items-center gap-3">
+                          <div 
+                            style={{ 
+                              width: '24px', 
+                              height: '24px', 
+                              borderRadius: '6px',
+                              border: '1px solid rgba(255,255,255,0.2)',
+                              boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                              backgroundColor: spool.colorHex || '#ccc' 
+                            }}
+                          />
+                          <span className="font-medium">{spool.color || spool.colorName}</span>
+                        </div>
+                      </td>
+                      <td className="p-4 text-right whitespace-nowrap">
+                        <div className="flex justify-end items-center gap-2">
+                          <button 
+                            className="btn-icon text-primary p-1 hover:bg-primary/10 rounded"
+                            onClick={() => openEditModal(spool)}
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button 
+                            className="btn-icon text-error p-1 hover:bg-error/10 rounded"
+                            onClick={() => onDeleteSpool(spool.id)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {spools.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="p-8 text-center text-dim italic text-sm">
+                        Belum ada data filament yang terdaftar.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
-          <div className="settings-row">
-            <span className="settings-row-label">Weight Unit</span>
-            <div className="radio-group">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="weightUnit"
-                  value="gram"
-                  checked={settings.weightUnit === 'gram'}
-                  onChange={() => onUpdateSettings({ weightUnit: 'gram' })}
-                />
-                <span className="text-sm">gram</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="weightUnit"
-                  value="kg"
-                  checked={settings.weightUnit === 'kg'}
-                  onChange={() => onUpdateSettings({ weightUnit: 'kg' })}
-                />
-                <span className="text-sm">kg</span>
-              </label>
+        {/* General Preferences */}
+        <div className="section mb-8">
+          <div className="section-header">
+            <SettingsIcon style={{ width: 16, height: 16 }} />
+            <span>General Preferences</span>
+          </div>
+
+          <div className="settings-card">
+            <div className="settings-row">
+              <span className="settings-row-label">Weight Unit</span>
+              <div className="radio-group">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="weightUnit"
+                    value="gram"
+                    checked={settings.weightUnit === 'gram'}
+                    onChange={() => onUpdateSettings({ weightUnit: 'gram' })}
+                  />
+                  <span className="text-sm">gram</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="weightUnit"
+                    value="kg"
+                    checked={settings.weightUnit === 'kg'}
+                    onChange={() => onUpdateSettings({ weightUnit: 'kg' })}
+                  />
+                  <span className="text-sm">kg</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Data Management */}
+        <div className="section">
+          <div className="section-header">
+            <Database style={{ width: 16, height: 16 }} />
+            <span>Data Management</span>
+          </div>
+
+          <div className="settings-card">
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button className="btn btn-secondary" onClick={handleExport}>
+                <Download style={{ width: 16, height: 16 }} />
+                Export JSON
+              </button>
+              <button className="btn btn-secondary" onClick={handleImport}>
+                <Upload style={{ width: 16, height: 16 }} />
+                Import Data
+              </button>
+              {confirmReset ? (
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--accent-rose)' }}>Yakin reset semua data?</span>
+                  <button className="btn btn-danger" onClick={() => { onResetAll(); setConfirmReset(false); }}>
+                    Reset
+                  </button>
+                  <button className="btn btn-ghost" onClick={() => setConfirmReset(false)}>Batal</button>
+                </div>
+              ) : (
+                <button className="btn btn-danger" onClick={() => setConfirmReset(true)}>
+                  <AlertTriangle style={{ width: 16, height: 16 }} />
+                  Reset All
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
-
-      {/* Data Management */}
-      <div className="section">
-        <div className="section-header">
-          <Database style={{ width: 16, height: 16 }} />
-          <span>Data Management</span>
-        </div>
-
-        <div className="settings-card">
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <button className="btn btn-secondary" onClick={handleExport}>
-              <Download style={{ width: 16, height: 16 }} />
-              Export JSON
-            </button>
-            <button className="btn btn-secondary" onClick={handleImport}>
-              <Upload style={{ width: 16, height: 16 }} />
-              Import Data
-            </button>
-            {confirmReset ? (
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--accent-rose)' }}>Yakin reset semua data?</span>
-                <button className="btn btn-danger" onClick={() => { onResetAll(); setConfirmReset(false); }}>
-                  Reset
-                </button>
-                <button className="btn btn-ghost" onClick={() => setConfirmReset(false)}>Batal</button>
-              </div>
-            ) : (
-              <button className="btn btn-danger" onClick={() => setConfirmReset(true)}>
-                <AlertTriangle style={{ width: 16, height: 16 }} />
-                Reset All
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
