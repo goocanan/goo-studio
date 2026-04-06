@@ -48,7 +48,6 @@ export const settings = pgTable("settings", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade" }),
   lowStockThreshold: integer("lowStockThreshold").notNull().default(200),
-  weightUnit: text("weightUnit").notNull().default("gram"),
 });
 
 export const activityLog = pgTable("activity_log", {
@@ -69,8 +68,6 @@ export const inventory = pgTable("inventory", {
   color: text("color").notNull(),
 
   pricePerGram: integer("price_per_gram").notNull().default(0), // Using integer for simplicity (cents/units) or double if needed
-  remainingWeight: integer("remaining_weight").notNull().default(0),
-  initialWeight: integer("initial_weight").notNull().default(1000),
   imageUrl: text("image_url"),
   lowStockThreshold: integer("low_stock_threshold").default(100),
   productLink: text("product_link"),
@@ -110,7 +107,6 @@ export const parts = pgTable("parts", {
   material: text("material").notNull(),
   color: text("color").notNull(),
   quantity: integer("quantity").notNull().default(1),
-  weight: integer("weight").notNull().default(0),
   status: text("status").notNull().default("pending"), // pending, ready, printing, done
   path: text("path"),
   batchId: text("batchId").references(() => batches.id, { onDelete: "set null" }),

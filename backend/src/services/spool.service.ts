@@ -9,29 +9,23 @@ export class SpoolService {
 
   static async createSpool(userId: string, data: any) {
     try {
-      const id = data.id || `INV-${Date.now().toString().slice(-4)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-      const newEntry = {
+      const id = `SPL-${Date.now().toString().slice(-4)}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      const newSpool = {
         id,
         userId,
         sku: data.sku || id,
         brand: data.brand || "Unknown",
-        materialType: data.materialType || data.material || "PLA",
+        materialType: data.material || data.materialType || "PLA",
         color: data.color || data.colorName || "Unknown",
-        type: data.type || null,
-        version: data.version || null,
-
+        type: data.type || "Solid",
+        version: data.version || "V1",
         pricePerGram: data.pricePerGram || 0,
-        colorHex: data.colorHex || null,
         imageUrl: data.imageUrl || null,
+        colorHex: data.colorHex || "#000000",
       };
-      await db.insert(inventory).values(newEntry);
-      
-      await db.insert(activityLog).values({
-        userId,
-        message: `Item inventory baru didaftarkan: ${id} ${newEntry.brand} ${newEntry.materialType} ${newEntry.color}`
-      });
 
-      return newEntry;
+      const [result] = await db.insert(inventory).values(newSpool).returning();
+      return result;
     } catch (error: any) {
       console.error('CREATE_SPOOL_ERROR:', error);
       throw error;

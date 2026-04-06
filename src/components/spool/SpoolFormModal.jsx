@@ -28,8 +28,6 @@ export default function SpoolFormModal({ spools, onSave, onClose }) {
     onSave({
       ...form,
       id: generatedId,
-      remainingWeight: 0,
-      initialWeight: 0,
 
       nozzleTempMin: Number(form.nozzleTempMin),
       nozzleTempMax: Number(form.nozzleTempMax),
