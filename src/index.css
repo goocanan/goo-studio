@@ -229,6 +229,11 @@ input, select, textarea { font-family: inherit; }
 .gap-2 { gap: 0.5rem; }
 .gap-3 { gap: 0.75rem; }
 .gap-4 { gap: 1rem; }
+.clickable { cursor: pointer; user-select: none; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opacity-50 { opacity: 0.5; }
+.text-xxs { font-size: 0.65rem; }
+.text-primary { color: var(--accent-primary); }
 
 .layout-split {
   display: flex;
@@ -1306,6 +1311,20 @@ textarea.form-input {
 
 .project-item:hover {
   background: rgba(255,255,255,0.03);
+}
+
+.batching-part-row.clickable {
+  transition: all 0.2s ease;
+}
+
+.batching-part-row.clickable:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.batching-parts-header.flex-between {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .project-item-drag {

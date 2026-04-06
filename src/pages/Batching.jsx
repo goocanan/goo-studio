@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Scale, Box, MoreHorizontal } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Scale, Box, MoreHorizontal, CheckSquare, Square } from 'lucide-react';
 import { formatWeight } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -8,6 +8,8 @@ export default function Batching({
 }) {
   const [selectedSpools, setSelectedSpools] = useState({});
   const [activeTab, setActiveTab] = useState('suggested');
+  // State for selected parts: { [partId]: boolean }
+  const [selectedParts, setSelectedParts] = useState({});
 
   const handleCreateBatch = (group, key) => {
     const spoolId = selectedSpools[key];
@@ -15,7 +17,31 @@ export default function Batching({
       alert('Pilih spool terlebih dahulu!');
       return;
     }
-    createBatch(group, spoolId);
+
+    // Filter parts based on selection. If not explicitly in selectedParts, assume selected.
+    const selectedGroupParts = group.parts.filter(p => selectedParts[p.id] !== false);
+
+    if (selectedGroupParts.length === 0) {
+      alert('Pilih setidaknya satu komponen untuk dibuat batch!');
+      return;
+    }
+
+    createBatch({ ...group, parts: selectedGroupParts }, spoolId);
+  };
+
+  const togglePart = (partId) => {
+    setSelectedParts(prev => ({
+      ...prev,
+      [partId]: prev[partId] === false ? true : false
+    }));
+  };
+
+  const toggleGroupSelection = (group, selectAll = true) => {
+    const updates = {};
+    group.parts.forEach(p => {
+      updates[p.id] = selectAll;
+    });
+    setSelectedParts(prev => ({ ...prev, ...updates }));
   };
 
   const activeBatches = batches.filter(b => b.status !== 'completed');
@@ -106,6 +132,8 @@ export default function Batching({
             ) : (
               suggestedGroups.map((group) => {
                 const key = `${group.material}-${group.color}`;
+                const groupSelectedParts = group.parts.filter(p => selectedParts[p.id] !== false);
+                
                 const sortedSpools = [...spools].sort((a, b) => {
                   const aMatch = a.material === group.material && a.colorName === group.color;
                   const bMatch = b.material === group.material && b.colorName === group.color;
@@ -116,7 +144,6 @@ export default function Batching({
 
                 const selectedSpool = spools.find(s => s.id === selectedSpools[key]);
                 const materialMismatch = selectedSpool && selectedSpool.material !== group.material;
-                const weightInsufficient = false;
 
                 return (
                   <motion.div 
@@ -136,19 +163,47 @@ export default function Batching({
 
                     {/* Parts List */}
                     <div className="batching-parts-list">
-                      <div className="batching-parts-header">
-                        <span>{group.parts.length} Components</span>
-                      </div>
-                      {group.parts.map(part => (
-                        <div key={part.id} className="batching-part-row">
-                          <div className="batching-part-info">
-                            <span className="batching-part-project">{part.projectName}</span>
-                            <ChevronRight size={10} />
-                            <span className="batching-part-name">{part.name}</span>
-                          </div>
-                          <span className="batching-part-qty">×{part.quantity || 1}</span>
+                      <div className="batching-parts-header flex-between">
+                        <span>{group.parts.length} Components ({groupSelectedParts.length} selected)</span>
+                        <div className="flex gap-2">
+                          <button 
+                            type="button" 
+                            className="text-xxs uppercase tracking-wider text-primary font-bold hover:underline"
+                            onClick={() => toggleGroupSelection(group, true)}
+                          >
+                            All
+                          </button>
+                          <button 
+                            type="button" 
+                            className="text-xxs uppercase tracking-wider text-dim font-bold hover:underline"
+                            onClick={() => toggleGroupSelection(group, false)}
+                          >
+                            None
+                          </button>
                         </div>
-                      ))}
+                      </div>
+                      {group.parts.map(part => {
+                        const isSelected = selectedParts[part.id] !== false;
+                        return (
+                          <div 
+                            key={part.id} 
+                            className={`batching-part-row clickable ${!isSelected ? 'opacity-50' : ''}`}
+                            onClick={() => togglePart(part.id)}
+                          >
+                            <div className="flex items-center gap-2 flex-1 overflow-hidden">
+                              <button type="button" className="text-primary flex-shrink-0">
+                                {isSelected ? <CheckSquare size={16} /> : <Square size={16} />}
+                              </button>
+                              <div className="batching-part-info truncate">
+                                <span className="batching-part-project">{part.projectName}</span>
+                                <ChevronRight size={10} />
+                                <span className="batching-part-name truncate">{part.name}</span>
+                              </div>
+                            </div>
+                            <span className="batching-part-qty">×{part.quantity || 1}</span>
+                          </div>
+                        );
+                      })}
                     </div>
 
                     {/* Spool Selector */}
@@ -172,16 +227,15 @@ export default function Batching({
                           <AlertCircle size={12} /> Material tidak cocok!
                         </div>
                       )}
-                      {/* Weight check removed */}
                     </div>
 
                     {/* Action */}
                     <button 
                       className="btn btn-primary batching-action-btn"
-                      disabled={!selectedSpools[key] || sortedSpools.length === 0}
+                      disabled={!selectedSpools[key] || sortedSpools.length === 0 || groupSelectedParts.length === 0}
                       onClick={() => handleCreateBatch(group, key)}
                     >
-                      <Zap size={16} /> Generate Print Batch
+                      <Zap size={16} /> Generate Print Batch ({groupSelectedParts.length})
                     </button>
                   </motion.div>
                 );

@@ -140,8 +140,8 @@ export function groupPartsByColorMaterial(projects) {
     if (project.status === 'done' || !project.parts) return;
 
     project.parts.forEach(part => {
-      // Only batch parts that are NOT 'done'
-      if (part.status === 'done') return;
+      // Only batch parts that are 'pending' or 'ready'
+      if (part.status === 'done' || part.status === 'printing') return;
 
       const key = `${part.material || part.materialType}|${part.color || part.colorName}`;
       if (!groups[key]) {
