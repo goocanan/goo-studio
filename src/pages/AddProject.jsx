@@ -40,7 +40,11 @@ export default function AddProject({ onAdd, onBack, initialData }) {
     let finalValue = value;
     if (field === 'weight') finalValue = parseFloat(value) || 0;
     if (field === 'quantity') finalValue = parseInt(value) || 0;
-    setParts(parts.map(p => p.id === id ? { ...p, [field]: finalValue } : p));
+    setParts(prev => prev.map(p => p.id === id ? { ...p, [field]: finalValue } : p));
+  };
+
+  const handleSpoolSelect = (id, spool) => {
+    setParts(prev => prev.map(p => p.id === id ? { ...p, material: spool.material, color: spool.colorName } : p));
   };
 
   const handleImageChange = (e) => {
@@ -206,8 +210,7 @@ export default function AddProject({ onAdd, onBack, initialData }) {
                         onChange={(e) => {
                           const spool = spools.find(s => s.id === e.target.value);
                           if (spool) {
-                            handlePartChange(part.id, 'material', spool.material);
-                            handlePartChange(part.id, 'color', spool.colorName);
+                            handleSpoolSelect(part.id, spool);
                           }
                         }}
                       >
