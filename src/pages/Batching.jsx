@@ -1,3 +1,4 @@
+import React, { useState, useMemo } from 'react';
 import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Scale, Box, MoreHorizontal, Check, Square, XCircle } from 'lucide-react';
 import { formatWeight } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
