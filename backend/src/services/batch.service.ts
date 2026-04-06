@@ -14,29 +14,39 @@ export class BatchService {
   }
 
   static async createBatch(userId: string, data: any) {
-    const id = `BATCH-${Date.now().toString().slice(-4)}`;
-    
-    // Create the batch record
-    const newBatch = {
-      id,
-      userId,
-      material: data.material,
-      color: data.color,
-      spoolId: data.spoolId,
-      status: "ready"
-    };
-    await db.insert(batches).values(newBatch);
+    try {
+      return await db.transaction(async (tx) => {
+        const id = `BATCH-${Date.now().toString().slice(-4)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        
+        // Create the batch record
+        const newBatch = {
+          id,
+          userId,
+          material: data.material || "PLA",
+          color: data.color || "Unknown",
+          spoolId: data.spoolId || null,
+          status: "ready"
+        };
+        await tx.insert(batches).values(newBatch);
 
-    // Update part statuses and bind to batch
-    if (data.partIds && data.partIds.length > 0) {
-      await db.update(parts)
-        .set({ batchId: id, status: "printing", updatedAt: new Date() })
-        .where(inArray(parts.id, data.partIds));
+        // Update part statuses and bind to batch
+        if (data.partIds && data.partIds.length > 0) {
+          await tx.update(parts)
+            .set({ batchId: id, status: "printing", updatedAt: new Date() })
+            .where(inArray(parts.id, data.partIds));
+        }
+
+        await tx.insert(activityLog).values({
+          userId,
+          message: `Batch print dibuat: ${id} (${data.partIds?.length || 0} parts)`
+        });
+
+        return newBatch;
+      });
+    } catch (error: any) {
+      console.error('CREATE_BATCH_ERROR:', error);
+      throw error;
     }
-
-      message: `Batch print dibuat: ${id} (${data.partIds?.length || 0} parts)`
-
-    return newBatch;
   }
 
   static async completeBatch(userId: string, id: string) {

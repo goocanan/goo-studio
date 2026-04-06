@@ -15,50 +15,70 @@ export class ProjectService {
   }
 
   static async createProject(userId: string, data: any) {
-    const id = `PRJ-${Date.now().toString().slice(-4)}`;
-    const newProject = {
-      id,
-      userId,
-      name: data.name,
-      status: data.status || "idea",
-      priority: data.priority || "medium",
-      notes: data.notes || "",
-      image: data.image || null,
-    };
-    
-    await db.insert(projects).values(newProject);
-    
-    // Save parts if present
-    const projectParts: any[] = [];
-    if (data.parts && Array.isArray(data.parts)) {
-      for (const partData of data.parts) {
-        const partId = `PART-${Math.random().toString(36).substring(2, 6)}`;
-        const newPart = {
-          id: partId,
-          projectId: id,
-          name: partData.name,
-          material: partData.material,
-          color: partData.color,
-          quantity: partData.quantity || 1,
-          status: partData.status || "pending",
-          path: partData.path || null
+    try {
+      return await db.transaction(async (tx) => {
+        // Generate a more unique ID using timestamp and random string
+        const id = `PRJ-${Date.now().toString().slice(-4)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        
+        const newProject = {
+          id,
+          userId,
+          name: data.name || "Untitled Project",
+          status: data.status || "idea",
+          priority: data.priority || "medium",
+          notes: data.notes || "",
+          image: data.image || null,
         };
-        await db.insert(parts).values(newPart);
-        projectParts.push(newPart);
-      }
+        
+        await tx.insert(projects).values(newProject);
+        
+        const projectParts: any[] = [];
+        if (data.parts && Array.isArray(data.parts)) {
+          for (const partData of data.parts) {
+            const partId = `PART-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+            const newPart = {
+              id: partId,
+              projectId: id,
+              name: partData.name || "Unnamed Part",
+              material: partData.material || "PLA",
+              color: partData.color || "Unknown",
+              quantity: partData.quantity || 1,
+              status: partData.status || "pending",
+              path: partData.path || null
+            };
+            await tx.insert(parts).values(newPart);
+            projectParts.push(newPart);
+          }
+        }
+        
+        await tx.insert(activityLog).values({
+          userId,
+          message: `Proyek baru dibuat: ${newProject.name}`
+        });
+        
+        return { ...newProject, parts: projectParts };
+      });
+    } catch (error: any) {
+      console.error('CREATE_PROJECT_ERROR:', error);
+      throw error; // Re-throw to be caught by Express error handler
     }
-    
-    await db.insert(activityLog).values({
-      userId,
-      message: `Proyek baru dibuat: ${newProject.name}`
-    });
-    
-    return { ...newProject, parts: projectParts };
   }
 
   static async updateProject(userId: string, id: string, data: any) {
-    await db.update(projects).set({ ...data, updatedAt: new Date() }).where(eq(projects.id, id));
-    return { id, ...data };
+    try {
+      const updateData: any = { updatedAt: new Date() };
+      if (data.name !== undefined) updateData.name = data.name;
+      if (data.status !== undefined) updateData.status = data.status;
+      if (data.priority !== undefined) updateData.priority = data.priority;
+      if (data.notes !== undefined) updateData.notes = data.notes;
+      if (data.image !== undefined) updateData.image = data.image;
+
+      await db.update(projects).set(updateData).where(eq(projects.id, id));
+      return { id, ...updateData };
+    } catch (error: any) {
+      console.error('UPDATE_PROJECT_ERROR:', error);
+      throw error;
+    }
   }
 
   static async deleteProject(userId: string, id: string) {
@@ -74,13 +94,13 @@ export class ProjectService {
   }
 
   static async addPart(userId: string, projectId: string, data: any) {
-    const id = `PART-${Date.now().toString().slice(-4)}`;
+    const id = `PART-${Date.now().toString().slice(-4)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     const newPart = {
       id,
       projectId,
-      name: data.name,
-      material: data.material,
-      color: data.color,
+      name: data.name || "Unnamed Part",
+      material: data.material || "PLA",
+      color: data.color || "Unknown",
       quantity: data.quantity || 1,
       status: data.status || "pending"
     };
@@ -89,8 +109,21 @@ export class ProjectService {
   }
 
   static async updatePart(userId: string, projectId: string, partId: string, data: any) {
-    await db.update(parts).set({ ...data, updatedAt: new Date() }).where(eq(parts.id, partId));
-    return { id: partId, ...data };
+    try {
+      const updateData: any = { updatedAt: new Date() };
+      if (data.name !== undefined) updateData.name = data.name;
+      if (data.material !== undefined) updateData.material = data.material;
+      if (data.color !== undefined) updateData.color = data.color;
+      if (data.quantity !== undefined) updateData.quantity = data.quantity;
+      if (data.status !== undefined) updateData.status = data.status;
+      if (data.path !== undefined) updateData.path = data.path;
+
+      await db.update(parts).set(updateData).where(eq(parts.id, partId));
+      return { id: partId, ...updateData };
+    } catch (error: any) {
+      console.error('UPDATE_PART_ERROR:', error);
+      throw error;
+    }
   }
 
   static async deletePart(userId: string, projectId: string, partId: string) {
