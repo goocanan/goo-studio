@@ -171,7 +171,7 @@ export function groupPartsByColorMaterial(projects) {
  * Compresses and resizes an image before uploading/saving to DB.
  * Max width/height 1200px, JPEG quality 0.8
  */
-export async function optimizeImage(fileOrBase64, maxWidth = 1200, maxHeight = 1200) {
+export async function optimizeImage(fileOrBase64, maxWidth = 1000, maxHeight = 1000) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
