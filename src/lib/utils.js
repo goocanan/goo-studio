@@ -148,15 +148,14 @@ export function groupPartsByColorMaterial(projects) {
         groups[key] = {
           material: part.material || part.materialType,
           color: part.color || part.colorName,
-          totalWeight: 0,
+          totalQuantity: 0,
           parts: [],
         };
       }
 
-      const weight = Number(part.weight) || 0;
       const quantity = Number(part.quantity) || 1;
       
-      groups[key].totalWeight += weight * quantity;
+      groups[key].totalQuantity += quantity;
       groups[key].parts.push({
         ...part,
         projectName: project.name,
@@ -164,7 +163,7 @@ export function groupPartsByColorMaterial(projects) {
       });
     });
   });
-  return Object.values(groups).sort((a, b) => b.totalWeight - a.totalWeight);
+  return Object.values(groups).sort((a, b) => b.totalQuantity - a.totalQuantity);
 }
 
 /**

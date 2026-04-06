@@ -17,7 +17,6 @@ export default function AddProject({ onAdd, onBack, initialData }) {
     path: p.path, // Preserve local path for 3D viewer
     material: p.material || MATERIALS[0],
     color: p.color || '',
-    weight: 0,
     quantity: p.quantity || 1
   })) || []);
 
@@ -27,7 +26,6 @@ export default function AddProject({ onAdd, onBack, initialData }) {
       name: '',
       material: MATERIALS[0],
       color: '',
-      weight: 0,
       quantity: 1
     }]);
   };
@@ -38,7 +36,6 @@ export default function AddProject({ onAdd, onBack, initialData }) {
 
   const handlePartChange = (id, field, value) => {
     let finalValue = value;
-    if (field === 'weight') finalValue = parseFloat(value) || 0;
     if (field === 'quantity') finalValue = parseInt(value) || 0;
     setParts(prev => prev.map(p => p.id === id ? { ...p, [field]: finalValue } : p));
   };

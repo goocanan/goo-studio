@@ -273,31 +273,7 @@ export default function Settings({ settings, spools, onAddSpool, onUpdateSetting
           </div>
 
           <div className="settings-card">
-            <div className="settings-row">
-              <span className="settings-row-label">Weight Unit</span>
-              <div className="radio-group">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="weightUnit"
-                    value="gram"
-                    checked={settings.weightUnit === 'gram'}
-                    onChange={() => onUpdateSettings({ weightUnit: 'gram' })}
-                  />
-                  <span className="text-sm">gram</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="weightUnit"
-                    value="kg"
-                    checked={settings.weightUnit === 'kg'}
-                    onChange={() => onUpdateSettings({ weightUnit: 'kg' })}
-                  />
-                  <span className="text-sm">kg</span>
-                </label>
-              </div>
-            </div>
+            <p className="text-sm text-dim italic">No general preferences at the moment.</p>
           </div>
         </div>
 

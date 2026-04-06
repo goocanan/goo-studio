@@ -48,13 +48,9 @@ export default function ProjectDetail({
     const totalParts = project.parts?.length || 0;
     const totalUnits = project.parts?.reduce((sum, p) => sum + (parseInt(p.quantity) || 1), 0) || 0;
     const doneParts = project.parts?.filter(p => p.status === PART_STATUSES.DONE).length || 0;
-    const totalWeight = project.parts?.reduce((sum, p) => {
-      const w = parseFloat(p.weight) || 0;
-      const q = parseInt(p.quantity) || 1;
-      return sum + (w * q);
-    }, 0) || 0;
+    
     const progress = totalParts > 0 ? Math.round((doneParts / totalParts) * 100) : 0;
-    return { totalParts, totalUnits, doneParts, totalWeight, progress };
+    return { totalParts, totalUnits, doneParts, progress };
   }, [project.parts]);
 
   const handleSaveProject = () => {
@@ -91,7 +87,6 @@ export default function ProjectDetail({
       name: formData.get('name'),
       material: spool ? spool.material : 'PLA',
       color: spool ? spool.colorName : '',
-      weight: 0,
       quantity: parseInt(formData.get('quantity')) || 1,
       status: editingPart ? editingPart.status : PART_STATUSES.PENDING
     };

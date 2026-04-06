@@ -137,7 +137,7 @@ export function useProjects() {
     const totalParts = projects.reduce((sum, p) => sum + (p.parts?.length || 0), 0);
     const doneParts = projects.reduce((sum, p) => sum + (p.parts?.filter(pt => pt.status === PART_STATUSES.DONE).length || 0), 0);
     const activeProjects = projects.filter(p => [PROJECT_STATUSES.IDEA, PROJECT_STATUSES.READY, PROJECT_STATUSES.PRINTING].includes(p.status)).length;
-    const pendingWeight = suggestedGroups.reduce((sum, g) => sum + (Number(g.totalWeight) || 0), 0);
+    const totalQuantity = suggestedGroups.reduce((sum, g) => sum + (Number(g.totalQuantity) || 0), 0);
 
     return {
       totalProjects: projects.length,
@@ -145,7 +145,7 @@ export function useProjects() {
       totalParts,
       doneParts,
       completionRate: totalParts > 0 ? Math.round((doneParts / totalParts) * 100) : 0,
-      pendingWeight,
+      totalQuantity,
       activeBatches: batches.filter(b => b.status === 'ready' || b.status === 'printing').length
     };
   }, [projects, batches, suggestedGroups]);
