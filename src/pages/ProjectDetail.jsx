@@ -75,19 +75,34 @@ export default function ProjectDetail({
     }
   };
 
+  const [formState, setFormState] = useState({ name: '', spoolId: '', quantity: 1 });
+
+  useEffect(() => {
+    if (showPartModal) {
+      if (editingPart) {
+        const matchingSpool = spools.find(s => s.material === editingPart.material && s.colorName === editingPart.color);
+        setFormState({
+          name: editingPart.name || '',
+          spoolId: matchingSpool?.id || '',
+          quantity: editingPart.quantity || 1
+        });
+      } else {
+        setFormState({ name: '', spoolId: '', quantity: 1 });
+      }
+    }
+  }, [showPartModal, editingPart, spools]);
+
   const handleAddPartSubmit = (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
     
     // Find selected spool for material/color
-    const spoolId = formData.get('spoolId');
-    const spool = spools.find(s => s.id === spoolId);
+    const spool = spools.find(s => s.id === formState.spoolId);
 
     const partData = {
-      name: formData.get('name'),
+      name: formState.name,
       material: spool ? spool.material : 'PLA',
       color: spool ? spool.colorName : '',
-      quantity: parseInt(formData.get('quantity')) || 1,
+      quantity: parseInt(formState.quantity) || 1,
       status: editingPart ? editingPart.status : PART_STATUSES.PENDING
     };
     
@@ -113,7 +128,6 @@ export default function ProjectDetail({
 
   return (
     <>
-      {/* Modals outside transformed container to avoid 'position: fixed' bugs */}
       {viewerUrl && (
         <ThreeDViewer 
           url={viewerUrl} 
@@ -134,16 +148,23 @@ export default function ProjectDetail({
             <form onSubmit={handleAddPartSubmit} className="modal-form">
               <div className="form-group">
                 <label className="form-label">Component Name</label>
-                <input name="name" type="text" required placeholder="e.g. Panel R" className="form-input" defaultValue={editingPart?.name || ''} />
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="e.g. Panel R" 
+                  className="form-input" 
+                  value={formState.name}
+                  onChange={e => setFormState({...formState, name: e.target.value})}
+                />
               </div>
               
               <div className="form-group">
                 <label className="form-label">Filament (Inventory)</label>
                 <select 
-                  name="spoolId" 
                   className="form-input" 
                   required
-                  defaultValue={spools.find(s => s.material === editingPart?.material && s.colorName === editingPart?.color)?.id || ''}
+                  value={formState.spoolId}
+                  onChange={e => setFormState({...formState, spoolId: e.target.value})}
                 >
                   <option value="">-- Pilih Filament --</option>
                   {spools.map(s => (
@@ -156,7 +177,13 @@ export default function ProjectDetail({
 
               <div className="form-group">
                 <label className="form-label">Quantity</label>
-                <input name="quantity" type="number" required defaultValue={editingPart?.quantity || 1} className="form-input" />
+                <input 
+                  type="number" 
+                  required 
+                  className="form-input" 
+                  value={formState.quantity}
+                  onChange={e => setFormState({...formState, quantity: e.target.value})}
+                />
               </div>
 
               <div className="modal-actions">
