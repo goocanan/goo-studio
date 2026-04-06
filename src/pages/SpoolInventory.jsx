@@ -97,13 +97,11 @@ export default function SpoolInventory({ spools, onViewDetail, onAdd }) {
       {viewMode === 'grid' && (
         <div className="grid-spools">
           {filtered.map(spool => {
-            const pct = weightPercent(spool.remainingWeight, spool.initialWeight);
-            const barColor = getWeightColor(pct);
             return (
               <div
                 key={spool.id}
                 className="glass-card interactive spool-card"
-            onClick={() => onViewDetail(spool.id)}
+                onClick={() => onViewDetail(spool.id)}
               >
                 <div className="spool-card-header">
                   <div>
@@ -115,18 +113,6 @@ export default function SpoolInventory({ spools, onViewDetail, onAdd }) {
                     </div>
                   </div>
                   <div className="spool-color-dot" style={{ background: spool.colorHex }} />
-                </div>
-                <div className="spool-weight-section">
-                  <div className="spool-weight-text">
-                    <span className="spool-weight-value">{formatWeight(spool.remainingWeight)}</span>
-                    <span className="text-muted">/ {formatWeight(spool.initialWeight)}</span>
-                  </div>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-bar-fill"
-                      style={{ width: `${pct}%`, background: barColor }}
-                    />
-                  </div>
                 </div>
                 <div className="spool-footer">
                   <div className="spool-temp">
@@ -161,15 +147,12 @@ export default function SpoolInventory({ spools, onViewDetail, onAdd }) {
                 <th>Material</th>
                 <th>Color</th>
                 <th>Ver</th>
-                <th>Weight</th>
                 <th>Temp</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(spool => {
-                const pct = weightPercent(spool.remainingWeight, spool.initialWeight);
-                const barColor = getWeightColor(pct);
                 return (
                   <tr key={spool.id} onClick={() => onViewDetail(spool.id)}>
                     <td style={{ fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" }}>{spool.id}</td>
@@ -182,14 +165,6 @@ export default function SpoolInventory({ spools, onViewDetail, onAdd }) {
                       </div>
                     </td>
                     <td>{spool.version}</td>
-                    <td>
-                      <div className="weight-cell">
-                        <span style={{ fontSize: '0.8rem' }}>{formatWeight(spool.remainingWeight)}</span>
-                        <div className="progress-bar">
-                          <div className="progress-bar-fill" style={{ width: `${pct}%`, background: barColor }} />
-                        </div>
-                      </div>
-                    </td>
                     <td style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
                       {spool.nozzleTempMin}/{spool.bedTempMin}°C
                     </td>

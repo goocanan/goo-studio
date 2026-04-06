@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Plus, Trash2, Save, Package, Info, Zap } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Save, Package, Info, Zap, Droplet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MATERIALS } from '../lib/constants';
 import { optimizeImage } from '../lib/utils';
+import { useSpools } from '../hooks/useSpools';
 
 export default function AddProject({ onAdd, onBack, initialData }) {
+  const { spools } = useSpools();
   const [name, setName] = useState(initialData?.name || '');
   const [image, setImage] = useState(initialData?.thumbnail || null);
   const [notes, setNotes] = useState('');
@@ -13,10 +15,10 @@ export default function AddProject({ onAdd, onBack, initialData }) {
     id: Math.random(),
     name: p.name,
     path: p.path, // Preserve local path for 3D viewer
-    material: MATERIALS[0],
-    color: '',
-    weight: 50,
-    quantity: 1
+    material: p.material || MATERIALS[0],
+    color: p.color || '',
+    weight: 0,
+    quantity: p.quantity || 1
   })) || []);
 
   const handleAddPart = () => {
@@ -25,7 +27,7 @@ export default function AddProject({ onAdd, onBack, initialData }) {
       name: '',
       material: MATERIALS[0],
       color: '',
-      weight: 50,
+      weight: 0,
       quantity: 1
     }]);
   };
@@ -195,37 +197,30 @@ export default function AddProject({ onAdd, onBack, initialData }) {
                         onChange={(e) => handlePartChange(part.id, 'name', e.target.value)}
                       />
                     </div>
-                    <div className="form-grid-2">
-                      <div className="form-group">
-                        <label className="text-xs text-dim">Material</label>
-                        <select 
-                          className="form-input"
-                          value={part.material}
-                          onChange={(e) => handlePartChange(part.id, 'material', e.target.value)}
-                        >
-                          {MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label className="text-xs text-dim">Color</label>
-                        <input 
-                          className="form-input" 
-                          placeholder="Color"
-                          value={part.color}
-                          onChange={(e) => handlePartChange(part.id, 'color', e.target.value)}
-                        />
-                      </div>
+                    
+                    <div className="form-group mb-3">
+                      <label className="text-xs text-dim">Filament (Inventory)</label>
+                      <select 
+                        className="form-input"
+                        value={spools.find(s => s.material === part.material && s.colorName === part.color)?.id || ''}
+                        onChange={(e) => {
+                          const spool = spools.find(s => s.id === e.target.value);
+                          if (spool) {
+                            handlePartChange(part.id, 'material', spool.material);
+                            handlePartChange(part.id, 'color', spool.colorName);
+                          }
+                        }}
+                      >
+                        <option value="">-- Pilih Filament dari Inventory --</option>
+                        {spools.map(s => (
+                          <option key={s.id} value={s.id}>
+                            {s.brand} {s.material} - {s.colorName}
+                          </option>
+                        ))}
+                      </select>
                     </div>
+
                     <div className="form-grid-2 mt-3">
-                      <div className="form-group">
-                        <label className="text-xs text-dim">Weight (g)</label>
-                        <input 
-                          type="number" 
-                          className="form-input" 
-                          value={part.weight}
-                          onChange={(e) => handlePartChange(part.id, 'weight', e.target.value)}
-                        />
-                      </div>
                       <div className="form-group">
                         <label className="text-xs text-dim">Quantity</label>
                         <input 

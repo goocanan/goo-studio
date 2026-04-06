@@ -96,7 +96,6 @@ export const batches = pgTable("batches", {
   userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade" }),
   material: text("material").notNull(),
   color: text("color").notNull(),
-  totalWeight: integer("totalWeight").notNull(),
   spoolId: text("spoolId").references(() => inventory.id, { onDelete: "set null" }), // Link to inventory
   status: text("status").notNull().default("ready"), // ready, printing, completed
   createdAt: timestamp("createdAt").notNull().defaultNow(),
@@ -109,7 +108,6 @@ export const parts = pgTable("parts", {
   name: text("name").notNull(),
   material: text("material").notNull(),
   color: text("color").notNull(),
-  weight: integer("weight").notNull(),
   quantity: integer("quantity").notNull().default(1),
   status: text("status").notNull().default("pending"), // pending, ready, printing, done
   path: text("path"),

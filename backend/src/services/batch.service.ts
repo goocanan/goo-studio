@@ -22,7 +22,6 @@ export class BatchService {
       userId,
       material: data.material,
       color: data.color,
-      totalWeight: data.totalWeight,
       spoolId: data.spoolId,
       status: "ready"
     };

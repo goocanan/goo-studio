@@ -5,10 +5,12 @@ import { PROJECT_STATUSES, PART_STATUSES, MATERIALS } from '../lib/constants';
 import { formatWeight, optimizeImage } from '../lib/utils';
 import ThreeDViewer from '../components/ui/ThreeDViewer';
 import ModelPreview from '../components/ui/ModelPreview';
+import { useSpools } from '../hooks/useSpools';
 
 export default function ProjectDetail({ 
   project, onUpdate, onDelete, onAddPart, onUpdatePart, onDeletePart, onBack, getFileData 
 }) {
+  const { spools } = useSpools();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ ...project });
   const [showPartModal, setShowPartModal] = useState(false);
@@ -77,14 +79,19 @@ export default function ProjectDetail({
     }
   };
 
-  const handleAddPart = (e) => {
+  const handleAddPartSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
+    
+    // Find selected spool for material/color
+    const spoolId = formData.get('spoolId');
+    const spool = spools.find(s => s.id === spoolId);
+
     const partData = {
       name: formData.get('name'),
-      material: formData.get('material'),
-      color: formData.get('color'),
-      weight: parseFloat(formData.get('weight')) || 0,
+      material: spool ? spool.material : 'PLA',
+      color: spool ? spool.colorName : '',
+      weight: 0,
       quantity: parseInt(formData.get('quantity')) || 1,
       status: editingPart ? editingPart.status : PART_STATUSES.PENDING
     };
@@ -215,10 +222,6 @@ export default function ProjectDetail({
                 <span className="hero-stat-value">{stats.doneParts}/{stats.totalParts} <span className="text-xs text-dim">({stats.totalUnits}u)</span></span>
               </div>
               <div className="hero-stat-item">
-                <span className="hero-stat-label">Est. Weight</span>
-                <span className="hero-stat-value">{formatWeight(stats.totalWeight)}</span>
-              </div>
-              <div className="hero-stat-item">
                 <span className="hero-stat-label">Progress</span>
                 <span className="hero-stat-value">{stats.progress}%</span>
               </div>
@@ -312,7 +315,6 @@ export default function ProjectDetail({
 
                     <div className="flex-between items-center text-xs text-dim">
                       <div className="flex flex-col gap-0.5">
-                        <span className="flex items-center gap-1"><Scale size={10} /> {part.weight || 0}g</span>
                         <span className="flex items-center gap-1"><Package size={10} /> Qty: {part.quantity || 1}</span>
                       </div>
                       <button 
@@ -395,33 +397,34 @@ export default function ProjectDetail({
               <h2 className="modal-title">{editingPart ? 'Edit Component' : 'Add Component'}</h2>
               <button className="btn-icon" onClick={() => setShowPartModal(false)}>✕</button>
             </div>
-            <form onSubmit={handleAddPart} className="modal-form">
+            <form onSubmit={handleAddPartSubmit} className="modal-form">
               <div className="form-group">
                 <label className="form-label">Component Name</label>
                 <input name="name" type="text" required placeholder="e.g. Panel R" className="form-input" defaultValue={editingPart?.name || ''} />
               </div>
-              <div className="form-grid-2">
-                <div className="form-group">
-                  <label className="form-label">Material</label>
-                  <select name="material" className="form-input" defaultValue={editingPart?.material || 'PLA'}>
-                    {MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Color</label>
-                  <input name="color" type="text" placeholder="e.g. Red" className="form-input" defaultValue={editingPart?.color || ''} />
-                </div>
+              
+              <div className="form-group">
+                <label className="form-label">Filament (Inventory)</label>
+                <select 
+                  name="spoolId" 
+                  className="form-input" 
+                  required
+                  defaultValue={spools.find(s => s.material === editingPart?.material && s.colorName === editingPart?.color)?.id || ''}
+                >
+                  <option value="">-- Pilih Filament --</option>
+                  {spools.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.brand} {s.material} - {s.colorName}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div className="form-grid-2">
-                <div className="form-group">
-                  <label className="form-label">Weight (g)</label>
-                  <input name="weight" type="number" required defaultValue={editingPart?.weight || 50} className="form-input" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Quantity</label>
-                  <input name="quantity" type="number" required defaultValue={editingPart?.quantity || 1} className="form-input" />
-                </div>
+
+              <div className="form-group">
+                <label className="form-label">Quantity</label>
+                <input name="quantity" type="number" required defaultValue={editingPart?.quantity || 1} className="form-input" />
               </div>
+
               <div className="modal-actions">
                 <button type="button" className="btn btn-ghost" onClick={() => setShowPartModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary">{editingPart ? 'Save Changes' : 'Add Component'}</button>

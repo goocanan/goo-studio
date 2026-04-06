@@ -143,7 +143,6 @@ export function useSpools() {
   const stats = useMemo(() => {
     return {
       totalSpools: processedSpools.length,
-      totalWeight: processedSpools.reduce((sum, s) => sum + (s.remainingWeight || 0), 0),
       lowStockCount: processedSpools.filter(s => s.status === 'low').length,
       uniqueBrands: [...new Set(processedSpools.map(s => s.brand))].length,
       lowStockSpools: processedSpools.filter(s => s.status === 'low' || s.status === 'empty'),

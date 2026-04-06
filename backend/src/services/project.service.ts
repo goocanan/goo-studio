@@ -39,7 +39,6 @@ export class ProjectService {
           name: partData.name,
           material: partData.material,
           color: partData.color,
-          weight: partData.weight,
           quantity: partData.quantity || 1,
           status: partData.status || "pending",
           path: partData.path || null
@@ -82,7 +81,6 @@ export class ProjectService {
       name: data.name,
       material: data.material,
       color: data.color,
-      weight: data.weight,
       quantity: data.quantity || 1,
       status: data.status || "pending"
     };
