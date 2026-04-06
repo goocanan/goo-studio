@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Scale, Box, MoreHorizontal, CheckSquare, Square } from 'lucide-react';
+import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Scale, Box, MoreHorizontal, Check, Square } from 'lucide-react';
 import { formatWeight } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -191,9 +191,9 @@ export default function Batching({
                             onClick={() => togglePart(part.id)}
                           >
                             <div className="flex items-center gap-2 flex-1 overflow-hidden">
-                              <button type="button" className="text-primary flex-shrink-0">
-                                {isSelected ? <CheckSquare size={16} /> : <Square size={16} />}
-                              </button>
+                              <div className={`batching-checkbox ${isSelected ? 'selected' : ''}`}>
+                                {isSelected && <Check size={14} strokeWidth={3} />}
+                              </div>
                               <div className="batching-part-info truncate">
                                 <span className="batching-part-project">{part.projectName}</span>
                                 <ChevronRight size={10} />
