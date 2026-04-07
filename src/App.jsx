@@ -39,9 +39,19 @@ class ErrorBoundary extends React.Component {
 export default function App() {
   const { data: session, isPending } = useSession();
   
-  const [currentPage, setCurrentPage] = useState('dashboard');
-  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(() => localStorage.getItem('goo-currentPage') || 'dashboard');
+  const [selectedProjectId, setSelectedProjectId] = useState(() => localStorage.getItem('goo-selectedProjectId') || null);
   const [fileImportData, setFileImportData] = useState(null);
+
+  // Sync state with localStorage to survive refreshes
+  useEffect(() => {
+    localStorage.setItem('goo-currentPage', currentPage);
+    if (selectedProjectId) {
+      localStorage.setItem('goo-selectedProjectId', selectedProjectId);
+    } else {
+      localStorage.removeItem('goo-selectedProjectId');
+    }
+  }, [currentPage, selectedProjectId]);
   
   const fileManager = useFileManager();
 
@@ -61,7 +71,13 @@ export default function App() {
     isLoading: isLoadingProjects
   } = useProjects();
 
-  const isLoading = isPending || isLoadingProjects || isLoadingSpools;
+  // Only show the global loading screen if we have NO data at all (Initial boot)
+  // Subsequent background refetches should NOT trigger the full-page loader
+  const isInitialLoading = isPending || 
+    (isLoadingProjects && projects.length === 0) || 
+    (isLoadingSpools && spools.length === 0);
+
+  const isLoading = isInitialLoading;
 
   const [loadingStep, setLoadingStep] = useState(0);
 
