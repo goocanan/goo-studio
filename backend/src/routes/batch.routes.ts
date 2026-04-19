@@ -31,3 +31,13 @@ batchRouter.post("/:id/complete", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+
+batchRouter.delete("/:id", async (req, res) => {
+  const userId = (req as any).user.id;
+  try {
+    const result = await BatchService.deleteBatch(userId, req.params.id);
+    res.json(result);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});

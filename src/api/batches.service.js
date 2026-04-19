@@ -14,5 +14,10 @@ export const BatchService = {
   complete: async (id) => {
     const { data } = await api.post(`/batches/${id}/complete`);
     return data;
+  },
+
+  delete: async (id) => {
+    const { data } = await api.delete(`/batches/${id}`);
+    return data;
   }
 };

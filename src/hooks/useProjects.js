@@ -89,6 +89,14 @@ export function useProjects() {
     }
   });
 
+  const deleteBatchMutation = useMutation({
+    mutationFn: BatchService.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
+      queryClient.invalidateQueries({ queryKey: ['userActivity'] });
+    }
+  });
+
   // Wrappers to maintain existing interface
   const addProject = useCallback(async (project) => {
     return await addProjectMutation.mutateAsync(project);
@@ -133,6 +141,10 @@ export function useProjects() {
     completeBatchMutation.mutate(batchId);
   }, [completeBatchMutation]);
 
+  const deleteBatch = useCallback((batchId) => {
+    deleteBatchMutation.mutate(batchId);
+  }, [deleteBatchMutation]);
+
   const stats = useMemo(() => {
     const totalParts = projects.reduce((sum, p) => sum + (p.parts?.length || 0), 0);
     const doneParts = projects.reduce((sum, p) => sum + (p.parts?.filter(pt => pt.status === PART_STATUSES.DONE).length || 0), 0);
@@ -163,6 +175,7 @@ export function useProjects() {
     deletePart,
     createBatch,
     completeBatch,
+    deleteBatch,
     isLoading: isLoadingProjects || isLoadingBatches
   };
 }

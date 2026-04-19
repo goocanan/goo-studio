@@ -73,4 +73,18 @@ export class BatchService {
 
     return { success: true };
   }
+
+  static async deleteBatch(userId: string, id: string) {
+    const [batch] = await db.select().from(batches).where(eq(batches.id, id));
+    if (!batch) throw new Error("Batch not found");
+
+    await db.delete(batches).where(eq(batches.id, id));
+
+    await db.insert(activityLog).values({
+      userId,
+      message: `Batch ${id} dihapus dari riwayat.`
+    });
+
+    return { success: true };
+  }
 }

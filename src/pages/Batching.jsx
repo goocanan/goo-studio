@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Scale, Box, MoreHorizontal, Check, Square, XCircle } from 'lucide-react';
+import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Scale, Box, MoreHorizontal, Check, Square, XCircle, Trash2 } from 'lucide-react';
 import { formatWeight } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Batching({ 
-  suggestedGroups, batches, spools, createBatch, completeBatch, onNavigate 
+  suggestedGroups, batches, spools, createBatch, completeBatch, deleteBatch, onNavigate 
 }) {
   const [selectedSpools, setSelectedSpools] = useState({});
   const [activeTab, setActiveTab] = useState('suggested');
@@ -42,6 +42,12 @@ export default function Batching({
       updates[p.id] = selectAll;
     });
     setSelectedParts(prev => ({ ...prev, ...updates }));
+  };
+
+  const handleDeleteCompletedBatch = (batchId) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus dari riwayat?")) {
+      deleteBatch(batchId);
+    }
   };
 
   const activeBatches = batches.filter(b => b.status !== 'completed');
@@ -330,10 +336,19 @@ export default function Batching({
                   animate={{ opacity: 1 }}
                   transition={{ delay: index * 0.03 }}
                 >
-                  <div className="batching-completed-header">
-                    <CheckCircle size={16} style={{ color: 'var(--accent-emerald)' }} />
-                    <span>{batch.material} {batch.color}</span>
-                    <span className="batching-completed-parts">{batch.parts?.length || 0} parts</span>
+                  <div className="batching-completed-header flex-between">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle size={16} style={{ color: 'var(--accent-emerald)' }} />
+                      <span>{batch.material} {batch.color}</span>
+                      <span className="batching-completed-parts">{batch.parts?.length || 0} parts</span>
+                    </div>
+                    <button 
+                      className="btn btn-ghost btn-sm text-error" 
+                      onClick={() => handleDeleteCompletedBatch(batch.id)}
+                      title="Hapus riwayat batch"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </motion.div>
               ))

@@ -67,7 +67,7 @@ export default function App() {
     projects, batches, suggestedGroups, stats: projectStats,
     addProject, updateProject, deleteProject,
     addPart, updatePart, deletePart,
-    createBatch, completeBatch,
+    createBatch, completeBatch, deleteBatch,
     isLoading: isLoadingProjects
   } = useProjects();
 
@@ -171,6 +171,7 @@ export default function App() {
             spools={spools}
             createBatch={createBatch}
             completeBatch={completeBatch}
+            deleteBatch={deleteBatch}
             onNavigate={navProps.onNavigate}
           />
         );
