@@ -94,6 +94,7 @@ export const batches = pgTable("batches", {
   userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade" }),
   material: text("material").notNull(),
   color: text("color").notNull(),
+  totalWeight: integer("totalWeight").notNull().default(0),
   spoolId: text("spoolId").references(() => inventory.id, { onDelete: "set null" }), // Link to inventory
   status: text("status").notNull().default("ready"), // ready, printing, completed
   createdAt: timestamp("createdAt").notNull().defaultNow(),

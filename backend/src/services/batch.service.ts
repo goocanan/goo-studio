@@ -25,6 +25,7 @@ export class BatchService {
           material: data.material || "PLA",
           color: data.color || "Unknown",
           spoolId: data.spoolId || null,
+          totalWeight: data.totalWeight || 0,
           status: "ready"
         };
         await tx.insert(batches).values(newBatch);
