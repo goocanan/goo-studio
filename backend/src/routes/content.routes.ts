@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireAuth } from "../app";
+import { requireAuth } from "../middleware/auth.middleware";
 import { ContentService } from "../services/content.service";
 
 export const contentRouter = Router();
