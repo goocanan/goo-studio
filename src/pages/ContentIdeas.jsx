@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Tag, Trash2, Edit3, Lightbulb, PlaySquare, Youtube } from 'lucide-react';
+import { Plus, Search, Tag, Trash2, Edit3, Lightbulb, PlaySquare, Video } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../hooks/useContent';
 
@@ -106,7 +106,7 @@ export default function ContentIdeas() {
                 
                 <div className="flex-between items-end mt-auto">
                   <div className="flex flex-wrap gap-1">
-                    {idea.platform === 'YouTube' && <span className="badge badge-error"><Youtube size={10} /> YT</span>}
+                    {idea.platform === 'YouTube' && <span className="badge badge-error"><Video size={10} /> YT</span>}
                     {idea.platform === 'TikTok' && <span className="badge badge-primary"><PlaySquare size={10} /> TT</span>}
                     {idea.tags && idea.tags.split(',').map(tag => (
                       <span key={tag} className="badge badge-ghost text-xxs"><Tag size={8} /> {tag.trim()}</span>
