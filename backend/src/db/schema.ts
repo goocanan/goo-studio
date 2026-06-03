@@ -114,3 +114,18 @@ export const parts = pgTable("parts", {
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
+
+// --- Content Tables ---
+export const contents = pgTable("contents", {
+  id: text("id").primaryKey(),
+  userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade" }),
+  projectId: text("projectId").references(() => projects.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  tags: text("tags"),
+  platform: text("platform"),
+  priority: text("priority").notNull().default("medium"), // low, medium, high
+  status: text("status").notNull().default("idea"), // idea, research, ready, script, recording, editing, review, scheduled, published
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});

@@ -4,8 +4,8 @@ import { LayoutDashboard, FolderKanban, Zap, Settings, FolderSearch } from 'luci
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
   { id: 'projects', label: 'Projects', icon: FolderKanban },
-  { id: 'batching', label: 'Batch', icon: Zap },
-  { id: 'files', label: 'Files', icon: FolderSearch },
+  { id: 'content-ideas', label: 'Ideas', icon: FolderSearch },
+  { id: 'content-pipeline', label: 'Content', icon: Zap },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

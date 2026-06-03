@@ -7,6 +7,7 @@ import { projectRouter } from "./routes/project.routes";
 import { spoolRouter } from "./routes/spool.routes";
 import { batchRouter } from "./routes/batch.routes";
 import { userRouter } from "./routes/user.routes";
+import { contentRouter } from "./routes/content.routes";
 import { toNodeHandler } from "better-auth/node";
 
 dotenv.config();
@@ -61,6 +62,7 @@ app.use("/api/projects", projectRouter);
 app.use("/api/spools", spoolRouter);
 app.use("/api/batches", batchRouter);
 app.use("/api/user", userRouter);
+app.use("/api/contents", contentRouter);
 
 // Error handler
 app.use((err: any, req: any, res: any, next: any) => {

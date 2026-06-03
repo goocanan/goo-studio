@@ -14,6 +14,8 @@ import AddProject from './pages/AddProject';
 import Batching from './pages/Batching';
 import Settings from './pages/Settings';
 import FileManager from './pages/FileManager';
+import ContentIdeas from './pages/ContentIdeas';
+import ContentPipeline from './pages/ContentPipeline';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -182,6 +184,10 @@ export default function App() {
             onImportProject={handleImportProject} 
           />
         );
+      case 'content-ideas':
+        return <ContentIdeas />;
+      case 'content-pipeline':
+        return <ContentPipeline />;
       case 'settings':
         return (
           <Settings 

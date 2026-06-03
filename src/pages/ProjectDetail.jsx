@@ -6,11 +6,14 @@ import { formatWeight, optimizeImage } from '../lib/utils';
 import ThreeDViewer from '../components/ui/ThreeDViewer';
 import ModelPreview from '../components/ui/ModelPreview';
 import { useSpools } from '../hooks/useSpools';
+import { useContent } from '../hooks/useContent';
 
 export default function ProjectDetail({ 
   project, onUpdate, onDelete, onAddPart, onUpdatePart, onDeletePart, onBack, getFileData 
 }) {
   const { spools } = useSpools();
+  const { contents, createContent } = useContent();
+  const relatedContent = contents.filter(c => c.projectId === project.id);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ ...project });
   const [showPartModal, setShowPartModal] = useState(false);
@@ -454,6 +457,40 @@ export default function ProjectDetail({
                 )}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Related Content Section */}
+        <div className="detail-section pt-8 border-t border-subtle mb-12">
+          <div className="section-header flex-between mb-4">
+            <h2 className="heading-md flex items-center gap-2"><Play size={20} /> Related Content</h2>
+            <button 
+              className="btn btn-primary btn-sm" 
+              onClick={() => {
+                const title = prompt('Masukkan ide konten baru untuk proyek ini:');
+                if (title) createContent({ title, projectId: project.id, status: 'idea' });
+              }}
+            >
+              <Plus size={14} /> Add Content Idea
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {relatedContent.length === 0 ? (
+              <div className="glass-card p-8 text-center text-dim col-span-full border-dashed">
+                <p>Belum ada ide konten yang terhubung dengan proyek ini.</p>
+              </div>
+            ) : (
+              relatedContent.map(content => (
+                <div key={content.id} className="glass-card p-4 flex-between">
+                  <div>
+                    <h4 className="font-bold text-sm mb-1">{content.title}</h4>
+                    <span className="text-xs text-dim">Platform: {content.platform || 'Any'}</span>
+                  </div>
+                  <span className="badge badge-primary">{content.status.toUpperCase()}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

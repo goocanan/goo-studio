@@ -2,12 +2,16 @@ import React from 'react';
 import { LayoutDashboard, FolderKanban, Zap, Settings, FolderSearch, LogOut } from 'lucide-react';
 import { signOut } from '../../lib/auth-client';
 
-const NAV_ITEMS = [
+const PRODUCTION_NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'projects', label: 'Projects', icon: FolderKanban },
   { id: 'batching', label: 'Batching', icon: Zap },
   { id: 'files', label: 'Files', icon: FolderSearch },
-  { id: 'settings', label: 'Settings', icon: Settings },
+];
+
+const CONTENT_NAV = [
+  { id: 'content-ideas', label: 'Ideas', icon: FolderSearch }, // Using FolderSearch placeholder, could use Lightbulb
+  { id: 'content-pipeline', label: 'Pipeline', icon: FolderKanban },
 ];
 
 export default function Sidebar({ activePage, onNavigate }) {
@@ -18,8 +22,9 @@ export default function Sidebar({ activePage, onNavigate }) {
         <span className="sidebar-logo-text">GOO-Studio</span>
       </div>
 
-      <nav className="sidebar-nav flex-1">
-        {NAV_ITEMS.map(item => {
+      <nav className="sidebar-nav flex-1 overflow-y-auto">
+        <div className="sidebar-section-title px-4 text-xs font-bold text-dim uppercase tracking-wider mb-2 mt-4">Production</div>
+        {PRODUCTION_NAV.map(item => {
           const Icon = item.icon;
           return (
             <button
@@ -32,6 +37,30 @@ export default function Sidebar({ activePage, onNavigate }) {
             </button>
           );
         })}
+
+        <div className="sidebar-section-title px-4 text-xs font-bold text-dim uppercase tracking-wider mb-2 mt-6">Content</div>
+        {CONTENT_NAV.map(item => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              className={`sidebar-link ${activePage === item.id ? 'active' : ''}`}
+              onClick={() => onNavigate(item.id)}
+            >
+              <Icon />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+
+        <div className="sidebar-section-title px-4 text-xs font-bold text-dim uppercase tracking-wider mb-2 mt-6">System</div>
+        <button
+          className={`sidebar-link ${activePage === 'settings' ? 'active' : ''}`}
+          onClick={() => onNavigate('settings')}
+        >
+          <Settings />
+          <span>Settings</span>
+        </button>
       </nav>
 
       <div className="px-4 mb-4">
