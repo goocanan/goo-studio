@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useContent } from '../hooks/useContent';
 import { useProjects } from '../hooks/useProjects';
-import { KanbanSquare, Calendar, Link as LinkIcon, Plus, Video, PlaySquare, Instagram, Facebook, MessageCircle, AlertTriangle } from 'lucide-react';
+import { KanbanSquare, Calendar, Link as LinkIcon, Plus, Video, PlaySquare, MessageCircle, AlertTriangle } from 'lucide-react';
+import { Instagram, Facebook } from '../components/icons/SocialIcons';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PIPELINE_STAGES = [

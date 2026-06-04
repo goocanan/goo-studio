@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Search, Tag, Trash2, Edit3, Lightbulb, PlaySquare, Video, Calendar, Link, Filter, Instagram, MessageCircle, Facebook } from 'lucide-react';
+import { Plus, Search, Tag, Trash2, Edit3, Lightbulb, PlaySquare, Video, Calendar, Link, Filter, MessageCircle } from 'lucide-react';
+import { Instagram, Facebook } from '../components/icons/SocialIcons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../hooks/useContent';
 import { useProjects } from '../hooks/useProjects';
