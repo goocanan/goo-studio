@@ -1,11 +1,11 @@
 import React from 'react';
-import { LayoutDashboard, FolderKanban, Zap, Settings, FolderSearch } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Zap, Settings, Lightbulb, KanbanSquare } from 'lucide-react';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
   { id: 'projects', label: 'Projects', icon: FolderKanban },
-  { id: 'content-ideas', label: 'Ideas', icon: FolderSearch },
-  { id: 'content-pipeline', label: 'Content', icon: Zap },
+  { id: 'content-ideas', label: 'Ideas', icon: Lightbulb },
+  { id: 'content-pipeline', label: 'Pipeline', icon: KanbanSquare },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

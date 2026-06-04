@@ -481,15 +481,50 @@ export default function ProjectDetail({
                 <p>Belum ada ide konten yang terhubung dengan proyek ini.</p>
               </div>
             ) : (
-              relatedContent.map(content => (
-                <div key={content.id} className="glass-card p-4 flex-between">
-                  <div>
-                    <h4 className="font-bold text-sm mb-1">{content.title}</h4>
-                    <span className="text-xs text-dim">Platform: {content.platform || 'Any'}</span>
+              relatedContent.map(content => {
+                const statusColorMap = {
+                  idea: 'badge-ghost', research: 'badge-ghost', ready: 'badge-ghost',
+                  script: 'badge-primary', recording: 'badge-primary', editing: 'badge-primary',
+                  review: 'badge-warning', scheduled: 'badge-info', published: 'badge-success'
+                };
+                const statusBadge = statusColorMap[content.status] || 'badge-ghost';
+                const priorityDot = content.priority === 'high' ? '🔴' : content.priority === 'low' ? '🟢' : '🟡';
+                const isOverdue = content.scheduledAt && new Date(content.scheduledAt).getTime() < Date.now() && content.status !== 'published';
+
+                return (
+                  <div key={content.id} className="glass-card p-4 relative overflow-hidden">
+                    {/* Priority strip */}
+                    <div 
+                      className="absolute top-0 left-0 right-0 h-0.5" 
+                      style={{ 
+                        background: content.priority === 'high' ? 'var(--accent-error)' : 
+                                    content.priority === 'low' ? 'var(--accent-emerald)' : 'var(--accent-amber)'
+                      }} 
+                    />
+                    <div className="flex-between items-start">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-bold text-sm truncate">{content.title}</h4>
+                          <span className="text-xxs shrink-0">{priorityDot}</span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-dim mt-2">
+                          {content.platform && (
+                            <span className="badge badge-ghost text-xxs">{content.platform}</span>
+                          )}
+                          {content.scheduledAt && (
+                            <span className={`text-xxs ${isOverdue ? 'text-error font-bold' : 'text-dim'}`}>
+                              {isOverdue ? '⚠️ Overdue: ' : 'Due: '}{new Date(content.scheduledAt).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <span className={`badge ${statusBadge} shrink-0 ml-2`}>
+                        {content.status.toUpperCase()}
+                      </span>
+                    </div>
                   </div>
-                  <span className="badge badge-primary">{content.status.toUpperCase()}</span>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

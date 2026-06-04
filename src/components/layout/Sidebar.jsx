@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FolderKanban, Zap, Settings, FolderSearch, LogOut } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Zap, Settings, FolderSearch, LogOut, Lightbulb, KanbanSquare } from 'lucide-react';
 import { signOut } from '../../lib/auth-client';
 
 const PRODUCTION_NAV = [
@@ -10,8 +10,8 @@ const PRODUCTION_NAV = [
 ];
 
 const CONTENT_NAV = [
-  { id: 'content-ideas', label: 'Ideas', icon: FolderSearch }, // Using FolderSearch placeholder, could use Lightbulb
-  { id: 'content-pipeline', label: 'Pipeline', icon: FolderKanban },
+  { id: 'content-ideas', label: 'Ideas', icon: Lightbulb },
+  { id: 'content-pipeline', label: 'Pipeline', icon: KanbanSquare },
 ];
 
 export default function Sidebar({ activePage, onNavigate }) {

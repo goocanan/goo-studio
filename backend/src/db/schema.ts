@@ -126,6 +126,7 @@ export const contents = pgTable("contents", {
   platform: text("platform"),
   priority: text("priority").notNull().default("medium"), // low, medium, high
   status: text("status").notNull().default("idea"), // idea, research, ready, script, recording, editing, review, scheduled, published
+  scheduledAt: timestamp("scheduledAt"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });

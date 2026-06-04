@@ -21,6 +21,7 @@ export class ContentService {
         platform: data.platform || "",
         priority: data.priority || "medium",
         status: data.status || "idea",
+        scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null,
       };
       
       const [result] = await db.insert(contents).values(newContent).returning();
@@ -47,6 +48,9 @@ export class ContentService {
       if (data.platform !== undefined) updateData.platform = data.platform;
       if (data.priority !== undefined) updateData.priority = data.priority;
       if (data.status !== undefined) updateData.status = data.status;
+      if (data.scheduledAt !== undefined) {
+        updateData.scheduledAt = data.scheduledAt ? new Date(data.scheduledAt) : null;
+      }
 
       await db.update(contents).set(updateData).where(eq(contents.id, id));
       
