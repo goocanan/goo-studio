@@ -350,33 +350,47 @@ export default function ProjectDetail({
               </div>
 
               {/* Stat Cards Overview */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="glass-card p-3 rounded-xl border border-white/5 bg-black/20">
-                  <span className="text-xxs text-dim block uppercase font-bold mb-1 flex items-center gap-1">
-                    <Package size={12} className="text-primary" /> Components
-                  </span>
-                  <span className="text-lg font-bold">{stats.doneParts}/{stats.totalParts} <span className="text-xs text-dim font-normal">({stats.totalUnits}u)</span></span>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+                <div className="stat-card-glass flex items-center gap-3">
+                  <div className="stat-icon-box bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    <Package size={18} />
+                  </div>
+                  <div>
+                    <span className="text-xxs text-dim uppercase font-bold tracking-wider block">Components</span>
+                    <span className="text-lg font-bold text-white leading-snug">
+                      {stats.doneParts}/{stats.totalParts} <span className="text-xs text-dim font-normal">({stats.totalUnits}u)</span>
+                    </span>
+                  </div>
                 </div>
 
-                <div className="glass-card p-3 rounded-xl border border-white/5 bg-black/20">
-                  <span className="text-xxs text-dim block uppercase font-bold mb-1 flex items-center gap-1">
-                    <Scale size={12} className="text-cyan" /> Total Berat
-                  </span>
-                  <span className="text-lg font-bold text-cyan-400">{formatWeight(stats.totalWeight)}</span>
+                <div className="stat-card-glass flex items-center gap-3">
+                  <div className="stat-icon-box bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    <Scale size={18} />
+                  </div>
+                  <div>
+                    <span className="text-xxs text-dim uppercase font-bold tracking-wider block">Total Berat</span>
+                    <span className="text-lg font-bold text-cyan-400 leading-snug">{formatWeight(stats.totalWeight)}</span>
+                  </div>
                 </div>
 
-                <div className="glass-card p-3 rounded-xl border border-white/5 bg-black/20">
-                  <span className="text-xxs text-dim block uppercase font-bold mb-1 flex items-center gap-1">
-                    <Clock size={12} className="text-amber" /> Total Durasi
-                  </span>
-                  <span className="text-lg font-bold text-amber-400">{formatDuration(stats.totalDurationMinutes)}</span>
+                <div className="stat-card-glass flex items-center gap-3">
+                  <div className="stat-icon-box bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <span className="text-xxs text-dim uppercase font-bold tracking-wider block">Total Durasi</span>
+                    <span className="text-lg font-bold text-amber-400 leading-snug">{formatDuration(stats.totalDurationMinutes)}</span>
+                  </div>
                 </div>
 
-                <div className="glass-card p-3 rounded-xl border border-white/5 bg-black/20">
-                  <span className="text-xxs text-dim block uppercase font-bold mb-1 flex items-center gap-1">
-                    <CheckCircle size={12} className="text-emerald" /> Progress
-                  </span>
-                  <span className="text-lg font-bold text-emerald-400">{stats.progress}%</span>
+                <div className="stat-card-glass flex items-center gap-3">
+                  <div className="stat-icon-box bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <CheckCircle size={18} />
+                  </div>
+                  <div>
+                    <span className="text-xxs text-dim uppercase font-bold tracking-wider block">Progress</span>
+                    <span className="text-lg font-bold text-emerald-400 leading-snug">{stats.progress}%</span>
+                  </div>
                 </div>
               </div>
 
@@ -397,42 +411,63 @@ export default function ProjectDetail({
 
         {/* Total & Breakdown per Warna Section */}
         {stats.byColor.length > 0 && (
-          <div className="detail-section mb-8">
-            <h3 className="heading-sm mb-3 flex items-center gap-2">
-              <Palette size={18} className="text-primary" /> Ringkasan Cetak per Warna & Material
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {stats.byColor.map((group) => (
-                <div key={group.key} className="glass-card p-4 rounded-xl border border-subtle flex flex-col justify-between gap-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {group.colorHex && (
-                        <span 
-                          className="w-3.5 h-3.5 rounded-full border border-white/20 inline-block shadow-sm"
-                          style={{ backgroundColor: group.colorHex }}
-                        />
-                      )}
-                      <span className="font-bold text-sm">{group.color}</span>
-                    </div>
-                    <span className="tag-glass text-xxs font-mono px-2 py-0.5">{group.material}</span>
-                  </div>
+          <div className="detail-section mb-10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="heading-sm flex items-center gap-2">
+                <Palette size={18} className="text-primary" /> Ringkasan Cetak per Warna & Material
+              </h3>
+              <span className="text-xs text-dim font-medium">{stats.byColor.length} Variasi Warna</span>
+            </div>
 
-                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-xs">
-                    <div>
-                      <span className="text-xxs text-dim block">Components</span>
-                      <span className="font-semibold text-white/90">{group.partCount} item ({group.totalUnits}u)</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {stats.byColor.map((group) => {
+                const percentWeight = stats.totalWeight > 0 ? Math.round((group.totalWeight / stats.totalWeight) * 100) : 0;
+                return (
+                  <div key={group.key} className="color-summary-card">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <span 
+                          className="color-swatch-glow"
+                          style={{ 
+                            backgroundColor: group.colorHex || 'var(--accent-primary)',
+                            boxShadow: group.colorHex ? `0 0 10px ${group.colorHex}66` : '0 0 10px var(--accent-primary-soft)'
+                          }}
+                        />
+                        <span className="font-bold text-sm text-white">{group.color}</span>
+                      </div>
+                      <span className="px-2.5 py-0.5 rounded-full text-xxs font-mono font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                        {group.material}
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-xxs text-dim block">Berat</span>
-                      <span className="font-semibold text-cyan-400">{formatWeight(group.totalWeight)}</span>
+
+                    {/* Weight share bar */}
+                    <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden mb-3.5 border border-white/5">
+                      <div 
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ 
+                          width: `${percentWeight}%`,
+                          backgroundColor: group.colorHex || 'var(--accent-cyan)'
+                        }}
+                      />
                     </div>
-                    <div>
-                      <span className="text-xxs text-dim block">Durasi</span>
-                      <span className="font-semibold text-amber-400">{formatDuration(group.totalDurationMinutes)}</span>
+
+                    <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/5 text-xs">
+                      <div>
+                        <span className="text-xxs text-dim uppercase tracking-wider block mb-0.5">Item</span>
+                        <span className="font-semibold text-white/90">{group.partCount} <span className="text-dim font-normal">({group.totalUnits}u)</span></span>
+                      </div>
+                      <div>
+                        <span className="text-xxs text-dim uppercase tracking-wider block mb-0.5">Berat</span>
+                        <span className="font-semibold text-cyan-400">{formatWeight(group.totalWeight)}</span>
+                      </div>
+                      <div>
+                        <span className="text-xxs text-dim uppercase tracking-wider block mb-0.5">Durasi</span>
+                        <span className="font-semibold text-amber-400">{formatDuration(group.totalDurationMinutes)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -440,7 +475,10 @@ export default function ProjectDetail({
         {/* Components Section */}
         <div className="detail-section mb-12">
           <div className="section-header flex-between mb-4">
-            <h2 className="heading-md flex items-center gap-2"><Package size={20} /> Project Components</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="heading-md flex items-center gap-2"><Package size={20} className="text-primary" /> Project Components</h2>
+              <span className="badge badge-ghost text-xxs font-mono">{stats.totalParts} Item</span>
+            </div>
             <button className="btn btn-primary btn-sm" onClick={openAddPartModal}>
               <Plus size={14} /> Tambah Component
             </button>
@@ -449,8 +487,8 @@ export default function ProjectDetail({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence>
               {project.parts.length === 0 ? (
-                <div className="glass-card p-12 text-center w-full col-span-full">
-                  <div className="mb-4 opacity-50"><Package size={48} className="mx-auto" /></div>
+                <div className="glass-card p-12 text-center w-full col-span-full border-dashed border-white/10">
+                  <div className="mb-4 opacity-50"><Package size={48} className="mx-auto text-dim" /></div>
                   <h3 className="heading-sm text-dim">Belum ada component</h3>
                   <p className="text-muted text-xs mb-4">Tambahkan component pertama untuk melacak berat dan waktu cetak.</p>
                   <button className="btn btn-secondary btn-sm" onClick={openAddPartModal}>
@@ -464,41 +502,64 @@ export default function ProjectDetail({
                   const totalWeight = unitWeight * qty;
                   const unitMins = Number(part.printDurationMinutes) || 0;
                   const totalMins = unitMins * qty;
+                  const isDone = part.status === PART_STATUSES.DONE;
+                  const matchingSpool = spools.find(s => 
+                    s.material?.toLowerCase() === part.material?.toLowerCase() && 
+                    s.colorName?.toLowerCase() === part.color?.toLowerCase()
+                  );
 
                   return (
                     <motion.div 
                       key={part.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="glass-card p-4 rounded-2xl border border-subtle flex flex-col justify-between hover:border-primary/50 transition-all"
+                      transition={{ delay: index * 0.04 }}
+                      className="component-card-aesthetic"
                     >
                       <div>
-                        <div className="flex-between items-start mb-2">
-                          <h4 className="font-bold text-base text-white truncate flex-1 pr-2">{part.name}</h4>
+                        {/* Header */}
+                        <div className="flex justify-between items-start mb-2.5 gap-2">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <span className="text-xxs font-bold text-dim bg-white/5 px-2 py-0.5 rounded-md border border-white/5 shrink-0">
+                              #{index + 1}
+                            </span>
+                            <h4 className="font-bold text-base text-white truncate">{part.name}</h4>
+                          </div>
                           <div className="flex gap-1 shrink-0">
-                            <button className="btn-icon xs hover:text-primary" onClick={() => openEditPartModal(part)} title="Edit Component">
+                            <button className="btn-icon xs hover:text-primary transition-colors" onClick={() => openEditPartModal(part)} title="Edit Component">
                               <Edit3 size={13} />
                             </button>
-                            <button className="btn-icon xs hover:text-error" onClick={() => onDeletePart(project.id, part.id)} title="Hapus Component">
+                            <button className="btn-icon xs hover:text-error transition-colors" onClick={() => onDeletePart(project.id, part.id)} title="Hapus Component">
                               <Trash2 size={13} />
                             </button>
                           </div>
                         </div>
                         
+                        {/* Filament Pills */}
                         <div className="flex items-center gap-2 mb-4">
-                          <span className="tag-glass text-xxs px-2 py-0.5">{part.material}</span>
-                          <span className="tag-glass text-xxs px-2 py-0.5">{part.color || 'Default'}</span>
+                          <span className="px-2 py-0.5 rounded-md text-xxs font-semibold bg-white/5 border border-white/10 text-white/80">
+                            {part.material}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md text-xxs font-semibold bg-white/5 border border-white/10 text-white/70 flex items-center gap-1.5">
+                            {matchingSpool?.colorHex && (
+                              <span 
+                                className="w-2 h-2 rounded-full inline-block"
+                                style={{ backgroundColor: matchingSpool.colorHex }}
+                              />
+                            )}
+                            {part.color || 'Default'}
+                          </span>
                         </div>
 
-                        <div className="space-y-2 bg-black/20 p-3 rounded-xl border border-white/5 text-xs mb-4">
-                          <div className="flex-between">
-                            <span className="text-dim flex items-center gap-1.5"><Package size={12} /> Quantity:</span>
+                        {/* Specs Panel */}
+                        <div className="component-specs-box mb-4">
+                          <div className="spec-row-item text-xs">
+                            <span className="text-dim flex items-center gap-1.5"><Package size={13} className="text-purple-400" /> Quantity:</span>
                             <span className="font-semibold text-white">{qty} unit</span>
                           </div>
                           
-                          <div className="flex-between">
-                            <span className="text-dim flex items-center gap-1.5"><Scale size={12} className="text-cyan-400" /> Berat:</span>
+                          <div className="spec-row-item text-xs">
+                            <span className="text-dim flex items-center gap-1.5"><Scale size={13} className="text-cyan-400" /> Berat:</span>
                             <span className="font-semibold text-cyan-300">
                               {formatWeight(totalWeight)}
                               {qty > 1 && unitWeight > 0 && (
@@ -507,8 +568,8 @@ export default function ProjectDetail({
                             </span>
                           </div>
 
-                          <div className="flex-between">
-                            <span className="text-dim flex items-center gap-1.5"><Clock size={12} className="text-amber-400" /> Durasi Cetak:</span>
+                          <div className="spec-row-item text-xs">
+                            <span className="text-dim flex items-center gap-1.5"><Clock size={13} className="text-amber-400" /> Durasi Cetak:</span>
                             <span className="font-semibold text-amber-300">
                               {formatDuration(totalMins)}
                               {qty > 1 && unitMins > 0 && (
@@ -519,13 +580,16 @@ export default function ProjectDetail({
                         </div>
                       </div>
 
-                      <div className="flex justify-end items-center pt-2 border-t border-white/5">
+                      {/* Footer Action */}
+                      <div className="flex justify-between items-center pt-3 border-t border-white/5">
+                        <span className="text-xxs text-dim">Status Component</span>
                         <button 
-                          className={`badge clickable ${part.status === PART_STATUSES.DONE ? 'badge-success' : 'badge-primary'}`}
+                          className={`badge-status-pill ${isDone ? 'badge-status-done' : 'badge-status-pending'}`}
                           onClick={() => onUpdatePart(project.id, part.id, { 
-                            status: part.status === PART_STATUSES.DONE ? PART_STATUSES.PENDING : PART_STATUSES.DONE 
+                            status: isDone ? PART_STATUSES.PENDING : PART_STATUSES.DONE 
                           })}
                         >
+                          <span className={`w-1.5 h-1.5 rounded-full ${isDone ? 'bg-emerald-400 animate-pulse' : 'bg-purple-400'}`} />
                           {part.status?.toUpperCase()}
                         </button>
                       </div>
