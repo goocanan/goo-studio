@@ -107,6 +107,8 @@ export const parts = pgTable("parts", {
   name: text("name").notNull(),
   material: text("material").notNull(),
   color: text("color").notNull(),
+  weight: integer("weight").notNull().default(0), // in grams
+  printDurationMinutes: integer("printDurationMinutes").notNull().default(0), // total print time in minutes
   quantity: integer("quantity").notNull().default(1),
   status: text("status").notNull().default("pending"), // pending, ready, printing, done
   path: text("path"),
