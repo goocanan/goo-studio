@@ -409,35 +409,38 @@ export default function ProjectDetail({
           </div>
         </div>
 
-        {/* Total & Breakdown per Warna Section (Compact & Low-Height) */}
+        {/* Total & Breakdown per Warna Section (Tidy & Compact Pill List) */}
         {stats.byColor.length > 0 && (
-          <div className="detail-section mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="heading-sm flex items-center gap-2">
-                <Palette size={16} className="text-primary" /> Ringkasan Cetak per Warna
+          <div className="glass-card p-3 px-4 rounded-xl border border-white/5 bg-black/20 mb-6">
+            <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-white/5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-dim flex items-center gap-2">
+                <Palette size={14} className="text-primary" /> Ringkasan Cetak per Warna
               </h3>
-              <span className="text-xxs text-dim font-medium">{stats.byColor.length} Variasi Warna</span>
+              <span className="text-xxs text-dim font-mono">{stats.byColor.length} Variasi Warna</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+            <div className="flex flex-wrap gap-2.5">
               {stats.byColor.map((group) => (
-                <div key={group.key} className="glass-card p-2.5 px-3 rounded-xl border border-white/5 bg-black/20 flex items-center justify-between gap-2 text-xs hover:border-white/15 transition-all">
-                  <div className="flex items-center gap-2 min-w-0">
+                <div 
+                  key={group.key} 
+                  className="flex items-center gap-3 px-3 py-1.5 rounded-lg border border-white/5 bg-white/5 text-xs hover:border-white/15 transition-all"
+                >
+                  <div className="flex items-center gap-2">
                     <span 
-                      className="w-3.5 h-3.5 rounded-full shrink-0 border border-white/20"
+                      className="w-3 h-3 rounded-full shrink-0 border border-white/20"
                       style={{ 
                         backgroundColor: group.colorHex || 'var(--accent-primary)',
                         boxShadow: group.colorHex ? `0 0 6px ${group.colorHex}66` : 'none'
                       }}
                     />
-                    <div className="min-w-0">
-                      <div className="font-bold text-white truncate text-xs">{group.color}</div>
-                      <span className="text-xxs text-dim block truncate">{group.material} • {group.totalUnits}u</span>
-                    </div>
+                    <span className="font-bold text-white text-xs">{group.color}</span>
+                    <span className="text-xxs font-mono text-dim bg-white/5 px-1.5 py-0.5 rounded">{group.material}</span>
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className="text-cyan-400 font-semibold block text-xs">{formatWeight(group.totalWeight)}</span>
-                    <span className="text-amber-400 text-xxs font-medium block">{formatDuration(group.totalDurationMinutes)}</span>
+
+                  <div className="flex items-center gap-2.5 border-l border-white/10 pl-2.5 text-xxs font-medium">
+                    <span className="text-dim">{group.totalUnits}u</span>
+                    <span className="text-cyan-400 font-semibold">{formatWeight(group.totalWeight)}</span>
+                    <span className="text-amber-400 font-semibold">{formatDuration(group.totalDurationMinutes)}</span>
                   </div>
                 </div>
               ))}
@@ -445,7 +448,7 @@ export default function ProjectDetail({
           </div>
         )}
 
-        {/* Components Section (Compact Cards) */}
+        {/* Components Section (Tidy Cards) */}
         <div className="detail-section mb-12">
           <div className="section-header flex-between mb-3">
             <div className="flex items-center gap-3">
@@ -487,26 +490,17 @@ export default function ProjectDetail({
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className="glass-card p-3.5 rounded-xl border border-subtle hover:border-primary/40 transition-all flex flex-col justify-between gap-3 bg-surface/30"
+                      className="glass-card p-3.5 rounded-xl border border-subtle hover:border-primary/40 transition-all flex flex-col justify-between gap-2.5 bg-surface/30"
                     >
-                      {/* Header Row: Title, Tag & Actions */}
-                      <div className="flex justify-between items-center gap-2">
+                      {/* Top Row: Title & Actions */}
+                      <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="text-xxs font-bold text-dim bg-white/5 px-1.5 py-0.5 rounded border border-white/5 shrink-0">
+                          <span className="text-xxs font-mono font-bold text-dim bg-white/5 px-1.5 py-0.5 rounded border border-white/5 shrink-0">
                             #{index + 1}
                           </span>
                           <h4 className="font-bold text-sm text-white truncate">{part.name}</h4>
-                          <span className="px-2 py-0.5 rounded text-xxs font-medium bg-white/5 border border-white/10 text-white/70 shrink-0 flex items-center gap-1">
-                            {matchingSpool?.colorHex && (
-                              <span 
-                                className="w-2 h-2 rounded-full inline-block"
-                                style={{ backgroundColor: matchingSpool.colorHex }}
-                              />
-                            )}
-                            {part.material} {part.color ? `• ${part.color}` : ''}
-                          </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-1.5 shrink-0">
                           <button 
                             className={`badge-status-pill py-0.5 px-2 text-xxs ${isDone ? 'badge-status-done' : 'badge-status-pending'}`}
@@ -528,21 +522,34 @@ export default function ProjectDetail({
                         </div>
                       </div>
 
+                      {/* Subtitle / Filament Tag */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2 py-0.5 rounded text-xxs font-medium bg-white/5 border border-white/10 text-white/80 inline-flex items-center gap-1.5">
+                          {matchingSpool?.colorHex && (
+                            <span 
+                              className="w-2 h-2 rounded-full inline-block shrink-0"
+                              style={{ backgroundColor: matchingSpool.colorHex }}
+                            />
+                          )}
+                          {part.material} • {part.color || 'Default'}
+                        </span>
+                      </div>
+
                       {/* Metrics Strip */}
                       <div className="grid grid-cols-3 gap-2 bg-black/30 p-2 px-3 rounded-lg border border-white/5 text-xs">
                         <div className="flex items-center gap-1.5">
                           <Package size={12} className="text-purple-400 shrink-0" />
-                          <span className="text-white/90 font-medium">{qty} unit</span>
+                          <span className="text-white/90 font-medium text-xs">{qty} unit</span>
                         </div>
 
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 justify-center">
                           <Scale size={12} className="text-cyan-400 shrink-0" />
-                          <span className="text-cyan-300 font-semibold">{formatWeight(totalWeight)}</span>
+                          <span className="text-cyan-300 font-semibold text-xs">{formatWeight(totalWeight)}</span>
                         </div>
 
                         <div className="flex items-center gap-1.5 justify-end">
                           <Clock size={12} className="text-amber-400 shrink-0" />
-                          <span className="text-amber-300 font-semibold">{formatDuration(totalMins)}</span>
+                          <span className="text-amber-300 font-semibold text-xs">{formatDuration(totalMins)}</span>
                         </div>
                       </div>
                     </motion.div>
