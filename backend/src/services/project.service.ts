@@ -42,6 +42,8 @@ export class ProjectService {
               name: partData.name || "Unnamed Part",
               material: partData.material || "PLA",
               color: partData.color || "Unknown",
+              weight: Number(partData.weight) || 0,
+              printDurationMinutes: Number(partData.printDurationMinutes) || 0,
               quantity: partData.quantity || 1,
               status: partData.status || "pending",
               path: partData.path || null
@@ -101,7 +103,9 @@ export class ProjectService {
       name: data.name || "Unnamed Part",
       material: data.material || "PLA",
       color: data.color || "Unknown",
-      quantity: data.quantity || 1,
+      weight: Number(data.weight) || 0,
+      printDurationMinutes: Number(data.printDurationMinutes) || 0,
+      quantity: Number(data.quantity) || 1,
       status: data.status || "pending"
     };
     await db.insert(parts).values(newPart);
@@ -114,7 +118,9 @@ export class ProjectService {
       if (data.name !== undefined) updateData.name = data.name;
       if (data.material !== undefined) updateData.material = data.material;
       if (data.color !== undefined) updateData.color = data.color;
-      if (data.quantity !== undefined) updateData.quantity = data.quantity;
+      if (data.weight !== undefined) updateData.weight = Number(data.weight) || 0;
+      if (data.printDurationMinutes !== undefined) updateData.printDurationMinutes = Number(data.printDurationMinutes) || 0;
+      if (data.quantity !== undefined) updateData.quantity = Number(data.quantity) || 1;
       if (data.status !== undefined) updateData.status = data.status;
       if (data.path !== undefined) updateData.path = data.path;
 

@@ -1,15 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, CheckCircle, Clock, Play, Save, Package, Scale, Settings, MoreVertical, Edit3, Box, Zap } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, CheckCircle, Clock, Play, Save, Package, Scale, Settings, MoreVertical, Edit3, Box, Layers, Palette } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PROJECT_STATUSES, PART_STATUSES, MATERIALS } from '../lib/constants';
-import { formatWeight, optimizeImage } from '../lib/utils';
-import ThreeDViewer from '../components/ui/ThreeDViewer';
-import ModelPreview from '../components/ui/ModelPreview';
+import { formatWeight, formatDuration, optimizeImage } from '../lib/utils';
 import { useSpools } from '../hooks/useSpools';
 import { useContent } from '../hooks/useContent';
 
 export default function ProjectDetail({ 
-  project, onUpdate, onDelete, onAddPart, onUpdatePart, onDeletePart, onBack, getFileData 
+  project, onUpdate, onDelete, onAddPart, onUpdatePart, onDeletePart, onBack 
 }) {
   const { spools } = useSpools();
   const { contents, createContent } = useContent();
@@ -18,43 +16,61 @@ export default function ProjectDetail({
   const [editForm, setEditForm] = useState({ ...project });
   const [showPartModal, setShowPartModal] = useState(false);
   const [editingPart, setEditingPart] = useState(null);
-  const [viewerUrl, setViewerUrl] = useState(null);
-  const [partPreviews, setPartPreviews] = useState({});
   const [isUploading, setIsUploading] = useState(false);
 
-  // Pre-load previews for parts that have a path
-  useEffect(() => {
-    if (!getFileData) return;
-    
-    project.parts.forEach(async (part) => {
-      if (part.path && !partPreviews[part.id]) {
-        try {
-          const file = await getFileData(part.path);
-          if (file) {
-            const url = URL.createObjectURL(file);
-            setPartPreviews(prev => ({ ...prev, [part.id]: url }));
-          }
-        } catch (e) {
-          console.warn('Failed to load preview for', part.name, e);
-        }
-      }
-    });
-
-    return () => {
-      // Cleanup URLs
-      Object.values(partPreviews).forEach(p => { if (p) URL.revokeObjectURL(p); });
-    };
-  }, [project.parts, getFileData]);
-
-  // Calculate project stats
+  // Calculate project stats & breakdown
   const stats = useMemo(() => {
     const totalParts = project.parts?.length || 0;
     const totalUnits = project.parts?.reduce((sum, p) => sum + (parseInt(p.quantity) || 1), 0) || 0;
     const doneParts = project.parts?.filter(p => p.status === PART_STATUSES.DONE).length || 0;
     
+    // Total Weight (sum of weight * quantity)
+    const totalWeight = project.parts?.reduce((sum, p) => sum + ((Number(p.weight) || 0) * (parseInt(p.quantity) || 1)), 0) || 0;
+    
+    // Total Print Duration (sum of printDurationMinutes * quantity)
+    const totalDurationMinutes = project.parts?.reduce((sum, p) => sum + ((Number(p.printDurationMinutes) || 0) * (parseInt(p.quantity) || 1)), 0) || 0;
+    
+    // Group stats per Color & Material
+    const colorMap = {};
+    project.parts?.forEach(p => {
+      const qty = parseInt(p.quantity) || 1;
+      const materialName = p.material || 'PLA';
+      const colorName = p.color || 'Default';
+      const key = `${materialName}___${colorName}`;
+      
+      if (!colorMap[key]) {
+        const matchingSpool = spools.find(s => 
+          s.material?.toLowerCase() === materialName.toLowerCase() && 
+          s.colorName?.toLowerCase() === colorName.toLowerCase()
+        );
+        colorMap[key] = {
+          key,
+          material: materialName,
+          color: colorName,
+          colorHex: matchingSpool?.colorHex || null,
+          totalWeight: 0,
+          totalDurationMinutes: 0,
+          totalUnits: 0,
+          partCount: 0
+        };
+      }
+      colorMap[key].totalWeight += (Number(p.weight) || 0) * qty;
+      colorMap[key].totalDurationMinutes += (Number(p.printDurationMinutes) || 0) * qty;
+      colorMap[key].totalUnits += qty;
+      colorMap[key].partCount += 1;
+    });
+
     const progress = totalParts > 0 ? Math.round((doneParts / totalParts) * 100) : 0;
-    return { totalParts, totalUnits, doneParts, progress };
-  }, [project.parts]);
+    return { 
+      totalParts, 
+      totalUnits, 
+      doneParts, 
+      progress, 
+      totalWeight, 
+      totalDurationMinutes,
+      byColor: Object.values(colorMap)
+    };
+  }, [project.parts, spools]);
 
   const handleSaveProject = () => {
     onUpdate(project.id, editForm);
@@ -67,7 +83,6 @@ export default function ProjectDetail({
 
     setIsUploading(true);
     try {
-      // Optimize image before sending to DB (max 1200px, 0.8 quality)
       const optimizedBase64 = await optimizeImage(file);
       onUpdate(project.id, { image: optimizedBase64 });
       setEditForm(prev => ({ ...prev, image: optimizedBase64 }));
@@ -78,19 +93,30 @@ export default function ProjectDetail({
     }
   };
 
-  const [formState, setFormState] = useState({ name: '', spoolId: '', quantity: 1 });
+  const [formState, setFormState] = useState({ 
+    name: '', 
+    spoolId: '', 
+    quantity: 1, 
+    weight: 0, 
+    hours: 0, 
+    minutes: 0 
+  });
 
   useEffect(() => {
     if (showPartModal) {
       if (editingPart) {
         const matchingSpool = spools.find(s => s.material === editingPart.material && s.colorName === editingPart.color);
+        const totalMins = Number(editingPart.printDurationMinutes) || 0;
         setFormState({
           name: editingPart.name || '',
           spoolId: matchingSpool?.id || '',
-          quantity: editingPart.quantity || 1
+          quantity: editingPart.quantity || 1,
+          weight: editingPart.weight || 0,
+          hours: Math.floor(totalMins / 60),
+          minutes: totalMins % 60
         });
       } else {
-        setFormState({ name: '', spoolId: '', quantity: 1 });
+        setFormState({ name: '', spoolId: '', quantity: 1, weight: 0, hours: 0, minutes: 0 });
       }
     }
   }, [showPartModal, editingPart, spools]);
@@ -98,14 +124,16 @@ export default function ProjectDetail({
   const handleAddPartSubmit = (e) => {
     e.preventDefault();
     
-    // Find selected spool for material/color
     const spool = spools.find(s => s.id === formState.spoolId);
+    const totalDurationMins = (parseInt(formState.hours) || 0) * 60 + (parseInt(formState.minutes) || 0);
 
     const partData = {
       name: formState.name,
-      material: spool ? spool.material : 'PLA',
-      color: spool ? spool.colorName : '',
+      material: spool ? spool.material : (editingPart?.material || 'PLA'),
+      color: spool ? spool.colorName : (editingPart?.color || ''),
       quantity: parseInt(formState.quantity) || 1,
+      weight: parseInt(formState.weight) || 0,
+      printDurationMinutes: totalDurationMins,
       status: editingPart ? editingPart.status : PART_STATUSES.PENDING
     };
     
@@ -131,16 +159,6 @@ export default function ProjectDetail({
 
   return (
     <>
-      {viewerUrl && (
-        <ThreeDViewer 
-          url={viewerUrl} 
-          onClose={() => {
-            URL.revokeObjectURL(viewerUrl);
-            setViewerUrl(null);
-          }} 
-        />
-      )}
-
       {showPartModal && (
         <div className="modal-overlay" onClick={() => setShowPartModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -150,11 +168,11 @@ export default function ProjectDetail({
             </div>
             <form onSubmit={handleAddPartSubmit} className="modal-form">
               <div className="form-group">
-                <label className="form-label">Component Name</label>
+                <label className="form-label">Nama Component</label>
                 <input 
                   type="text" 
                   required 
-                  placeholder="e.g. Panel R" 
+                  placeholder="e.g. Panel Depan R" 
                   className="form-input" 
                   value={formState.name}
                   onChange={e => setFormState({...formState, name: e.target.value})}
@@ -178,20 +196,64 @@ export default function ProjectDetail({
                 </select>
               </div>
 
+              <div className="form-grid-2">
+                <div className="form-group">
+                  <label className="form-label">Jumlah (Quantity)</label>
+                  <input 
+                    type="number" 
+                    min="1"
+                    required 
+                    className="form-input" 
+                    value={formState.quantity}
+                    onChange={e => setFormState({...formState, quantity: e.target.value})}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Berat per unit (gram)</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    placeholder="0"
+                    className="form-input" 
+                    value={formState.weight}
+                    onChange={e => setFormState({...formState, weight: e.target.value})}
+                  />
+                </div>
+              </div>
+
               <div className="form-group">
-                <label className="form-label">Quantity</label>
-                <input 
-                  type="number" 
-                  required 
-                  className="form-input" 
-                  value={formState.quantity}
-                  onChange={e => setFormState({...formState, quantity: e.target.value})}
-                />
+                <label className="form-label">Durasi Cetak per unit</label>
+                <div className="flex gap-2">
+                  <div className="flex-1 flex items-center gap-1">
+                    <input 
+                      type="number" 
+                      min="0"
+                      placeholder="0"
+                      className="form-input" 
+                      value={formState.hours}
+                      onChange={e => setFormState({...formState, hours: e.target.value})}
+                    />
+                    <span className="text-xs text-dim">Jam</span>
+                  </div>
+                  <div className="flex-1 flex items-center gap-1">
+                    <input 
+                      type="number" 
+                      min="0"
+                      max="59"
+                      placeholder="0"
+                      className="form-input" 
+                      value={formState.minutes}
+                      onChange={e => setFormState({...formState, minutes: e.target.value})}
+                    />
+                    <span className="text-xs text-dim">Menit</span>
+                  </div>
+                </div>
               </div>
 
               <div className="modal-actions">
-                <button type="button" className="btn btn-ghost" onClick={() => setShowPartModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">{editingPart ? 'Save Changes' : 'Add Component'}</button>
+                <button type="button" className="btn btn-ghost" onClick={() => setShowPartModal(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary">{editingPart ? 'Simpan Perubahan' : 'Tambah Component'}</button>
               </div>
             </form>
           </div>
@@ -203,7 +265,7 @@ export default function ProjectDetail({
         <div className="page-header mb-2">
           <div className="page-header-left">
             <button className="btn-text" onClick={onBack}>
-              <ArrowLeft size={16} /> Back to Projects
+              <ArrowLeft size={16} /> Kembali ke Project
             </button>
           </div>
           <div className="flex gap-2">
@@ -213,7 +275,7 @@ export default function ProjectDetail({
               </button>
             ) : (
               <button className="btn btn-primary btn-sm" onClick={handleSaveProject}>
-                <Save size={14} /> Save Changes
+                <Save size={14} /> Simpan Perubahan
               </button>
             )}
             <button className="btn btn-ghost btn-sm text-error" onClick={() => {
@@ -228,7 +290,7 @@ export default function ProjectDetail({
         </div>
 
         {/* Project Hero Section */}
-        <div className="project-hero aesthetic-hero">
+        <div className="project-hero aesthetic-hero mb-6">
           <div className="hero-backdrop" style={{ 
             backgroundImage: project.image ? `url(${typeof project.image === 'string' ? project.image : URL.createObjectURL(project.image)})` : 'none' 
           }}></div>
@@ -267,13 +329,13 @@ export default function ProjectDetail({
                       </span>
                     )}
                     <span className="text-xxs text-dim ml-2 flex items-center gap-1">
-                       <Clock size={10} /> Created on {new Date(project.createdAt).toLocaleDateString()}
+                       <Clock size={10} /> Dibuat {new Date(project.createdAt).toLocaleDateString('id-ID')}
                     </span>
                   </div>
                 </div>
                 
                 <div className="flex-col align-end">
-                  <div className="text-xxs text-dim uppercase mb-1 font-bold">Project Status</div>
+                  <div className="text-xxs text-dim uppercase mb-1 font-bold">Status Project</div>
                   <select 
                     className="form-input bg-surface/50 border-subtle text-xs py-1"
                     style={{ width: 'auto' }}
@@ -287,18 +349,38 @@ export default function ProjectDetail({
                 </div>
               </div>
 
-              <div className="project-hero-stats">
-                <div className="hero-stat-item">
-                  <span className="hero-stat-label">Components</span>
-                  <span className="hero-stat-value">{stats.doneParts}/{stats.totalParts} <span className="text-xs text-dim">({stats.totalUnits}u)</span></span>
+              {/* Stat Cards Overview */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="glass-card p-3 rounded-xl border border-white/5 bg-black/20">
+                  <span className="text-xxs text-dim block uppercase font-bold mb-1 flex items-center gap-1">
+                    <Package size={12} className="text-primary" /> Components
+                  </span>
+                  <span className="text-lg font-bold">{stats.doneParts}/{stats.totalParts} <span className="text-xs text-dim font-normal">({stats.totalUnits}u)</span></span>
                 </div>
-                <div className="hero-stat-item">
-                  <span className="hero-stat-label">Progress</span>
-                  <span className="hero-stat-value">{stats.progress}%</span>
+
+                <div className="glass-card p-3 rounded-xl border border-white/5 bg-black/20">
+                  <span className="text-xxs text-dim block uppercase font-bold mb-1 flex items-center gap-1">
+                    <Scale size={12} className="text-cyan" /> Total Berat
+                  </span>
+                  <span className="text-lg font-bold text-cyan-400">{formatWeight(stats.totalWeight)}</span>
+                </div>
+
+                <div className="glass-card p-3 rounded-xl border border-white/5 bg-black/20">
+                  <span className="text-xxs text-dim block uppercase font-bold mb-1 flex items-center gap-1">
+                    <Clock size={12} className="text-amber" /> Total Durasi
+                  </span>
+                  <span className="text-lg font-bold text-amber-400">{formatDuration(stats.totalDurationMinutes)}</span>
+                </div>
+
+                <div className="glass-card p-3 rounded-xl border border-white/5 bg-black/20">
+                  <span className="text-xxs text-dim block uppercase font-bold mb-1 flex items-center gap-1">
+                    <CheckCircle size={12} className="text-emerald" /> Progress
+                  </span>
+                  <span className="text-lg font-bold text-emerald-400">{stats.progress}%</span>
                 </div>
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4">
                 <div className="progress-bar lg">
                   <motion.div 
                     className="progress-bar-fill" 
@@ -313,93 +395,143 @@ export default function ProjectDetail({
           </div>
         </div>
 
+        {/* Total & Breakdown per Warna Section */}
+        {stats.byColor.length > 0 && (
+          <div className="detail-section mb-8">
+            <h3 className="heading-sm mb-3 flex items-center gap-2">
+              <Palette size={18} className="text-primary" /> Ringkasan Cetak per Warna & Material
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {stats.byColor.map((group) => (
+                <div key={group.key} className="glass-card p-4 rounded-xl border border-subtle flex flex-col justify-between gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {group.colorHex && (
+                        <span 
+                          className="w-3.5 h-3.5 rounded-full border border-white/20 inline-block shadow-sm"
+                          style={{ backgroundColor: group.colorHex }}
+                        />
+                      )}
+                      <span className="font-bold text-sm">{group.color}</span>
+                    </div>
+                    <span className="tag-glass text-xxs font-mono px-2 py-0.5">{group.material}</span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-xs">
+                    <div>
+                      <span className="text-xxs text-dim block">Components</span>
+                      <span className="font-semibold text-white/90">{group.partCount} item ({group.totalUnits}u)</span>
+                    </div>
+                    <div>
+                      <span className="text-xxs text-dim block">Berat</span>
+                      <span className="font-semibold text-cyan-400">{formatWeight(group.totalWeight)}</span>
+                    </div>
+                    <div>
+                      <span className="text-xxs text-dim block">Durasi</span>
+                      <span className="font-semibold text-amber-400">{formatDuration(group.totalDurationMinutes)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Components Section */}
         <div className="detail-section mb-12">
           <div className="section-header flex-between mb-4">
             <h2 className="heading-md flex items-center gap-2"><Package size={20} /> Project Components</h2>
             <button className="btn btn-primary btn-sm" onClick={openAddPartModal}>
-              <Plus size={14} /> Add Part
+              <Plus size={14} /> Tambah Component
             </button>
           </div>
           
-          <div className="parts-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence>
               {project.parts.length === 0 ? (
                 <div className="glass-card p-12 text-center w-full col-span-full">
                   <div className="mb-4 opacity-50"><Package size={48} className="mx-auto" /></div>
-                  <h3 className="heading-sm text-dim">No components yet</h3>
-                  <p className="text-muted text-xs mb-4">Add your first printable file to start tracking progress.</p>
+                  <h3 className="heading-sm text-dim">Belum ada component</h3>
+                  <p className="text-muted text-xs mb-4">Tambahkan component pertama untuk melacak berat dan waktu cetak.</p>
                   <button className="btn btn-secondary btn-sm" onClick={openAddPartModal}>
-                    <Plus size={14} /> Add First Component
+                    <Plus size={14} /> Tambah Component Pertama
                   </button>
                 </div>
               ) : (
-                project.parts.map((part, index) => (
-                  <motion.div 
-                    key={part.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="part-card premium-part-card"
-                  >
-                    <div className="part-card-visual">
-                      {partPreviews[part.id] ? (
-                        <ModelPreview url={partPreviews[part.id]} />
-                      ) : (
-                        <div className="part-card-visual-placeholder">
-                          <Box size={32} className="opacity-20" />
-                          <span className="text-xxs opacity-30 mt-2">No 3D Preview</span>
-                        </div>
-                      )}
-                      <button 
-                        className="part-card-expand-btn"
-                        onClick={() => {
-                          if (partPreviews[part.id]) {
-                            setViewerUrl(partPreviews[part.id]);
-                          } else {
-                            alert('Hubungkan kembali library di File Manager untuk melihat file 3D ini.');
-                          }
-                        }}
-                        title="Expand 3D Viewer"
-                      >
-                        <Zap size={14} />
-                      </button>
-                    </div>
+                project.parts.map((part, index) => {
+                  const qty = parseInt(part.quantity) || 1;
+                  const unitWeight = Number(part.weight) || 0;
+                  const totalWeight = unitWeight * qty;
+                  const unitMins = Number(part.printDurationMinutes) || 0;
+                  const totalMins = unitMins * qty;
 
-                    <div className="part-card-body p-4">
-                      <div className="part-card-header mb-2">
-                        <h4 className="part-card-name truncate">{part.name}</h4>
-                        <div className="flex gap-1">
-                          <button className="btn-icon xs hover:text-primary" onClick={() => openEditPartModal(part)}>
-                            <Edit3 size={12} />
-                          </button>
-                          <button className="btn-icon xs hover:text-error" onClick={() => onDeletePart(project.id, part.id)}>
-                            <Trash2 size={12} />
-                          </button>
+                  return (
+                    <motion.div 
+                      key={part.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="glass-card p-4 rounded-2xl border border-subtle flex flex-col justify-between hover:border-primary/50 transition-all"
+                    >
+                      <div>
+                        <div className="flex-between items-start mb-2">
+                          <h4 className="font-bold text-base text-white truncate flex-1 pr-2">{part.name}</h4>
+                          <div className="flex gap-1 shrink-0">
+                            <button className="btn-icon xs hover:text-primary" onClick={() => openEditPartModal(part)} title="Edit Component">
+                              <Edit3 size={13} />
+                            </button>
+                            <button className="btn-icon xs hover:text-error" onClick={() => onDeletePart(project.id, part.id)} title="Hapus Component">
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="tag-glass text-xxs px-2 py-0.5">{part.material}</span>
+                          <span className="tag-glass text-xxs px-2 py-0.5">{part.color || 'Default'}</span>
+                        </div>
+
+                        <div className="space-y-2 bg-black/20 p-3 rounded-xl border border-white/5 text-xs mb-4">
+                          <div className="flex-between">
+                            <span className="text-dim flex items-center gap-1.5"><Package size={12} /> Quantity:</span>
+                            <span className="font-semibold text-white">{qty} unit</span>
+                          </div>
+                          
+                          <div className="flex-between">
+                            <span className="text-dim flex items-center gap-1.5"><Scale size={12} className="text-cyan-400" /> Berat:</span>
+                            <span className="font-semibold text-cyan-300">
+                              {formatWeight(totalWeight)}
+                              {qty > 1 && unitWeight > 0 && (
+                                <span className="text-xxs text-dim font-normal ml-1">({formatWeight(unitWeight)}/u)</span>
+                              )}
+                            </span>
+                          </div>
+
+                          <div className="flex-between">
+                            <span className="text-dim flex items-center gap-1.5"><Clock size={12} className="text-amber-400" /> Durasi Cetak:</span>
+                            <span className="font-semibold text-amber-300">
+                              {formatDuration(totalMins)}
+                              {qty > 1 && unitMins > 0 && (
+                                <span className="text-xxs text-dim font-normal ml-1">({formatDuration(unitMins)}/u)</span>
+                              )}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="part-card-meta mb-3">
-                        <span className="tag-glass text-xxs px-2">{part.material}</span>
-                        <span className="tag-glass text-xxs px-2">{part.color || 'Default'}</span>
-                      </div>
 
-                      <div className="flex-between items-center text-xs text-dim">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="flex items-center gap-1"><Package size={10} /> Qty: {part.quantity || 1}</span>
-                        </div>
+                      <div className="flex justify-end items-center pt-2 border-t border-white/5">
                         <button 
-                           className={`badge clickable ${part.status === PART_STATUSES.DONE ? 'badge-success' : 'badge-primary'}`}
-                           onClick={() => onUpdatePart(project.id, part.id, { 
-                             status: part.status === PART_STATUSES.DONE ? PART_STATUSES.PENDING : PART_STATUSES.DONE 
-                           })}
+                          className={`badge clickable ${part.status === PART_STATUSES.DONE ? 'badge-success' : 'badge-primary'}`}
+                          onClick={() => onUpdatePart(project.id, part.id, { 
+                            status: part.status === PART_STATUSES.DONE ? PART_STATUSES.PENDING : PART_STATUSES.DONE 
+                          })}
                         >
                           {part.status?.toUpperCase()}
                         </button>
                       </div>
-                    </div>
-                  </motion.div>
-                ))
+                    </motion.div>
+                  );
+                })
               )}
             </AnimatePresence>
           </div>

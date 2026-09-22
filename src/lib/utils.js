@@ -47,6 +47,18 @@ export function formatWeight(grams) {
 }
 
 /**
+ * Format minutes into readable hours and minutes string (e.g. 2j 15m or 45m).
+ */
+export function formatDuration(totalMinutes) {
+  if (!totalMinutes || isNaN(totalMinutes) || totalMinutes <= 0) return '0m';
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = Math.round(totalMinutes % 60);
+  if (hours > 0 && mins > 0) return `${hours}j ${mins}m`;
+  if (hours > 0) return `${hours}j`;
+  return `${mins}m`;
+}
+
+/**
  * Get a progress bar color/class based on percentage.
  */
 export function getWeightColor(percent) {

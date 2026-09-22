@@ -14,9 +14,12 @@ export default function AddProject({ onAdd, onBack, initialData }) {
   const [parts, setParts] = useState(initialData?.parts?.map(p => ({
     id: Math.random(),
     name: p.name,
-    path: p.path, // Preserve local path for 3D viewer
+    path: p.path,
     material: p.material || MATERIALS[0],
     color: p.color || '',
+    weight: p.weight || 0,
+    hours: p.printDurationMinutes ? Math.floor(p.printDurationMinutes / 60) : 0,
+    minutes: p.printDurationMinutes ? p.printDurationMinutes % 60 : 0,
     quantity: p.quantity || 1
   })) || []);
 
@@ -26,6 +29,9 @@ export default function AddProject({ onAdd, onBack, initialData }) {
       name: '',
       material: MATERIALS[0],
       color: '',
+      weight: 0,
+      hours: 0,
+      minutes: 0,
       quantity: 1
     }]);
   };
@@ -36,7 +42,7 @@ export default function AddProject({ onAdd, onBack, initialData }) {
 
   const handlePartChange = (id, field, value) => {
     let finalValue = value;
-    if (field === 'quantity') finalValue = parseInt(value) || 0;
+    if (['quantity', 'weight', 'hours', 'minutes'].includes(field)) finalValue = parseInt(value) || 0;
     setParts(prev => prev.map(p => p.id === id ? { ...p, [field]: finalValue } : p));
   };
 
@@ -47,7 +53,6 @@ export default function AddProject({ onAdd, onBack, initialData }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // For now, store the file object. In a real app, you'd upload it or store a blob.
       setImage(file);
     }
   };
@@ -57,7 +62,6 @@ export default function AddProject({ onAdd, onBack, initialData }) {
     
     let finalImage = image;
     
-    // If image is a File or an unoptimized base64 string, compress it
     if (image instanceof File || (typeof image === 'string' && image.length > 200000)) {
       try {
         finalImage = await optimizeImage(image);
@@ -72,7 +76,10 @@ export default function AddProject({ onAdd, onBack, initialData }) {
       notes,
       priority,
       status: parts.length > 0 ? 'ready' : 'idea',
-      parts: parts.map(({ id, ...rest }) => rest)
+      parts: parts.map(({ id, hours, minutes, ...rest }) => ({
+        ...rest,
+        printDurationMinutes: (hours || 0) * 60 + (minutes || 0)
+      }))
     });
   };
 
@@ -225,10 +232,51 @@ export default function AddProject({ onAdd, onBack, initialData }) {
                         <label className="text-xs text-dim">Quantity</label>
                         <input 
                           type="number" 
+                          min="1"
                           className="form-input" 
                           value={part.quantity}
                           onChange={(e) => handlePartChange(part.id, 'quantity', e.target.value)}
                         />
+                      </div>
+                      <div className="form-group">
+                        <label className="text-xs text-dim">Berat per unit (gram)</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          placeholder="0"
+                          className="form-input" 
+                          value={part.weight}
+                          onChange={(e) => handlePartChange(part.id, 'weight', e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group mt-3">
+                      <label className="text-xs text-dim">Durasi Cetak per unit</label>
+                      <div className="flex gap-2">
+                        <div className="flex-1 flex items-center gap-1">
+                          <input 
+                            type="number" 
+                            min="0"
+                            placeholder="0"
+                            className="form-input" 
+                            value={part.hours}
+                            onChange={(e) => handlePartChange(part.id, 'hours', e.target.value)}
+                          />
+                          <span className="text-xs text-dim">Jam</span>
+                        </div>
+                        <div className="flex-1 flex items-center gap-1">
+                          <input 
+                            type="number" 
+                            min="0"
+                            max="59"
+                            placeholder="0"
+                            className="form-input" 
+                            value={part.minutes}
+                            onChange={(e) => handlePartChange(part.id, 'minutes', e.target.value)}
+                          />
+                          <span className="text-xs text-dim">Menit</span>
+                        </div>
                       </div>
                     </div>
                   </motion.div>
