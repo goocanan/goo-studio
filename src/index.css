@@ -2314,15 +2314,15 @@ textarea.form-input {
   border-radius: 16px;
 }
 
-@media (max-width: 768px) {
-  .premium-frame {
-    width: 100% !important;
-    max-width: 200px !important;
-    height: 140px !important;
-    margin: 0 auto;
-    border-radius: 16px !important;
+  @media (max-width: 768px) {
+    .premium-frame {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      margin: 0 auto;
+      border-radius: 16px !important;
+    }
   }
-}
 
 .project-hero-content-row {
   display: flex;
@@ -2357,7 +2357,14 @@ textarea.form-input {
     margin-bottom: 1.25rem !important;
   }
 
-  .stat-card-glass {
+  @media (max-width: 768px) {
+  .project-hero-image {
+    height: auto !important;
+    max-height: 250px !important;
+    object-fit: cover;
+  }
+}
+.stat-card-glass {
     padding: 0.75rem 0.85rem !important;
     border-radius: 14px !important;
   }
