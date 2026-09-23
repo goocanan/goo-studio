@@ -450,13 +450,13 @@ export default function ProjectDetail({
 
         {/* Components Section (Responsive Mobile Rows) */}
         <div className="detail-section mb-8 sm:mb-12">
-          <div className="section-header flex-between mb-3">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <h2 className="heading-md flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base"><Package size={18} className="text-primary" /> Project Components</h2>
-              <span className="badge badge-ghost text-xxs font-mono">{stats.totalParts} Item</span>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2">
+              <h2 className="heading-md flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base mb-0"><Package size={18} className="text-primary shrink-0" /> Project Components</h2>
+              <span className="badge badge-ghost text-xxs font-mono shrink-0">{stats.totalParts} Item</span>
             </div>
-            <button className="btn btn-primary btn-sm text-xs" onClick={openAddPartModal}>
-              <Plus size={14} /> Tambah Component
+            <button className="btn btn-primary btn-sm text-xs shrink-0" onClick={openAddPartModal}>
+              <Plus size={14} /> <span className="hidden sm:inline">Tambah Component</span><span className="sm:hidden">Tambah</span>
             </button>
           </div>
           
@@ -571,8 +571,8 @@ export default function ProjectDetail({
               <div className="space-y-4">
                 <div>
                   <label className="text-xxs text-dim block mb-1.5 font-bold uppercase tracking-wider">Foto Proyek</label>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="w-full sm:w-52 h-36 rounded-xl overflow-hidden border border-white/15 bg-black/40 shadow-lg shrink-0 relative group">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                    <div className="w-full max-w-[220px] sm:w-48 h-32 rounded-xl overflow-hidden border border-white/15 bg-black/40 shadow-lg shrink-0 relative group">
                       {project.image ? (
                         <img 
                           src={typeof project.image === 'string' ? project.image : URL.createObjectURL(project.image)} 
@@ -586,7 +586,7 @@ export default function ProjectDetail({
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-1.5">
                       <input 
                         type="file" 
                         id="project-image-upload" 
