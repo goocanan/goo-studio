@@ -2341,9 +2341,25 @@ textarea.form-input {
   font-weight: 600;
 }
 
-/* ============================================================
-   Enhanced Project Detail & Component Card Styling
-   ============================================================ */
+@media (max-width: 640px) {
+  .aesthetic-hero {
+    padding: 1.25rem 1rem !important;
+    border-radius: 18px !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .stat-card-glass {
+    padding: 0.75rem 0.85rem !important;
+    border-radius: 14px !important;
+  }
+
+  .stat-icon-box {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+}
+
 .stat-card-glass {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(20, 24, 33, 0.6) 100%);
   backdrop-filter: blur(16px);

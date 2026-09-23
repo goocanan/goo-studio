@@ -290,13 +290,13 @@ export default function ProjectDetail({
         </div>
 
         {/* Project Hero Section */}
-        <div className="project-hero aesthetic-hero mb-6">
+        <div className="project-hero aesthetic-hero mb-4 sm:mb-6">
           <div className="hero-backdrop" style={{ 
             backgroundImage: project.image ? `url(${typeof project.image === 'string' ? project.image : URL.createObjectURL(project.image)})` : 'none' 
           }}></div>
-          <div className="project-hero-content-row relative z-10">
+          <div className="project-hero-content-row relative z-10 flex flex-col md:flex-row items-center gap-4 md:gap-6">
             {project.image && (
-              <div className="project-hero-image-wrapper premium-frame">
+              <div className="project-hero-image-wrapper premium-frame shrink-0">
                 <img 
                   src={typeof project.image === 'string' ? project.image : (project.image instanceof File ? URL.createObjectURL(project.image) : '')} 
                   className="project-hero-image" 
@@ -304,10 +304,10 @@ export default function ProjectDetail({
                 />
               </div>
             )}
-            <div className="flex-1">
-              <div className="project-hero-header mb-6">
-                <div className="flex-col">
-                  <div className="flex items-center gap-4">
+            <div className="flex-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+                <div className="flex flex-col gap-1 min-w-0">
+                  <div className="flex items-center gap-3">
                     {isEditing ? (
                       <input 
                         className="heading-xl bg-transparent border-b border-dashed border-white/30 outline-none text-white w-full"
@@ -316,10 +316,10 @@ export default function ProjectDetail({
                         autoFocus
                       />
                     ) : (
-                      <h1 className="heading-xl gradient-text-hero leading-tight mb-1">{project.name}</h1>
+                      <h1 className="heading-xl gradient-text-hero leading-tight mb-0.5 text-xl sm:text-2xl md:text-3xl font-extrabold truncate">{project.name}</h1>
                     )}
                   </div>
-                  <div className="flex gap-3 items-center">
+                  <div className="flex flex-wrap gap-2 items-center">
                     <span className={`tag tag-glass status-${project.status}`}>
                       {project.status.toUpperCase()}
                     </span>
@@ -328,14 +328,14 @@ export default function ProjectDetail({
                         {project.priority.toUpperCase()}
                       </span>
                     )}
-                    <span className="text-xxs text-dim ml-2 flex items-center gap-1">
+                    <span className="text-xxs text-dim flex items-center gap-1">
                        <Clock size={10} /> Dibuat {new Date(project.createdAt).toLocaleDateString('id-ID')}
                     </span>
                   </div>
                 </div>
                 
-                <div className="flex-col align-end">
-                  <div className="text-xxs text-dim uppercase mb-1 font-bold">Status Project</div>
+                <div className="flex flex-col sm:items-end shrink-0">
+                  <div className="text-xxs text-dim uppercase mb-0.5 font-bold">Status Project</div>
                   <select 
                     className="form-input bg-surface/50 border-subtle text-xs py-1"
                     style={{ width: 'auto' }}
@@ -349,52 +349,52 @@ export default function ProjectDetail({
                 </div>
               </div>
 
-              {/* Stat Cards Overview */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-                <div className="stat-card-glass flex items-center gap-3">
-                  <div className="stat-icon-box bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                    <Package size={18} />
+              {/* Stat Cards Overview (Mobile 2x2 Grid) */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3.5">
+                <div className="stat-card-glass flex items-center gap-2 sm:gap-3">
+                  <div className="stat-icon-box bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
+                    <Package size={16} className="sm:w-[18px] sm:h-[18px]" />
                   </div>
-                  <div>
-                    <span className="text-xxs text-dim uppercase font-bold tracking-wider block">Components</span>
-                    <span className="text-lg font-bold text-white leading-snug">
-                      {stats.doneParts}/{stats.totalParts} <span className="text-xs text-dim font-normal">({stats.totalUnits}u)</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xxs text-dim uppercase font-bold tracking-wider block truncate">Components</span>
+                    <span className="text-sm sm:text-lg font-bold text-white leading-snug truncate block">
+                      {stats.doneParts}/{stats.totalParts} <span className="text-[10px] sm:text-xs text-dim font-normal">({stats.totalUnits}u)</span>
                     </span>
                   </div>
                 </div>
 
-                <div className="stat-card-glass flex items-center gap-3">
-                  <div className="stat-icon-box bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                    <Scale size={18} />
+                <div className="stat-card-glass flex items-center gap-2 sm:gap-3">
+                  <div className="stat-icon-box bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
+                    <Scale size={16} className="sm:w-[18px] sm:h-[18px]" />
                   </div>
-                  <div>
-                    <span className="text-xxs text-dim uppercase font-bold tracking-wider block">Total Berat</span>
-                    <span className="text-lg font-bold text-cyan-400 leading-snug">{formatWeight(stats.totalWeight)}</span>
-                  </div>
-                </div>
-
-                <div className="stat-card-glass flex items-center gap-3">
-                  <div className="stat-icon-box bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    <Clock size={18} />
-                  </div>
-                  <div>
-                    <span className="text-xxs text-dim uppercase font-bold tracking-wider block">Total Durasi</span>
-                    <span className="text-lg font-bold text-amber-400 leading-snug">{formatDuration(stats.totalDurationMinutes)}</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xxs text-dim uppercase font-bold tracking-wider block truncate">Total Berat</span>
+                    <span className="text-sm sm:text-lg font-bold text-cyan-400 leading-snug truncate block">{formatWeight(stats.totalWeight)}</span>
                   </div>
                 </div>
 
-                <div className="stat-card-glass flex items-center gap-3">
-                  <div className="stat-icon-box bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <CheckCircle size={18} />
+                <div className="stat-card-glass flex items-center gap-2 sm:gap-3">
+                  <div className="stat-icon-box bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
+                    <Clock size={16} className="sm:w-[18px] sm:h-[18px]" />
                   </div>
-                  <div>
-                    <span className="text-xxs text-dim uppercase font-bold tracking-wider block">Progress</span>
-                    <span className="text-lg font-bold text-emerald-400 leading-snug">{stats.progress}%</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xxs text-dim uppercase font-bold tracking-wider block truncate">Total Durasi</span>
+                    <span className="text-sm sm:text-lg font-bold text-amber-400 leading-snug truncate block">{formatDuration(stats.totalDurationMinutes)}</span>
+                  </div>
+                </div>
+
+                <div className="stat-card-glass flex items-center gap-2 sm:gap-3">
+                  <div className="stat-icon-box bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                    <CheckCircle size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xxs text-dim uppercase font-bold tracking-wider block truncate">Progress</span>
+                    <span className="text-sm sm:text-lg font-bold text-emerald-400 leading-snug truncate block">{stats.progress}%</span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4">
+              <div className="mt-3 sm:mt-4">
                 <div className="progress-bar lg">
                   <motion.div 
                     className="progress-bar-fill" 
@@ -409,23 +409,23 @@ export default function ProjectDetail({
           </div>
         </div>
 
-        {/* Total & Breakdown per Warna Section (Tidy & Compact Pill List) */}
+        {/* Total & Breakdown per Warna Section (Responsive Mobile Pill List) */}
         {stats.byColor.length > 0 && (
-          <div className="glass-card p-3 px-4 rounded-xl border border-white/5 bg-black/20 mb-6">
-            <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-white/5">
+          <div className="glass-card p-3 px-3.5 sm:px-4 rounded-xl border border-white/5 bg-black/20 mb-5 sm:mb-6">
+            <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-dim flex items-center gap-2">
                 <Palette size={14} className="text-primary" /> Ringkasan Cetak per Warna
               </h3>
-              <span className="text-xxs text-dim font-mono">{stats.byColor.length} Variasi Warna</span>
+              <span className="text-xxs text-dim font-mono">{stats.byColor.length} Warna</span>
             </div>
 
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2">
               {stats.byColor.map((group) => (
                 <div 
                   key={group.key} 
-                  className="flex items-center gap-3 px-3 py-1.5 rounded-lg border border-white/5 bg-white/5 text-xs hover:border-white/15 transition-all"
+                  className="flex flex-wrap items-center justify-between sm:justify-start gap-2 sm:gap-3 px-2.5 py-1.5 rounded-lg border border-white/5 bg-white/5 text-xs hover:border-white/15 transition-all w-full sm:w-auto"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0">
                     <span 
                       className="w-3 h-3 rounded-full shrink-0 border border-white/20"
                       style={{ 
@@ -433,11 +433,11 @@ export default function ProjectDetail({
                         boxShadow: group.colorHex ? `0 0 6px ${group.colorHex}66` : 'none'
                       }}
                     />
-                    <span className="font-bold text-white text-xs">{group.color}</span>
-                    <span className="text-xxs font-mono text-dim bg-white/5 px-1.5 py-0.5 rounded">{group.material}</span>
+                    <span className="font-bold text-white text-xs truncate max-w-[120px]">{group.color}</span>
+                    <span className="text-xxs font-mono text-dim bg-white/5 px-1.5 py-0.5 rounded shrink-0">{group.material}</span>
                   </div>
 
-                  <div className="flex items-center gap-2.5 border-l border-white/10 pl-2.5 text-xxs font-medium">
+                  <div className="flex items-center gap-2 border-l border-white/10 pl-2 text-xxs font-medium ml-auto sm:ml-0">
                     <span className="text-dim">{group.totalUnits}u</span>
                     <span className="text-cyan-400 font-semibold">{formatWeight(group.totalWeight)}</span>
                     <span className="text-amber-400 font-semibold">{formatDuration(group.totalDurationMinutes)}</span>
@@ -448,14 +448,14 @@ export default function ProjectDetail({
           </div>
         )}
 
-        {/* Components Section (Tidy Cards) */}
-        <div className="detail-section mb-12">
+        {/* Components Section (Responsive Mobile Rows) */}
+        <div className="detail-section mb-8 sm:mb-12">
           <div className="section-header flex-between mb-3">
-            <div className="flex items-center gap-3">
-              <h2 className="heading-md flex items-center gap-2"><Package size={18} className="text-primary" /> Project Components</h2>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <h2 className="heading-md flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base"><Package size={18} className="text-primary" /> Project Components</h2>
               <span className="badge badge-ghost text-xxs font-mono">{stats.totalParts} Item</span>
             </div>
-            <button className="btn btn-primary btn-sm" onClick={openAddPartModal}>
+            <button className="btn btn-primary btn-sm text-xs" onClick={openAddPartModal}>
               <Plus size={14} /> Tambah Component
             </button>
           </div>
@@ -463,11 +463,11 @@ export default function ProjectDetail({
           <div className="grid grid-cols-1 gap-2.5">
             <AnimatePresence>
               {project.parts.length === 0 ? (
-                <div className="glass-card p-8 text-center w-full col-span-full border-dashed border-white/10">
-                  <div className="mb-3 opacity-50"><Package size={36} className="mx-auto text-dim" /></div>
-                  <h3 className="heading-sm text-dim">Belum ada component</h3>
+                <div className="glass-card p-6 sm:p-8 text-center w-full col-span-full border-dashed border-white/10">
+                  <div className="mb-2.5 opacity-50"><Package size={36} className="mx-auto text-dim" /></div>
+                  <h3 className="heading-sm text-dim text-sm">Belum ada component</h3>
                   <p className="text-muted text-xs mb-3">Tambahkan component pertama untuk melacak berat dan waktu cetak.</p>
-                  <button className="btn btn-secondary btn-sm" onClick={openAddPartModal}>
+                  <button className="btn btn-secondary btn-sm text-xs" onClick={openAddPartModal}>
                     <Plus size={14} /> Tambah Component Pertama
                   </button>
                 </div>
@@ -493,11 +493,11 @@ export default function ProjectDetail({
                       className="glass-card p-2.5 px-3 sm:px-4 rounded-xl border border-subtle hover:border-primary/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 bg-surface/30"
                     >
                       {/* Left Column: Index + Name + Material/Color Tag */}
-                      <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
                         <span className="text-xxs font-mono font-bold text-dim bg-white/5 px-1.5 py-0.5 rounded border border-white/5 shrink-0">
                           #{index + 1}
                         </span>
-                        <h4 className="font-bold text-sm text-white truncate max-w-[150px] sm:max-w-[220px]">{part.name}</h4>
+                        <h4 className="font-bold text-sm text-white truncate max-w-[160px] sm:max-w-[220px]">{part.name}</h4>
                         
                         <span className="px-2 py-0.5 rounded text-xxs font-medium bg-white/5 border border-white/10 text-white/80 inline-flex items-center gap-1.5 shrink-0">
                           {matchingSpool?.colorHex && (
@@ -513,19 +513,19 @@ export default function ProjectDetail({
                       {/* Right Container: Metrics (unit, weight, duration inline) + Action Buttons attached right */}
                       <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 sm:gap-3 shrink-0">
                         {/* Horizontal Metrics Pill (Side-by-side) */}
-                        <div className="flex items-center gap-2.5 bg-black/40 px-2.5 py-1 rounded-lg border border-white/5 text-xs">
+                        <div className="flex items-center gap-1.5 sm:gap-2.5 bg-black/40 px-2 sm:px-2.5 py-1 rounded-lg border border-white/5 text-xs whitespace-nowrap">
                           <div className="flex items-center gap-1" title="Quantity">
-                            <Package size={12} className="text-purple-400 shrink-0" />
+                            <Package size={11} className="text-purple-400 shrink-0" />
                             <span className="text-white/90 font-medium text-xs">{qty}u</span>
                           </div>
 
-                          <div className="flex items-center gap-1 border-l border-white/10 pl-2.5" title="Total Berat">
-                            <Scale size={12} className="text-cyan-400 shrink-0" />
+                          <div className="flex items-center gap-1 border-l border-white/10 pl-1.5 sm:pl-2.5" title="Total Berat">
+                            <Scale size={11} className="text-cyan-400 shrink-0" />
                             <span className="text-cyan-300 font-semibold text-xs">{formatWeight(totalWeight)}</span>
                           </div>
 
-                          <div className="flex items-center gap-1 border-l border-white/10 pl-2.5" title="Total Durasi">
-                            <Clock size={12} className="text-amber-400 shrink-0" />
+                          <div className="flex items-center gap-1 border-l border-white/10 pl-1.5 sm:pl-2.5" title="Total Durasi">
+                            <Clock size={11} className="text-amber-400 shrink-0" />
                             <span className="text-amber-300 font-semibold text-xs">{formatDuration(totalMins)}</span>
                           </div>
                         </div>
