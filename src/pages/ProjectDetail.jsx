@@ -571,15 +571,22 @@ export default function ProjectDetail({
               <div className="space-y-4">
                 <div>
                   <label className="text-xxs text-dim block mb-1.5 font-bold uppercase tracking-wider">Foto Proyek</label>
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 rounded-xl overflow-hidden border border-white/10 bg-black/30 shrink-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="w-full sm:w-52 h-36 rounded-xl overflow-hidden border border-white/15 bg-black/40 shadow-lg shrink-0 relative group">
                       {project.image ? (
-                        <img src={typeof project.image === 'string' ? project.image : URL.createObjectURL(project.image)} className="w-full h-full object-cover" alt="Preview" />
+                        <img 
+                          src={typeof project.image === 'string' ? project.image : URL.createObjectURL(project.image)} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                          alt="Preview" 
+                        />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-dim text-xxs">Belum ada foto</div>
+                        <div className="w-full h-full flex flex-col items-center justify-center text-dim text-xs gap-1">
+                          <Box size={24} className="opacity-30" />
+                          <span>Belum ada foto</span>
+                        </div>
                       )}
                     </div>
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-2">
                       <input 
                         type="file" 
                         id="project-image-upload" 
@@ -591,9 +598,9 @@ export default function ProjectDetail({
                         htmlFor="project-image-upload" 
                         className={`btn btn-secondary btn-sm ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
                       >
-                        {isUploading ? 'Mengunggah...' : 'Ubah Foto'}
+                        {isUploading ? 'Mengunggah...' : 'Ubah Foto Proyek'}
                       </label>
-                      <p className="text-xxs text-dim">Format disarankan: 16:9 atau 1:1</p>
+                      <p className="text-xxs text-dim">Rekomendasi: Format 16:9 atau 1:1 (PNG/JPG)</p>
                     </div>
                   </div>
                 </div>

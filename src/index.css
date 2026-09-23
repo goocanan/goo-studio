@@ -2289,20 +2289,45 @@ textarea.form-input {
 }
 
 .premium-frame {
-  width: 130px !important;
-  height: 130px !important;
-  border-radius: 18px !important;
-  border: 2px solid rgba(255, 255, 255, 0.12) !important;
-  padding: 4px;
-  background: rgba(255, 255, 255, 0.03);
+  width: 240px !important;
+  height: 240px !important;
+  border-radius: 22px !important;
+  border: 3px solid rgba(255, 255, 255, 0.15) !important;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 25px rgba(139, 92, 246, 0.12);
   flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-frame:hover {
+  transform: scale(1.02);
+  border-color: rgba(139, 92, 246, 0.4) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), 0 0 30px rgba(139, 92, 246, 0.25);
+}
+
+@media (max-width: 768px) {
+  .premium-frame {
+    width: 100% !important;
+    max-width: 320px !important;
+    height: 200px !important;
+    margin: 0 auto;
+  }
 }
 
 .project-hero-content-row {
   display: flex;
-  gap: 2rem;
+  flex-direction: row;
+  gap: 2.25rem;
   align-items: center;
   width: 100%;
+}
+
+@media (max-width: 768px) {
+  .project-hero-content-row {
+    flex-direction: column;
+    text-align: center;
+  }
 }
 
 .tag-glass {
