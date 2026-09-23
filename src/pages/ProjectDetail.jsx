@@ -460,7 +460,7 @@ export default function ProjectDetail({
             </button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-2.5">
             <AnimatePresence>
               {project.parts.length === 0 ? (
                 <div className="glass-card p-8 text-center w-full col-span-full border-dashed border-white/10">
@@ -487,21 +487,51 @@ export default function ProjectDetail({
                   return (
                     <motion.div 
                       key={part.id}
-                      initial={{ opacity: 0, y: 6 }}
+                      initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03 }}
-                      className="glass-card p-3.5 rounded-xl border border-subtle hover:border-primary/40 transition-all flex flex-col justify-between gap-2.5 bg-surface/30"
+                      transition={{ delay: index * 0.02 }}
+                      className="glass-card p-2.5 px-3 sm:px-4 rounded-xl border border-subtle hover:border-primary/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 bg-surface/30"
                     >
-                      {/* Top Row: Title & Actions */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="text-xxs font-mono font-bold text-dim bg-white/5 px-1.5 py-0.5 rounded border border-white/5 shrink-0">
-                            #{index + 1}
-                          </span>
-                          <h4 className="font-bold text-sm text-white truncate">{part.name}</h4>
+                      {/* Left Column: Index + Name + Material/Color Tag */}
+                      <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1">
+                        <span className="text-xxs font-mono font-bold text-dim bg-white/5 px-1.5 py-0.5 rounded border border-white/5 shrink-0">
+                          #{index + 1}
+                        </span>
+                        <h4 className="font-bold text-sm text-white truncate max-w-[150px] sm:max-w-[220px]">{part.name}</h4>
+                        
+                        <span className="px-2 py-0.5 rounded text-xxs font-medium bg-white/5 border border-white/10 text-white/80 inline-flex items-center gap-1.5 shrink-0">
+                          {matchingSpool?.colorHex && (
+                            <span 
+                              className="w-2 h-2 rounded-full inline-block shrink-0"
+                              style={{ backgroundColor: matchingSpool.colorHex }}
+                            />
+                          )}
+                          {part.material} {part.color ? `• ${part.color}` : ''}
+                        </span>
+                      </div>
+
+                      {/* Right Container: Metrics (unit, weight, duration inline) + Action Buttons attached right */}
+                      <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 sm:gap-3 shrink-0">
+                        {/* Horizontal Metrics Pill (Side-by-side) */}
+                        <div className="flex items-center gap-2.5 bg-black/40 px-2.5 py-1 rounded-lg border border-white/5 text-xs">
+                          <div className="flex items-center gap-1" title="Quantity">
+                            <Package size={12} className="text-purple-400 shrink-0" />
+                            <span className="text-white/90 font-medium text-xs">{qty}u</span>
+                          </div>
+
+                          <div className="flex items-center gap-1 border-l border-white/10 pl-2.5" title="Total Berat">
+                            <Scale size={12} className="text-cyan-400 shrink-0" />
+                            <span className="text-cyan-300 font-semibold text-xs">{formatWeight(totalWeight)}</span>
+                          </div>
+
+                          <div className="flex items-center gap-1 border-l border-white/10 pl-2.5" title="Total Durasi">
+                            <Clock size={12} className="text-amber-400 shrink-0" />
+                            <span className="text-amber-300 font-semibold text-xs">{formatDuration(totalMins)}</span>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        {/* Action Buttons (Attached to far right) */}
+                        <div className="flex items-center gap-1.5 ml-auto sm:ml-0 shrink-0">
                           <button 
                             className={`badge-status-pill py-0.5 px-2 text-xxs ${isDone ? 'badge-status-done' : 'badge-status-pending'}`}
                             onClick={() => onUpdatePart(project.id, part.id, { 
@@ -519,37 +549,6 @@ export default function ProjectDetail({
                           <button className="btn-icon xs hover:text-error transition-colors" onClick={() => onDeletePart(project.id, part.id)} title="Hapus Component">
                             <Trash2 size={12} />
                           </button>
-                        </div>
-                      </div>
-
-                      {/* Subtitle / Filament Tag */}
-                      <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded text-xxs font-medium bg-white/5 border border-white/10 text-white/80 inline-flex items-center gap-1.5">
-                          {matchingSpool?.colorHex && (
-                            <span 
-                              className="w-2 h-2 rounded-full inline-block shrink-0"
-                              style={{ backgroundColor: matchingSpool.colorHex }}
-                            />
-                          )}
-                          {part.material} • {part.color || 'Default'}
-                        </span>
-                      </div>
-
-                      {/* Metrics Strip */}
-                      <div className="grid grid-cols-3 gap-2 bg-black/30 p-2 px-3 rounded-lg border border-white/5 text-xs">
-                        <div className="flex items-center gap-1.5">
-                          <Package size={12} className="text-purple-400 shrink-0" />
-                          <span className="text-white/90 font-medium text-xs">{qty} unit</span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 justify-center">
-                          <Scale size={12} className="text-cyan-400 shrink-0" />
-                          <span className="text-cyan-300 font-semibold text-xs">{formatWeight(totalWeight)}</span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 justify-end">
-                          <Clock size={12} className="text-amber-400 shrink-0" />
-                          <span className="text-amber-300 font-semibold text-xs">{formatDuration(totalMins)}</span>
                         </div>
                       </div>
                     </motion.div>
