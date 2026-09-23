@@ -450,12 +450,12 @@ export default function ProjectDetail({
 
         {/* Components Section (Responsive Mobile Rows) */}
         <div className="detail-section mb-8 sm:mb-12">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <h2 className="heading-md flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base mb-0"><Package size={18} className="text-primary shrink-0" /> Project Components</h2>
               <span className="badge badge-ghost text-xxs font-mono shrink-0">{stats.totalParts} Item</span>
             </div>
-            <button className="btn btn-primary btn-sm text-xs shrink-0" onClick={openAddPartModal}>
+            <button className="btn btn-primary btn-sm text-xs shrink-0 max-w-full whitespace-nowrap flex items-center gap-1 w-full sm:w-auto" onClick={openAddPartModal}>
               <Plus size={14} /> <span className="hidden sm:inline">Tambah Component</span><span className="sm:hidden">Tambah</span>
             </button>
           </div>
