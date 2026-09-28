@@ -1668,11 +1668,43 @@ textarea.form-input {
     display: block;
   }
 
+  .bottom-nav-items {
+    gap: 0;
+  }
+
+  .bottom-nav-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.35rem 0.25rem;
+  }
+
   .main-content {
     padding: 1.25rem;
     padding-bottom: 5rem;
     height: auto;
     min-height: 100vh;
+  }
+
+  .detail-section {
+    padding: 1rem;
+    border-radius: 18px;
+  }
+
+  .modal-content {
+    padding: 1.25rem;
+    max-height: 92vh;
+  }
+
+  .modal-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-actions {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-surface);
+    margin-top: 0.5rem;
+    padding-bottom: 0.25rem;
   }
 
   .grid-stats {
@@ -2315,12 +2347,20 @@ textarea.form-input {
 }
 
   @media (max-width: 768px) {
-    .premium-frame {
+    .premium-frame,
+    .project-hero-image-wrapper {
       width: 100% !important;
       max-width: 100% !important;
       height: auto !important;
+      aspect-ratio: 16 / 9 !important;
       margin: 0 auto;
       border-radius: 16px !important;
+    }
+
+    .premium-frame .project-hero-image {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover;
     }
   }
 
@@ -2350,6 +2390,14 @@ textarea.form-input {
   font-weight: 600;
 }
 
+@media (max-width: 768px) {
+  .project-hero-image {
+    height: auto !important;
+    max-height: 250px !important;
+    object-fit: cover;
+  }
+}
+
 @media (max-width: 640px) {
   .aesthetic-hero {
     padding: 1.25rem 1rem !important;
@@ -2357,14 +2405,7 @@ textarea.form-input {
     margin-bottom: 1.25rem !important;
   }
 
-  @media (max-width: 768px) {
-  .project-hero-image {
-    height: auto !important;
-    max-height: 250px !important;
-    object-fit: cover;
-  }
-}
-.stat-card-glass {
+  .stat-card-glass {
     padding: 0.75rem 0.85rem !important;
     border-radius: 14px !important;
   }

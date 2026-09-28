@@ -231,38 +231,38 @@ export default function ProjectDetail({
               <div className="form-group">
                 <label className="form-label">Ukuran per unit (mm)</label>
                 <div className="flex gap-2">
-                  <div className="flex-1 flex items-center gap-1">
+                  <div className="flex-1">
+                    <span className="text-xxs text-dim block mb-1 font-semibold">X</span>
                     <input 
                       type="number" 
                       min="0"
-                      placeholder="X"
+                      placeholder="0"
                       className="form-input" 
                       value={formState.dimX}
                       onChange={e => setFormState({...formState, dimX: e.target.value})}
                     />
-                    <span className="text-xs text-dim">X</span>
                   </div>
-                  <div className="flex-1 flex items-center gap-1">
+                  <div className="flex-1">
+                    <span className="text-xxs text-dim block mb-1 font-semibold">Y</span>
                     <input 
                       type="number" 
                       min="0"
-                      placeholder="Y"
+                      placeholder="0"
                       className="form-input" 
                       value={formState.dimY}
                       onChange={e => setFormState({...formState, dimY: e.target.value})}
                     />
-                    <span className="text-xs text-dim">Y</span>
                   </div>
-                  <div className="flex-1 flex items-center gap-1">
+                  <div className="flex-1">
+                    <span className="text-xxs text-dim block mb-1 font-semibold">Z</span>
                     <input 
                       type="number" 
                       min="0"
-                      placeholder="Z"
+                      placeholder="0"
                       className="form-input" 
                       value={formState.dimZ}
                       onChange={e => setFormState({...formState, dimZ: e.target.value})}
                     />
-                    <span className="text-xs text-dim">Z</span>
                   </div>
                 </div>
               </div>
@@ -270,7 +270,8 @@ export default function ProjectDetail({
               <div className="form-group">
                 <label className="form-label">Durasi Cetak per unit</label>
                 <div className="flex gap-2">
-                  <div className="flex-1 flex items-center gap-1">
+                  <div className="flex-1">
+                    <span className="text-xxs text-dim block mb-1 font-semibold">Jam</span>
                     <input 
                       type="number" 
                       min="0"
@@ -279,9 +280,9 @@ export default function ProjectDetail({
                       value={formState.hours}
                       onChange={e => setFormState({...formState, hours: e.target.value})}
                     />
-                    <span className="text-xs text-dim">Jam</span>
                   </div>
-                  <div className="flex-1 flex items-center gap-1">
+                  <div className="flex-1">
+                    <span className="text-xxs text-dim block mb-1 font-semibold">Menit</span>
                     <input 
                       type="number" 
                       min="0"
@@ -291,7 +292,6 @@ export default function ProjectDetail({
                       value={formState.minutes}
                       onChange={e => setFormState({...formState, minutes: e.target.value})}
                     />
-                    <span className="text-xs text-dim">Menit</span>
                   </div>
                 </div>
               </div>
