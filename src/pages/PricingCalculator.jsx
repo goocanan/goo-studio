@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Copy,
   Check,
+  Send,
   AlertCircle,
   ChevronDown,
   ChevronRight,
@@ -18,7 +19,9 @@ import {
   Box,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MATERIALS } from '../lib/constants';
+import { ProjectService } from '../api';
 import { analyzeSTLFile } from '../lib/stl';
 import {
   DEFAULT_PRICING,
@@ -110,6 +113,108 @@ export default function PricingCalculator() {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState({});
   const inputRef = useRef(null);
+
+  // "Kirim ke Project" — pick a project, then either update an existing
+  // component or create a new one, writing the computed weight (g/unit) and
+  // print time (min/unit) into it.
+  const queryClient = useQueryClient();
+  const [sendItem, setSendItem] = useState(null); // { item, cost } | null
+  const [sendProjectId, setSendProjectId] = useState('');
+  const [sendPartId, setSendPartId] = useState('');
+  const [sendMode, setSendMode] = useState('update'); // 'update' | 'create'
+  const [sendNewName, setSendNewName] = useState('');
+  const [sendFeedback, setSendFeedback] = useState(null); // { type, message }
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: ProjectService.getAll,
+    enabled: !!sendItem,
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: ({ projectId, partId, updates }) =>
+      ProjectService.updatePart(projectId, partId, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+
+  const sendCreateMutation = useMutation({
+    mutationFn: ({ projectId, part }) => ProjectService.addPart(projectId, part),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+
+  const sendProject = useMemo(
+    () => projects.find((p) => p.id === sendProjectId) || null,
+    [projects, sendProjectId]
+  );
+  const sendParts = sendProject?.parts || [];
+  const sendPart = sendParts.find((pt) => pt.id === sendPartId) || null;
+  const sendWeight = sendItem ? Math.max(0, Math.round(sendItem.cost.weightPerUnit)) : 0;
+  const sendMinutes = sendItem
+    ? Math.max(0, Math.round(sendItem.cost.printHoursPerUnit * 60))
+    : 0;
+  const sendDurationLabel = sendItem ? formatDuration(sendItem.cost.printHoursPerUnit) : '-';
+  // Default name for a new component: the STL file name without its extension.
+  const sendDefaultName = sendItem ? sendItem.item.name.replace(/\.stl$/i, '') : '';
+
+  const openSend = (item, cost) => {
+    setSendItem({ item, cost });
+    setSendProjectId('');
+    setSendPartId('');
+    setSendMode('update');
+    setSendNewName(item.name.replace(/\.stl$/i, ''));
+    setSendFeedback(null);
+  };
+
+  const closeSend = () => {
+    setSendItem(null);
+    setSendProjectId('');
+    setSendPartId('');
+    setSendFeedback(null);
+  };
+
+  const canSubmitSend =
+    !!sendProjectId && (sendMode === 'update' ? !!sendPartId : sendNewName.trim().length > 0);
+
+  const handleSend = async () => {
+    if (!sendItem || !sendProjectId) return;
+    try {
+      if (sendMode === 'create') {
+        const name = sendNewName.trim() || sendDefaultName || 'Component';
+        await sendCreateMutation.mutateAsync({
+          projectId: sendProjectId,
+          part: {
+            name,
+            material: MATERIALS[0],
+            color: 'Unknown',
+            weight: sendWeight,
+            printDurationMinutes: sendMinutes,
+            quantity: sendItem.item.quantity || 1,
+          },
+        });
+        setSendFeedback({
+          type: 'ok',
+          message: `Component baru "${name}" dibuat: ${sendWeight} g · ${sendDurationLabel} per unit.`,
+        });
+      } else {
+        if (!sendPartId) return;
+        await sendMutation.mutateAsync({
+          projectId: sendProjectId,
+          partId: sendPartId,
+          updates: { weight: sendWeight, printDurationMinutes: sendMinutes },
+        });
+        setSendFeedback({
+          type: 'ok',
+          message: `Berhasil diperbarui: ${sendWeight} g · ${sendDurationLabel} per unit.`,
+        });
+      }
+    } catch (e) {
+      setSendFeedback({ type: 'err', message: e?.message || 'Gagal mengirim ke project.' });
+    }
+  };
 
   // Persist to localStorage so values survive page switches and refreshes.
   useEffect(() => {
@@ -226,7 +331,165 @@ export default function PricingCalculator() {
   const toggleExpand = (id) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
   return (
-    <div className="animate-in">
+    <>
+      {sendItem && (
+        <div className="modal-overlay" onClick={closeSend}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Kirim ke Component Project</h2>
+              <button className="btn-icon" onClick={closeSend} type="button">✕</button>
+            </div>
+
+            <div className="modal-form">
+              <div className="pricing-send-source">
+                <FileBox size={16} className="pricing-file-icon" />
+                <span className="pricing-send-source-name" title={sendItem.item.name}>
+                  {sendItem.item.name}
+                </span>
+              </div>
+
+              <div className="pricing-send-preview">
+                <div className="pricing-send-preview-cell">
+                  <Scale size={13} className="text-cyan-400" />
+                  <span className="pricing-send-preview-label">Berat / unit</span>
+                  <span className="pricing-send-preview-value">{sendWeight} g</span>
+                </div>
+                <div className="pricing-send-preview-cell">
+                  <Clock size={13} className="text-amber-400" />
+                  <span className="pricing-send-preview-label">Waktu cetak / unit</span>
+                  <span className="pricing-send-preview-value">{sendDurationLabel}</span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Project</label>
+                <select
+                  className="form-input"
+                  value={sendProjectId}
+                  onChange={(e) => {
+                    setSendProjectId(e.target.value);
+                    setSendPartId('');
+                    setSendFeedback(null);
+                  }}
+                >
+                  <option value="">-- Pilih Project --</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Aksi</label>
+                <div className="pricing-send-mode">
+                  <button
+                    type="button"
+                    className={`pricing-send-mode-btn ${sendMode === 'update' ? 'active' : ''}`}
+                    onClick={() => { setSendMode('update'); setSendFeedback(null); }}
+                  >
+                    Perbarui component
+                  </button>
+                  <button
+                    type="button"
+                    className={`pricing-send-mode-btn ${sendMode === 'create' ? 'active' : ''}`}
+                    onClick={() => { setSendMode('create'); setSendFeedback(null); }}
+                  >
+                    Buat component baru
+                  </button>
+                </div>
+              </div>
+
+              {sendMode === 'update' ? (
+                <div className="form-group">
+                  <label className="form-label">Component (yang diperbarui)</label>
+                  <select
+                    className="form-input"
+                    value={sendPartId}
+                    disabled={!sendProjectId}
+                    onChange={(e) => {
+                      setSendPartId(e.target.value);
+                      setSendFeedback(null);
+                    }}
+                  >
+                    <option value="">
+                      {!sendProjectId
+                        ? '-- Pilih project dulu --'
+                        : sendParts.length === 0
+                          ? '-- Project ini belum punya component --'
+                          : '-- Pilih Component --'}
+                    </option>
+                    {sendParts.map((pt) => (
+                      <option key={pt.id} value={pt.id}>
+                        {pt.name} ({pt.quantity || 1}u) · {Math.round(Number(pt.weight) || 0)}g
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="form-group">
+                  <label className="form-label">Nama component baru</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={sendNewName}
+                    placeholder={sendDefaultName || 'Nama component'}
+                    onChange={(e) => {
+                      setSendNewName(e.target.value);
+                      setSendFeedback(null);
+                    }}
+                  />
+                </div>
+              )}
+
+              {sendMode === 'update' && sendPart && (
+                <p className="pricing-send-warn">
+                  Component &quot;{sendPart.name}&quot; akan diperbarui: berat{' '}
+                  {Math.round(Number(sendPart.weight) || 0)} g → <strong>{sendWeight} g</strong>,
+                  durasi {formatDuration((Number(sendPart.printDurationMinutes) || 0) / 60)} →{' '}
+                  <strong>{sendDurationLabel}</strong>.
+                </p>
+              )}
+
+              {sendMode === 'create' && sendProjectId && (
+                <p className="pricing-send-warn">
+                  Component baru &quot;{sendNewName.trim() || sendDefaultName}&quot; akan dibuat di
+                  project &quot;{sendProject?.name}&quot; dengan berat{' '}
+                  <strong>{sendWeight} g</strong> dan durasi <strong>{sendDurationLabel}</strong>{' '}
+                  per unit.
+                </p>
+              )}
+
+              {sendFeedback && (
+                <p className={`pricing-send-feedback ${sendFeedback.type === 'ok' ? 'ok' : 'err'}`}>
+                  {sendFeedback.type === 'ok' ? <Check size={14} /> : <AlertCircle size={14} />}
+                  {sendFeedback.message}
+                </p>
+              )}
+
+              <div className="modal-actions">
+                <button type="button" className="btn btn-ghost" onClick={closeSend}>
+                  {sendFeedback?.type === 'ok' ? 'Selesai' : 'Batal'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSend}
+                  disabled={!canSubmitSend || sendMutation.isPending || sendCreateMutation.isPending}
+                >
+                  <Send size={14} />
+                  {sendMutation.isPending || sendCreateMutation.isPending
+                    ? 'Mengirim...'
+                    : sendMode === 'create'
+                      ? 'Buat'
+                      : 'Kirim'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="animate-in">
       <div className="page-header">
         <div className="page-header-left">
           <h1 className="heading-xl gradient-text">🧮 Kalkulator Harga Jual</h1>
@@ -429,6 +692,17 @@ export default function PricingCalculator() {
                               {formatRupiah(cost.profitPerUnit)}
                             </span>
                           </div>
+                        </div>
+
+                        <div className="pricing-file-actions">
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm pricing-send-btn"
+                            onClick={() => openSend(item, cost)}
+                            title="Copy berat & waktu cetak ke component project"
+                          >
+                            <Send size={14} /> Kirim ke Project
+                          </button>
                         </div>
 
                         <AnimatePresence initial={false}>
@@ -769,5 +1043,6 @@ export default function PricingCalculator() {
         </div>
       </div>
     </div>
+    </>
   );
 }
