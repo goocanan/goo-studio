@@ -1,17 +1,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, CheckCircle, Clock, Play, Save, Package, Scale, Settings, MoreVertical, Edit3, Box, Layers, Palette } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, CheckCircle, Clock, Save, Package, Scale, Settings, MoreVertical, Edit3, Box, Layers, Palette } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PROJECT_STATUSES, PART_STATUSES, MATERIALS } from '../lib/constants';
 import { formatWeight, formatDuration, optimizeImage } from '../lib/utils';
 import { useSpools } from '../hooks/useSpools';
-import { useContent } from '../hooks/useContent';
 
 export default function ProjectDetail({ 
   project, onUpdate, onDelete, onAddPart, onUpdatePart, onDeletePart, onBack 
 }) {
   const { spools } = useSpools();
-  const { contents, createContent } = useContent();
-  const relatedContent = contents.filter(c => c.projectId === project.id);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ ...project });
   const [showPartModal, setShowPartModal] = useState(false);
@@ -559,8 +556,8 @@ export default function ProjectDetail({
           </div>
         </div>
 
-        {/* Configuration, Notes & Related Content Section (Balanced 2-Column Grid) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 border-t border-subtle pt-8">
+        {/* Configuration & Notes Section */}
+        <div className="grid grid-cols-1 gap-6 mb-12 border-t border-subtle pt-8">
           {/* Left Column: Photo Configuration & Notes */}
           <div className="glass-card p-5 rounded-2xl border border-subtle flex flex-col justify-between">
             <div>
@@ -625,75 +622,6 @@ export default function ProjectDetail({
             </div>
           </div>
 
-          {/* Right Column: Related Content Ideas */}
-          <div className="glass-card p-5 rounded-2xl border border-subtle flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="heading-sm flex items-center gap-2 text-white">
-                  <Play size={18} className="text-primary" /> Ide Konten Terkait
-                </h3>
-                <button 
-                  className="btn btn-secondary btn-sm" 
-                  onClick={() => {
-                    const title = prompt('Masukkan ide konten baru untuk proyek ini:');
-                    if (title) createContent({ title, projectId: project.id, status: 'idea' });
-                  }}
-                >
-                  <Plus size={13} /> Tambah Ide
-                </button>
-              </div>
-
-              <div className="space-y-2.5">
-                {relatedContent.length === 0 ? (
-                  <div className="glass-card p-6 text-center text-dim border-dashed border-white/10 rounded-xl">
-                    <p className="text-xs">Belum ada ide konten yang terhubung dengan proyek ini.</p>
-                  </div>
-                ) : (
-                  relatedContent.map(content => {
-                    const statusColorMap = {
-                      idea: 'badge-ghost', research: 'badge-ghost', ready: 'badge-ghost',
-                      script: 'badge-primary', recording: 'badge-primary', editing: 'badge-primary',
-                      review: 'badge-warning', scheduled: 'badge-info', published: 'badge-success'
-                    };
-                    const statusBadge = statusColorMap[content.status] || 'badge-ghost';
-                    const priorityDot = content.priority === 'high' ? '🔴' : content.priority === 'low' ? '🟢' : '🟡';
-                    const isOverdue = content.scheduledAt && new Date(content.scheduledAt).getTime() < Date.now() && content.status !== 'published';
-
-                    return (
-                      <div key={content.id} className="glass-card p-3 rounded-xl border border-white/5 bg-black/20 flex justify-between items-center relative overflow-hidden">
-                        <div 
-                          className="absolute top-0 left-0 bottom-0 w-1" 
-                          style={{ 
-                            background: content.priority === 'high' ? 'var(--accent-error)' : 
-                                        content.priority === 'low' ? 'var(--accent-emerald)' : 'var(--accent-amber)'
-                          }} 
-                        />
-                        <div className="pl-2 flex-1 min-w-0 pr-2">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <h4 className="font-bold text-xs text-white truncate">{content.title}</h4>
-                            <span className="text-xxs shrink-0">{priorityDot}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-xxs text-dim">
-                            {content.platform && (
-                              <span className="badge badge-ghost text-xxs py-0 px-1.5">{content.platform}</span>
-                            )}
-                            {content.scheduledAt && (
-                              <span className={`text-xxs ${isOverdue ? 'text-error font-bold' : 'text-dim'}`}>
-                                {isOverdue ? '⚠️ Overdue' : `Due: ${new Date(content.scheduledAt).toLocaleDateString()}`}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <span className={`badge ${statusBadge} shrink-0 text-xxs py-0.5 px-2`}>
-                          {content.status.toUpperCase()}
-                        </span>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </>

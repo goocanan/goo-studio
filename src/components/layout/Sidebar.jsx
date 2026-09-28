@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FolderKanban, Zap, Settings, FolderSearch, LogOut, Lightbulb, KanbanSquare } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Zap, Settings, FolderSearch, LogOut } from 'lucide-react';
 import { signOut } from '../../lib/auth-client';
 
 const PRODUCTION_NAV = [
@@ -7,11 +7,6 @@ const PRODUCTION_NAV = [
   { id: 'projects', label: 'Projects', icon: FolderKanban },
   { id: 'batching', label: 'Batching', icon: Zap },
   { id: 'files', label: 'Files', icon: FolderSearch },
-];
-
-const CONTENT_NAV = [
-  { id: 'content-ideas', label: 'Ideas', icon: Lightbulb },
-  { id: 'content-pipeline', label: 'Pipeline', icon: KanbanSquare },
 ];
 
 export default function Sidebar({ activePage, onNavigate }) {
@@ -25,21 +20,6 @@ export default function Sidebar({ activePage, onNavigate }) {
       <nav className="sidebar-nav flex-1 overflow-y-auto">
         <div className="sidebar-section-title px-4 text-xs font-bold text-dim uppercase tracking-wider mb-2 mt-4">Production</div>
         {PRODUCTION_NAV.map(item => {
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.id}
-              className={`sidebar-link ${activePage === item.id ? 'active' : ''}`}
-              onClick={() => onNavigate(item.id)}
-            >
-              <Icon />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-
-        <div className="sidebar-section-title px-4 text-xs font-bold text-dim uppercase tracking-wider mb-2 mt-6">Content</div>
-        {CONTENT_NAV.map(item => {
           const Icon = item.icon;
           return (
             <button
