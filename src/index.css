@@ -3615,6 +3615,18 @@ textarea.form-input {
   }
 }
 
+/* Fix: inside the 320px parameter panel, a 2-column grid left each number
+   input ~110px wide; after the 56px suffix reservation only ~38px of text
+   area remained, clipping values like "150000". Stack them full width. */
+.pricing-params .form-grid-2 {
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.pricing-params .pricing-input-wrap .form-input {
+  padding-right: 3.25rem;
+}
+
 /* Fix: long rupiah values clipped inside the 2-column stat grid on mobile. */
 .pricing-stat .stat-info {
   min-width: 0;
