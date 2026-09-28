@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, CheckCircle, Clock, Save, Package, Scale, Settings, MoreVertical, Edit3, Box, Layers, Palette } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, CheckCircle, Clock, Save, Package, Scale, Settings, MoreVertical, Edit3, Box, Layers, Palette, Ruler } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PROJECT_STATUSES, PART_STATUSES, MATERIALS } from '../lib/constants';
 import { formatWeight, formatDuration, optimizeImage } from '../lib/utils';
@@ -96,7 +96,10 @@ export default function ProjectDetail({
     quantity: 1, 
     weight: 0, 
     hours: 0, 
-    minutes: 0 
+    minutes: 0,
+    dimX: 0,
+    dimY: 0,
+    dimZ: 0
   });
 
   useEffect(() => {
@@ -110,10 +113,13 @@ export default function ProjectDetail({
           quantity: editingPart.quantity || 1,
           weight: editingPart.weight || 0,
           hours: Math.floor(totalMins / 60),
-          minutes: totalMins % 60
+          minutes: totalMins % 60,
+          dimX: editingPart.dimX || 0,
+          dimY: editingPart.dimY || 0,
+          dimZ: editingPart.dimZ || 0
         });
       } else {
-        setFormState({ name: '', spoolId: '', quantity: 1, weight: 0, hours: 0, minutes: 0 });
+        setFormState({ name: '', spoolId: '', quantity: 1, weight: 0, hours: 0, minutes: 0, dimX: 0, dimY: 0, dimZ: 0 });
       }
     }
   }, [showPartModal, editingPart, spools]);
@@ -131,6 +137,9 @@ export default function ProjectDetail({
       quantity: parseInt(formState.quantity) || 1,
       weight: parseInt(formState.weight) || 0,
       printDurationMinutes: totalDurationMins,
+      dimX: parseInt(formState.dimX) || 0,
+      dimY: parseInt(formState.dimY) || 0,
+      dimZ: parseInt(formState.dimZ) || 0,
       status: editingPart ? editingPart.status : PART_STATUSES.PENDING
     };
     
@@ -216,6 +225,45 @@ export default function ProjectDetail({
                     value={formState.weight}
                     onChange={e => setFormState({...formState, weight: e.target.value})}
                   />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Ukuran per unit (mm)</label>
+                <div className="flex gap-2">
+                  <div className="flex-1 flex items-center gap-1">
+                    <input 
+                      type="number" 
+                      min="0"
+                      placeholder="X"
+                      className="form-input" 
+                      value={formState.dimX}
+                      onChange={e => setFormState({...formState, dimX: e.target.value})}
+                    />
+                    <span className="text-xs text-dim">X</span>
+                  </div>
+                  <div className="flex-1 flex items-center gap-1">
+                    <input 
+                      type="number" 
+                      min="0"
+                      placeholder="Y"
+                      className="form-input" 
+                      value={formState.dimY}
+                      onChange={e => setFormState({...formState, dimY: e.target.value})}
+                    />
+                    <span className="text-xs text-dim">Y</span>
+                  </div>
+                  <div className="flex-1 flex items-center gap-1">
+                    <input 
+                      type="number" 
+                      min="0"
+                      placeholder="Z"
+                      className="form-input" 
+                      value={formState.dimZ}
+                      onChange={e => setFormState({...formState, dimZ: e.target.value})}
+                    />
+                    <span className="text-xs text-dim">Z</span>
+                  </div>
                 </div>
               </div>
 
@@ -525,6 +573,15 @@ export default function ProjectDetail({
                             <Clock size={11} className="text-amber-400 shrink-0" />
                             <span className="text-amber-300 font-semibold text-xs">{formatDuration(totalMins)}</span>
                           </div>
+
+                          {(Number(part.dimX) > 0 || Number(part.dimY) > 0 || Number(part.dimZ) > 0) && (
+                            <div className="flex items-center gap-1 border-l border-white/10 pl-1.5 sm:pl-2.5" title="Ukuran per unit (X×Y×Z mm)">
+                              <Ruler size={11} className="text-emerald-400 shrink-0" />
+                              <span className="text-emerald-300 font-semibold text-xs">
+                                {Number(part.dimX) || 0}×{Number(part.dimY) || 0}×{Number(part.dimZ) || 0}
+                              </span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Action Buttons (Attached to far right) */}

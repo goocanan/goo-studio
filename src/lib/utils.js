@@ -1,4 +1,4 @@
-import { DEFAULT_LOW_STOCK_THRESHOLD } from './constants';
+import { DEFAULT_LOW_STOCK_THRESHOLD, BED_MARGIN_MM } from './constants';
 
 /**
  * Generate a spool ID based on material type and existing spools.
@@ -176,6 +176,117 @@ export function groupPartsByColorMaterial(projects) {
     });
   });
   return Object.values(groups).sort((a, b) => b.totalQuantity - a.totalQuantity);
+}
+
+/**
+ * Footprint (mm) of a part on the bed = its X/Y bounding box. Falls back to Z
+ * for legacy parts that only have one dimension recorded.
+ */
+export function partFootprint(part) {
+  const x = Number(part?.dimX) || 0;
+  const y = Number(part?.dimY) || 0;
+  const z = Number(part?.dimZ) || 0;
+  const w = x || z;
+  const d = y || z;
+  return { w, d, known: x > 0 && y > 0 };
+}
+
+// Try to place one rectangle (w x d) into the current shelf packing. Returns the
+// placement + next shelf state, or null when it does not fit anywhere left.
+function shelfTryPlace(shelf, w, d) {
+  let pw = w;
+  let pd = d;
+  if (pw > shelf.W || pd > shelf.D) {
+    // Rotate 90° if that helps.
+    if (d <= shelf.W && w <= shelf.D) {
+      pw = d;
+      pd = w;
+    } else {
+      return null;
+    }
+  }
+  let y = shelf.shelfY;
+  let x = shelf.cursorX;
+  let h = shelf.shelfH;
+  if (x + pw > shelf.W) {
+    // Start a new row (shelf).
+    y = shelf.shelfY + shelf.shelfH;
+    x = 0;
+    h = 0;
+  }
+  if (y + pd > shelf.D) return null;
+  return { x, y, w: pw, d: pd, nextY: y, nextH: Math.max(h, pd), nextX: x + pw };
+}
+
+/**
+ * Pack parts onto a bed with a shelf (row) algorithm.
+ *
+ * - `priorityIds` are laid out first (so the user's manual selection is kept),
+ *   then every other part is offered the leftover space, largest first.
+ * - A part is "placed" only when ALL of its copies fit (all-or-nothing), so the
+ *   returned `selectedIds` is exactly the set that fits the plate.
+ *
+ * Returns { W, D, totalArea, usedArea, fillPercent, selectedIds, overflowIds,
+ *           unknownIds, placements }.
+ */
+export function packBed(parts, bedWidth, bedDepth, { margin = BED_MARGIN_MM, priorityIds = [], excludeIds = [] } = {}) {
+  const W = Math.max(0, (Number(bedWidth) || 0) - margin * 2);
+  const D = Math.max(0, (Number(bedDepth) || 0) - margin * 2);
+  const priority = new Set(priorityIds);
+  const excluded = new Set(excludeIds);
+
+  const candidates = (parts || [])
+    .filter((part) => !excluded.has(part.id))
+    .map((part) => ({ part, fp: partFootprint(part) }))
+    .filter((c) => c.fp.known && c.fp.w > 0 && c.fp.d > 0)
+    .sort((a, b) => {
+      const pa = priority.has(a.part.id) ? 0 : 1;
+      const pb = priority.has(b.part.id) ? 0 : 1;
+      if (pa !== pb) return pa - pb;
+      return b.fp.w * b.fp.d - a.fp.w * a.fp.d;
+    });
+
+  const shelf = { W, D, placements: [], shelfY: 0, shelfH: 0, cursorX: 0 };
+  const selectedIds = [];
+
+  for (const c of candidates) {
+    const qty = Math.max(1, Number(c.part.quantity) || 1);
+    const trial = { ...shelf, placements: shelf.placements.slice() };
+    let ok = true;
+    for (let i = 0; i < qty; i++) {
+      const spot = shelfTryPlace(trial, c.fp.w, c.fp.d);
+      if (!spot) { ok = false; break; }
+      trial.placements.push({ partId: c.part.id, x: spot.x, y: spot.y, w: spot.w, d: spot.d });
+      trial.shelfY = spot.nextY;
+      trial.shelfH = spot.nextH;
+      trial.cursorX = spot.nextX;
+    }
+    if (ok) {
+      shelf.placements = trial.placements;
+      shelf.shelfY = trial.shelfY;
+      shelf.shelfH = trial.shelfH;
+      shelf.cursorX = trial.cursorX;
+      selectedIds.push(c.part.id);
+    }
+  }
+
+  const placedSet = new Set(selectedIds);
+  const usedArea = shelf.placements.reduce((s, p) => s + p.w * p.d, 0);
+  const totalArea = W * D;
+
+  return {
+    W,
+    D,
+    totalArea,
+    usedArea,
+    fillPercent: totalArea > 0 ? Math.round((usedArea / totalArea) * 100) : 0,
+    selectedIds,
+    overflowIds: (parts || [])
+      .filter((p) => priority.has(p.id) && !placedSet.has(p.id) && partFootprint(p).known)
+      .map((p) => p.id),
+    unknownIds: (parts || []).filter((p) => !partFootprint(p).known).map((p) => p.id),
+    placements: shelf.placements,
+  };
 }
 
 /**

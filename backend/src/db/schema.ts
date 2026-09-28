@@ -96,6 +96,9 @@ export const batches = pgTable("batches", {
   color: text("color").notNull(),
   totalWeight: integer("totalWeight").notNull().default(0),
   spoolId: text("spoolId").references(() => inventory.id, { onDelete: "set null" }), // Link to inventory
+  bedPlate: text("bedPlate"), // e.g. "Creality Hi" | "BambuLab A1 Mini"
+  bedWidth: integer("bedWidth").notNull().default(0), // mm (X)
+  bedDepth: integer("bedDepth").notNull().default(0), // mm (Y)
   status: text("status").notNull().default("ready"), // ready, printing, completed
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
@@ -112,6 +115,10 @@ export const parts = pgTable("parts", {
   quantity: integer("quantity").notNull().default(1),
   status: text("status").notNull().default("pending"), // pending, ready, printing, done
   path: text("path"),
+  // Bounding box dimensions from STL analysis (per unit, in mm)
+  dimX: integer("dimX").notNull().default(0),
+  dimY: integer("dimY").notNull().default(0),
+  dimZ: integer("dimZ").notNull().default(0),
   batchId: text("batchId").references(() => batches.id, { onDelete: "set null" }),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),

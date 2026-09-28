@@ -46,7 +46,10 @@ export class ProjectService {
               printDurationMinutes: Number(partData.printDurationMinutes) || 0,
               quantity: partData.quantity || 1,
               status: partData.status || "pending",
-              path: partData.path || null
+              path: partData.path || null,
+              dimX: Math.round(Number(partData.dimX) || 0),
+              dimY: Math.round(Number(partData.dimY) || 0),
+              dimZ: Math.round(Number(partData.dimZ) || 0)
             };
             await tx.insert(parts).values(newPart);
             projectParts.push(newPart);
@@ -106,7 +109,10 @@ export class ProjectService {
       weight: Number(data.weight) || 0,
       printDurationMinutes: Number(data.printDurationMinutes) || 0,
       quantity: Number(data.quantity) || 1,
-      status: data.status || "pending"
+      status: data.status || "pending",
+      dimX: Math.round(Number(data.dimX) || 0),
+      dimY: Math.round(Number(data.dimY) || 0),
+      dimZ: Math.round(Number(data.dimZ) || 0)
     };
     await db.insert(parts).values(newPart);
     return newPart;
@@ -123,6 +129,9 @@ export class ProjectService {
       if (data.quantity !== undefined) updateData.quantity = Number(data.quantity) || 1;
       if (data.status !== undefined) updateData.status = data.status;
       if (data.path !== undefined) updateData.path = data.path;
+      if (data.dimX !== undefined) updateData.dimX = Math.round(Number(data.dimX) || 0);
+      if (data.dimY !== undefined) updateData.dimY = Math.round(Number(data.dimY) || 0);
+      if (data.dimZ !== undefined) updateData.dimZ = Math.round(Number(data.dimZ) || 0);
 
       await db.update(parts).set(updateData).where(eq(parts.id, partId));
       return { id: partId, ...updateData };

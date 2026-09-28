@@ -50,6 +50,16 @@ export const PART_STATUSES = {
 
 export const DEFAULT_LOW_STOCK_THRESHOLD = 200; // gram
 
+// Print-bed presets (mm). Used by the Smart Batching size-based selection so we
+// can tell which components fit on the plate before generating a batch.
+export const BED_PLATES = [
+  { id: 'creality-hi', name: 'Creality Hi', width: 260, depth: 260 },
+  { id: 'bambu-a1-mini', name: 'BambuLab A1 Mini', width: 180, depth: 180 },
+];
+
+// Keep a small margin (mm) free around the bed edges for skirt / brim / prime line.
+export const BED_MARGIN_MM = 10;
+
 export const DEFAULT_INITIAL_WEIGHT = 1000; // gram
 
 export const SAMPLE_SPOOLS = [

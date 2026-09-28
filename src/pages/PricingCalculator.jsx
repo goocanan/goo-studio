@@ -157,6 +157,16 @@ export default function PricingCalculator() {
     ? Math.max(0, Math.round(sendItem.cost.printHoursPerUnit * 60))
     : 0;
   const sendDurationLabel = sendItem ? formatDuration(sendItem.cost.printHoursPerUnit) : '-';
+  // Bounding box (mm) from the STL analysis, per unit — sent alongside weight/time.
+  const sendDims = (() => {
+    const size = sendItem?.item?.bbox?.size;
+    if (!Array.isArray(size)) return { dimX: 0, dimY: 0, dimZ: 0 };
+    return {
+      dimX: Math.round(Number(size[0]) || 0),
+      dimY: Math.round(Number(size[1]) || 0),
+      dimZ: Math.round(Number(size[2]) || 0),
+    };
+  })();
   // Default name for a new component: the STL file name without its extension.
   const sendDefaultName = sendItem ? sendItem.item.name.replace(/\.stl$/i, '') : '';
 
@@ -193,6 +203,7 @@ export default function PricingCalculator() {
             weight: sendWeight,
             printDurationMinutes: sendMinutes,
             quantity: sendItem.item.quantity || 1,
+            ...sendDims,
           },
         });
         setSendFeedback({
@@ -204,7 +215,7 @@ export default function PricingCalculator() {
         await sendMutation.mutateAsync({
           projectId: sendProjectId,
           partId: sendPartId,
-          updates: { weight: sendWeight, printDurationMinutes: sendMinutes },
+          updates: { weight: sendWeight, printDurationMinutes: sendMinutes, ...sendDims },
         });
         setSendFeedback({
           type: 'ok',
@@ -358,6 +369,15 @@ export default function PricingCalculator() {
                   <Clock size={13} className="text-amber-400" />
                   <span className="pricing-send-preview-label">Waktu cetak / unit</span>
                   <span className="pricing-send-preview-value">{sendDurationLabel}</span>
+                </div>
+                <div className="pricing-send-preview-cell">
+                  <Box size={13} className="text-emerald-400" />
+                  <span className="pricing-send-preview-label">Ukuran (X×Y×Z)</span>
+                  <span className="pricing-send-preview-value">
+                    {sendDims.dimX > 0 || sendDims.dimY > 0
+                      ? `${sendDims.dimX}×${sendDims.dimY}×${sendDims.dimZ} mm`
+                      : '—'}
+                  </span>
                 </div>
               </div>
 

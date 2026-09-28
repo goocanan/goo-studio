@@ -26,6 +26,9 @@ export class BatchService {
           color: data.color || "Unknown",
           spoolId: data.spoolId || null,
           totalWeight: data.totalWeight || 0,
+          bedPlate: data.bedPlate || null,
+          bedWidth: Math.round(Number(data.bedWidth) || 0),
+          bedDepth: Math.round(Number(data.bedDepth) || 0),
           status: "ready"
         };
         await tx.insert(batches).values(newBatch);

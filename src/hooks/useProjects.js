@@ -126,13 +126,16 @@ export function useProjects() {
     return groupPartsByColorMaterial(projects);
   }, [projects]);
 
-  const createBatch = useCallback(async (group, spoolId) => {
+  const createBatch = useCallback(async (group, spoolId, bedInfo = {}) => {
     const payload = {
       material: group.material,
       color: group.color,
       partIds: group.parts.map(p => p.id),
       totalWeight: group.totalWeight,
-      spoolId: spoolId
+      spoolId: spoolId,
+      bedPlate: bedInfo.bedPlate || null,
+      bedWidth: bedInfo.bedWidth || 0,
+      bedDepth: bedInfo.bedDepth || 0
     };
     return await createBatchMutation.mutateAsync(payload);
   }, [createBatchMutation]);
