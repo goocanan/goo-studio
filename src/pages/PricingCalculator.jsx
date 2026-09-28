@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import {
   Calculator,
   UploadCloud,
@@ -31,6 +31,36 @@ import {
 
 let uid = 0;
 const nextId = () => `stl-${Date.now()}-${uid++}`;
+
+// Persist pricing parameters (and the parsed geometry of uploaded files, which
+// is plain numbers) so they survive a page switch or refresh.
+const PARAMS_STORAGE_KEY = 'goo-pricing-params';
+const ITEMS_STORAGE_KEY = 'goo-pricing-items';
+
+function loadJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return parsed ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// Merge saved params over defaults so newly added keys still get a value.
+function loadParams() {
+  const saved = loadJSON(PARAMS_STORAGE_KEY, null);
+  if (!saved || typeof saved !== 'object') return { ...DEFAULT_PRICING };
+  return { ...DEFAULT_PRICING, ...saved };
+}
+
+// Restore uploaded items (geometry only; the File object is not serializable).
+function loadItems() {
+  const saved = loadJSON(ITEMS_STORAGE_KEY, null);
+  if (!Array.isArray(saved)) return [];
+  return saved.filter((it) => it && typeof it.name === 'string');
+}
 
 function NumberField({ label, value, onChange, suffix, step = 'any', min = 0 }) {
   return (
@@ -66,13 +96,30 @@ function MiniStat({ icon: Icon, tone, value, label }) {
 }
 
 export default function PricingCalculator() {
-  const [items, setItems] = useState([]);
-  const [params, setParams] = useState({ ...DEFAULT_PRICING });
+  const [items, setItems] = useState(loadItems);
+  const [params, setParams] = useState(loadParams);
   const [isDragging, setIsDragging] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState({});
   const inputRef = useRef(null);
+
+  // Persist to localStorage so values survive page switches and refreshes.
+  useEffect(() => {
+    try {
+      localStorage.setItem(PARAMS_STORAGE_KEY, JSON.stringify(params));
+    } catch {
+      /* storage full / unavailable */
+    }
+  }, [params]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ITEMS_STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      /* storage full / unavailable */
+    }
+  }, [items]);
 
   const setParam = (key, value) =>
     setParams((prev) => ({ ...prev, [key]: value }));
