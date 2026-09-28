@@ -3396,6 +3396,12 @@ textarea.form-input {
   pointer-events: none;
 }
 
+.pricing-hint {
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
 .pricing-file-results {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

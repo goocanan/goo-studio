@@ -1,7 +1,9 @@
 // Lightweight STL parser (binary + ASCII) for the browser.
-// Computes: triangle count, solid volume (mm^3) and bounding box (mm).
-// Volume uses the signed-tetrahedron (divergence) method, valid for
-// watertight meshes. Units are assumed to be millimetres (STL has none).
+// Computes: triangle count, solid volume (mm^3), surface area (mm^2) and
+// bounding box (mm). Volume uses the signed-tetrahedron (divergence) method,
+// valid for watertight meshes. Surface area lets us estimate printed weight
+// far more accurately than a fixed "shell fraction" (see lib/pricing.js).
+// Units are assumed to be millimetres (STL has none).
 
 function looksBinary(arrayBuffer) {
   if (arrayBuffer.byteLength < 84) return false;
@@ -54,6 +56,7 @@ function parseBinary(arrayBuffer) {
   const count = Math.min(declared, Math.max(0, available));
 
   let volume = 0;
+  let area = 0;
   const bbox = emptyBBox();
   let offset = 84;
 
@@ -74,6 +77,18 @@ function parseBinary(arrayBuffer) {
         ay * (bx * cz - bz * cx) +
         az * (bx * cy - by * cx)) / 6;
 
+    // Triangle area = |(b-a) x (c-a)| / 2
+    const ux = bx - ax;
+    const uy = by - ay;
+    const uz = bz - az;
+    const vx = cx - ax;
+    const vy = cy - ay;
+    const vz = cz - az;
+    const nx = uy * vz - uz * vy;
+    const ny = uz * vx - ux * vz;
+    const nz = ux * vy - uy * vx;
+    area += Math.sqrt(nx * nx + ny * ny + nz * nz) / 2;
+
     extendBBox(bbox, ax, ay, az);
     extendBBox(bbox, bx, by, bz);
     extendBBox(bbox, cx, cy, cz);
@@ -85,6 +100,7 @@ function parseBinary(arrayBuffer) {
     format: 'binary',
     triangles: count,
     volumeMm3: Math.abs(volume),
+    areaMm2: area,
     bbox: finalizeBBox(bbox),
   };
 }
@@ -98,6 +114,7 @@ function parseASCII(text) {
   }
 
   let volume = 0;
+  let area = 0;
   const bbox = emptyBBox();
   const triangles = Math.floor(verts.length / 3);
 
@@ -111,6 +128,17 @@ function parseASCII(text) {
         a[1] * (b[0] * c[2] - b[2] * c[0]) +
         a[2] * (b[0] * c[1] - b[1] * c[0])) / 6;
 
+    const ux = b[0] - a[0];
+    const uy = b[1] - a[1];
+    const uz = b[2] - a[2];
+    const vx = c[0] - a[0];
+    const vy = c[1] - a[1];
+    const vz = c[2] - a[2];
+    const nx = uy * vz - uz * vy;
+    const ny = uz * vx - ux * vz;
+    const nz = ux * vy - uy * vx;
+    area += Math.sqrt(nx * nx + ny * ny + nz * nz) / 2;
+
     extendBBox(bbox, a[0], a[1], a[2]);
     extendBBox(bbox, b[0], b[1], b[2]);
     extendBBox(bbox, c[0], c[1], c[2]);
@@ -120,6 +148,7 @@ function parseASCII(text) {
     format: 'ascii',
     triangles,
     volumeMm3: Math.abs(volume),
+    areaMm2: area,
     bbox: finalizeBBox(bbox),
   };
 }

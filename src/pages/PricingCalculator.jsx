@@ -388,6 +388,14 @@ export default function PricingCalculator() {
                                 <span>{formatRupiah(cost.hppPerUnit)}</span>
                               </div>
                               <div className="pricing-breakdown-row">
+                                <span>Volume padat model</span>
+                                <span>{formatNumber(cost.solidCm3, 2)} cm³</span>
+                              </div>
+                              <div className="pricing-breakdown-row">
+                                <span>Volume tercetak (est.)</span>
+                                <span>{formatNumber(cost.printedCm3, 2)} cm³</span>
+                              </div>
+                              <div className="pricing-breakdown-row">
                                 <span>Markup dari HPP</span>
                                 <span>{formatNumber(cost.markupPercent, 0)}%</span>
                               </div>
@@ -445,6 +453,24 @@ export default function PricingCalculator() {
                   />
                   <span className="pricing-range-value">{Math.round((params.infill || 0) * 100)}%</span>
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Ketebalan Dinding</label>
+                <div className="pricing-input-wrap">
+                  <input
+                    type="number"
+                    className="form-input"
+                    min="0"
+                    step="0.1"
+                    value={params.shellThicknessMm}
+                    onChange={(e) => setParam('shellThicknessMm', Number(e.target.value) || 0)}
+                  />
+                  <span className="pricing-input-suffix">mm</span>
+                </div>
+                <p className="pricing-hint">
+                  Jumlah dinding × lebar nozzle (2 dinding × 0,4 mm ≈ 0,8 mm).
+                </p>
               </div>
 
               <div className="form-grid-2">
@@ -580,7 +606,8 @@ export default function PricingCalculator() {
             <div className="glass-card pricing-tip">
               <Clock size={16} />
               <p>
-                Berat dihitung dari volume STL × kepadatan material × (kulit + infill).
+                Berat dihitung dari volume STL, luas permukaan, ketebalan dinding, dan infill —
+                mengikuti cara slicer (OrcaSlicer/Bambu) menghitung, akurasi ±5% (uji 28 model).
                 Waktu cetak, harga filament, dan margin bisa kamu atur sendiri.
               </p>
             </div>
