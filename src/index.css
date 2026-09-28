@@ -3402,6 +3402,19 @@ textarea.form-input {
   color: var(--text-muted);
 }
 
+.pricing-auto-tag {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  vertical-align: middle;
+}
+
 .pricing-file-results {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

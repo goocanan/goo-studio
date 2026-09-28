@@ -1,6 +1,8 @@
 // Pricing engine: turns STL geometry + user cost inputs into HPP (cost of
 // goods) and a selling price. Pure functions so they are easy to test/reuse.
 
+import { estimatePrintHours } from './printTime';
+
 /** Typical solid densities in g/cm^3 (= g/ml). */
 export const MATERIAL_DENSITIES = {
   PLA: 1.24,
@@ -25,7 +27,12 @@ export const DEFAULT_PRICING = {
   // estimate the printed shell volume, which is what makes weight accurate.
   shellThicknessMm: 1.6,
   materialPricePerKg: 150000, // Rp / kg
-  printHours: 2, // jam
+  printHours: 2, // jam (fallback when print-time is manual)
+  // Auto-estimate print time from geometry, calibrated to OrcaSlicer for this
+  // printer (Creality Hi 0.4). Layer height and effective speed drive the flow.
+  printTimeAuto: true,
+  layerHeightMm: 0.2,
+  avgSpeedMmPerSec: 119,
   machineCostPerHour: 5000, // Rp / jam (listrik + depresiasi)
   laborMinutes: 10, // menit kerja manual
   laborCostPerHour: 30000, // Rp / jam
@@ -94,6 +101,27 @@ function num(value) {
 }
 
 /**
+ * Resolve the print time (hours) for an item: auto-estimated from geometry when
+ * cfg.printTimeAuto is on, otherwise the manual value.
+ */
+export function resolvePrintHours(geometry, cfg, manualHours) {
+  if (cfg && cfg.printTimeAuto === false) return num(manualHours);
+  const printedCm3 = estimatePrintedVolumeCm3(geometry, {
+    infill: num(cfg?.infill),
+    shellThicknessMm: num(cfg?.shellThicknessMm),
+  });
+  const auto = estimatePrintHours(geometry, {
+    printedCm3,
+    profile: {
+      layerHeightMm: num(cfg?.layerHeightMm) || undefined,
+      avgSpeedMmPerSec: num(cfg?.avgSpeedMmPerSec) || undefined,
+    },
+  });
+  // Fall back to the manual value if geometry is too thin to estimate.
+  return auto > 0 ? auto : num(manualHours);
+}
+
+/**
  * Compute a full cost breakdown for a single item.
  * @param {object} geometry  { volumeMm3 }
  * @param {object} input     pricing inputs (see DEFAULT_PRICING)
@@ -110,8 +138,10 @@ export function computeItemCost(geometry, input) {
   });
   const weightPerUnit = printedCm3 * num(cfg.density);
 
+  const printHours = resolvePrintHours(geometry, cfg, cfg.printHours);
+
   const materialPerUnit = (weightPerUnit / 1000) * num(cfg.materialPricePerKg);
-  const machinePerUnit = num(cfg.printHours) * num(cfg.machineCostPerHour);
+  const machinePerUnit = printHours * num(cfg.machineCostPerHour);
   const laborPerUnit = (num(cfg.laborMinutes) / 60) * num(cfg.laborCostPerHour);
 
   const basePerUnit = materialPerUnit + machinePerUnit + laborPerUnit;
@@ -142,6 +172,9 @@ export function computeItemCost(geometry, input) {
     quantity,
     weightPerUnit,
     weightTotal: weightPerUnit * quantity,
+    printHours,
+    printHoursPerUnit: printHours,
+    printHoursTotal: printHours * quantity,
     materialPerUnit,
     machinePerUnit,
     laborPerUnit,
@@ -170,12 +203,13 @@ export function summarizeItems(results) {
       acc.count += 1;
       acc.units += r.quantity;
       acc.weightTotal += r.weightTotal;
+      acc.printHoursTotal += num(r.printHoursTotal);
       acc.hppTotal += r.hppTotal;
       acc.sellTotal += r.sellTotal;
       acc.profitTotal += r.profitTotal;
       return acc;
     },
-    { count: 0, units: 0, weightTotal: 0, hppTotal: 0, sellTotal: 0, profitTotal: 0 }
+    { count: 0, units: 0, weightTotal: 0, printHoursTotal: 0, hppTotal: 0, sellTotal: 0, profitTotal: 0 }
   );
 }
 

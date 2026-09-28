@@ -24,10 +24,12 @@ import {
   DEFAULT_PRICING,
   densityForMaterial,
   computeItemCost,
+  estimatePrintedVolumeCm3,
   summarizeItems,
   formatRupiah,
   formatNumber,
 } from '../lib/pricing';
+import { estimatePrintHours, formatDuration } from '../lib/printTime';
 
 let uid = 0;
 const nextId = () => `stl-${Date.now()}-${uid++}`;
@@ -200,7 +202,7 @@ export default function PricingCalculator() {
         .filter((r) => r.cost)
         .map(
           ({ item, cost }) =>
-            `${item.name}\n  Berat: ${formatNumber(cost.weightPerUnit)} g x ${cost.quantity}\n  HPP: ${formatRupiah(cost.hppPerUnit)} /unit (${formatRupiah(cost.hppTotal)})\n  Harga jual: ${formatRupiah(cost.sellPerUnit)} /unit (${formatRupiah(cost.sellTotal)})`
+            `${item.name}\n  Berat: ${formatNumber(cost.weightPerUnit)} g x ${cost.quantity}\n  Waktu cetak: ${formatDuration(cost.printHours)} /unit\n  HPP: ${formatRupiah(cost.hppPerUnit)} /unit (${formatRupiah(cost.hppTotal)})\n  Harga jual: ${formatRupiah(cost.sellPerUnit)} /unit (${formatRupiah(cost.sellTotal)})`
         ),
       '',
       `Total HPP: ${formatRupiah(summary.hppTotal)}`,
@@ -369,20 +371,35 @@ export default function PricingCalculator() {
                             />
                           </div>
                           <div className="form-group">
-                            <label className="form-label">Waktu Cetak</label>
+                            <label className="form-label">
+                              Waktu Cetak{' '}
+                              {params.printTimeAuto !== false && (
+                                <span className="pricing-auto-tag">otomatis</span>
+                              )}
+                            </label>
                             <div className="pricing-input-wrap">
                               <input
                                 type="number"
                                 min="0"
                                 step="0.1"
                                 className="form-input"
-                                value={item.printHours}
+                                value={
+                                  params.printTimeAuto === false
+                                    ? item.printHours
+                                    : Math.round((cost?.printHours ?? 0) * 100) / 100
+                                }
+                                disabled={params.printTimeAuto !== false}
                                 onChange={(e) =>
                                   updateItem(item.id, { printHours: Number(e.target.value) || 0 })
                                 }
                               />
                               <span className="pricing-input-suffix">jam</span>
                             </div>
+                            {params.printTimeAuto !== false && cost?.printHours != null && (
+                              <p className="pricing-hint">
+                                ≈ {formatDuration(cost.printHours)} dari geometri STL
+                              </p>
+                            )}
                           </div>
                         </div>
 
@@ -534,6 +551,47 @@ export default function PricingCalculator() {
                 </p>
               </div>
 
+              <div className="form-group">
+                <label className="form-label">Waktu Cetak</label>
+                <div className="pricing-mode-toggle">
+                  <button
+                    className={`pricing-mode-btn ${params.printTimeAuto !== false ? 'active' : ''}`}
+                    onClick={() => setParam('printTimeAuto', true)}
+                  >
+                    Otomatis dari STL
+                  </button>
+                  <button
+                    className={`pricing-mode-btn ${params.printTimeAuto === false ? 'active' : ''}`}
+                    onClick={() => setParam('printTimeAuto', false)}
+                  >
+                    Manual
+                  </button>
+                </div>
+                {params.printTimeAuto !== false && (
+                  <div className="form-grid-2" style={{ marginTop: '0.5rem' }}>
+                    <NumberField
+                      label="Tinggi Layer"
+                      value={params.layerHeightMm}
+                      onChange={(v) => setParam('layerHeightMm', v)}
+                      suffix="mm"
+                      step="0.05"
+                    />
+                    <NumberField
+                      label="Kecepatan Efektif"
+                      value={params.avgSpeedMmPerSec}
+                      onChange={(v) => setParam('avgSpeedMmPerSec', v)}
+                      suffix="mm/s"
+                      step="5"
+                    />
+                  </div>
+                )}
+                <p className="pricing-hint">
+                  {params.printTimeAuto !== false
+                    ? 'Estimasi dari geometri (volume + jumlah layer), dikalibrasi ke OrcaSlicer. Akurasi ±10–15%.'
+                    : 'Isi jam cetak manual di tiap file.'}
+                </p>
+              </div>
+
               <div className="form-grid-2">
                 <NumberField
                   label="Kerja Manual"
@@ -641,6 +699,10 @@ export default function PricingCalculator() {
                 <span>{summary.units}</span>
               </div>
               <div className="pricing-breakdown-row">
+                <span>Total waktu cetak</span>
+                <span>{formatDuration(summary.printHoursTotal)}</span>
+              </div>
+              <div className="pricing-breakdown-row">
                 <span>Total HPP</span>
                 <span>{formatRupiah(summary.hppTotal)}</span>
               </div>
@@ -669,7 +731,8 @@ export default function PricingCalculator() {
               <p>
                 Berat dihitung dari volume STL, luas permukaan, ketebalan dinding, dan infill —
                 mengikuti cara slicer (OrcaSlicer/Bambu) menghitung, akurasi ±5% (uji 28 model).
-                Waktu cetak, harga filament, dan margin bisa kamu atur sendiri.
+                Waktu cetak diestimasi otomatis dari geometri (volume + jumlah layer) dan
+                dikalibrasi ke OrcaSlicer; kamu bisa setel tinggi layer & kecepatan efektif.
               </p>
             </div>
           </section>
