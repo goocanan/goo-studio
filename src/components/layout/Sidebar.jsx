@@ -1,11 +1,12 @@
 import React from 'react';
-import { LayoutDashboard, FolderKanban, Zap, Settings, FolderSearch, LogOut } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Zap, Settings, FolderSearch, LogOut, Calculator } from 'lucide-react';
 import { signOut } from '../../lib/auth-client';
 
 const PRODUCTION_NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'projects', label: 'Projects', icon: FolderKanban },
   { id: 'batching', label: 'Batching', icon: Zap },
+  { id: 'pricing', label: 'Pricing', icon: Calculator },
   { id: 'files', label: 'Files', icon: FolderSearch },
 ];
 

@@ -14,6 +14,7 @@ import AddProject from './pages/AddProject';
 import Batching from './pages/Batching';
 import Settings from './pages/Settings';
 import FileManager from './pages/FileManager';
+import PricingCalculator from './pages/PricingCalculator';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -182,6 +183,8 @@ export default function App() {
             onImportProject={handleImportProject} 
           />
         );
+      case 'pricing':
+        return <PricingCalculator />;
       case 'settings':
         return (
           <Settings 
