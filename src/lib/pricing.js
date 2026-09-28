@@ -19,11 +19,11 @@ export const MATERIAL_DENSITIES = {
 
 export const DEFAULT_PRICING = {
   density: 1.24, // g/cm^3
-  infill: 0.2, // 20 %
-  // Effective wall/shell thickness in mm, calibrated against OrcaSlicer
-  // (2 walls @ 0.4mm nozzle => ~0.8mm). Used with the mesh surface area to
+  infill: 0.15, // 15 % (default)
+  // Effective wall/shell thickness in mm. Calibrated against OrcaSlicer:
+  // 4 walls @ 0.4mm nozzle ~= 1.6mm. Used with the mesh surface area to
   // estimate the printed shell volume, which is what makes weight accurate.
-  shellThicknessMm: 0.8,
+  shellThicknessMm: 1.6,
   materialPricePerKg: 150000, // Rp / kg
   printHours: 2, // jam
   machineCostPerHour: 5000, // Rp / jam (listrik + depresiasi)

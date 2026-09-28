@@ -446,12 +446,26 @@ export default function PricingCalculator() {
                     type="range"
                     min="0"
                     max="100"
-                    step="5"
+                    step="1"
                     className="range-slider"
                     value={Math.round((params.infill || 0) * 100)}
                     onChange={(e) => setParam('infill', Number(e.target.value) / 100)}
                   />
-                  <span className="pricing-range-value">{Math.round((params.infill || 0) * 100)}%</span>
+                  <div className="pricing-input-wrap pricing-infill-wrap">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="1"
+                      className="form-input"
+                      value={Math.round((params.infill || 0) * 100)}
+                      onChange={(e) => {
+                        const v = Math.min(100, Math.max(0, Number(e.target.value) || 0));
+                        setParam('infill', v / 100);
+                      }}
+                    />
+                    <span className="pricing-input-suffix">%</span>
+                  </div>
                 </div>
               </div>
 
@@ -469,7 +483,7 @@ export default function PricingCalculator() {
                   <span className="pricing-input-suffix">mm</span>
                 </div>
                 <p className="pricing-hint">
-                  Jumlah dinding × lebar nozzle (2 dinding × 0,4 mm ≈ 0,8 mm).
+                  Jumlah dinding × lebar nozzle (4 dinding × 0,4 mm ≈ 1,6 mm).
                 </p>
               </div>
 

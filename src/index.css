@@ -3501,6 +3501,24 @@ textarea.form-input {
   gap: 0.75rem;
 }
 
+/* The range input has width:100%; inside a flex row it must be allowed to
+   shrink so the numeric input beside it keeps its width. */
+.pricing-range-row .range-slider {
+  flex: 1;
+  min-width: 0;
+}
+
+.pricing-infill-wrap {
+  flex: 0 0 auto;
+  width: 5rem;
+}
+
+.pricing-infill-wrap .form-input {
+  padding-left: 0.6rem;
+  padding-right: 1.9rem;
+  text-align: center;
+}
+
 .pricing-range-value {
   min-width: 3rem;
   text-align: right;
