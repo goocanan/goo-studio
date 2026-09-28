@@ -3565,6 +3565,54 @@ textarea.form-input {
   color: var(--accent-primary);
 }
 
+.pricing-preset-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.pricing-preset-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-right: 0.1rem;
+}
+
+.pricing-preset-chip {
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pricing-preset-chip:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+.pricing-preset-chip.active {
+  background: var(--accent-primary-soft);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.pricing-preset-chip.warn {
+  border-color: #b45309;
+  color: #b45309;
+}
+
+.pricing-preset-chip.warn.active {
+  background: rgba(180, 83, 9, 0.15);
+  border-color: #b45309;
+  color: #d97706;
+}
+
 .pricing-margin-input {
   width: 5rem;
   padding: 0.5rem 0.6rem;

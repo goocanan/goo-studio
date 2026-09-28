@@ -29,7 +29,12 @@ import {
   formatRupiah,
   formatNumber,
 } from '../lib/pricing';
-import { estimatePrintHours, formatDuration } from '../lib/printTime';
+import {
+  estimatePrintHours,
+  formatDuration,
+  LAYER_HEIGHT_PRESETS,
+  MAX_LAYER_HEIGHT_MM,
+} from '../lib/printTime';
 
 let uid = 0;
 const nextId = () => `stl-${Date.now()}-${uid++}`;
@@ -568,22 +573,47 @@ export default function PricingCalculator() {
                   </button>
                 </div>
                 {params.printTimeAuto !== false && (
-                  <div className="form-grid-2" style={{ marginTop: '0.5rem' }}>
-                    <NumberField
-                      label="Tinggi Layer"
-                      value={params.layerHeightMm}
-                      onChange={(v) => setParam('layerHeightMm', v)}
-                      suffix="mm"
-                      step="0.05"
-                    />
-                    <NumberField
-                      label="Kecepatan Efektif"
-                      value={params.avgSpeedMmPerSec}
-                      onChange={(v) => setParam('avgSpeedMmPerSec', v)}
-                      suffix="mm/s"
-                      step="5"
-                    />
-                  </div>
+                  <>
+                    <div className="form-grid-2" style={{ marginTop: '0.5rem' }}>
+                      <NumberField
+                        label="Tinggi Layer"
+                        value={params.layerHeightMm}
+                        onChange={(v) => setParam('layerHeightMm', v)}
+                        suffix="mm"
+                        step="0.05"
+                      />
+                      <NumberField
+                        label="Kecepatan Efektif"
+                        value={params.avgSpeedMmPerSec}
+                        onChange={(v) => setParam('avgSpeedMmPerSec', v)}
+                        suffix="mm/s"
+                        step="5"
+                      />
+                    </div>
+                    <div className="pricing-preset-row">
+                      <span className="pricing-preset-label">Preset tinggi layer</span>
+                      {LAYER_HEIGHT_PRESETS.map((h) => {
+                        const active = Number(params.layerHeightMm) === h;
+                        const overMax = h > MAX_LAYER_HEIGHT_MM;
+                        return (
+                          <button
+                            key={h}
+                            type="button"
+                            className={`pricing-preset-chip ${active ? 'active' : ''} ${overMax ? 'warn' : ''}`}
+                            onClick={() => setParam('layerHeightMm', h)}
+                            title={
+                              overMax
+                                ? `Tinggi layer ${String(h).replace('.', ',')} mm melebihi batas printer (maks ${String(MAX_LAYER_HEIGHT_MM).replace('.', ',')} mm) — OrcaSlicer tidak bisa slice`
+                                : `Tinggi layer ${String(h).replace('.', ',')} mm`
+                            }
+                          >
+                            {String(h).replace('.', ',')} mm
+                            {overMax ? ' ⚠' : ''}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
                 <p className="pricing-hint">
                   {params.printTimeAuto !== false
