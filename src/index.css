@@ -2300,9 +2300,20 @@ textarea.form-input {
 }
 
 .pricing-summary-actions .btn {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: fit-content;
   justify-content: center;
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
+}
+
+@media (max-width: 480px) {
+  .pricing-summary-actions {
+    flex-direction: column;
+  }
+  .pricing-summary-actions .btn {
+    width: 100%;
+  }
 }
 
 .pricing-bulk-count {

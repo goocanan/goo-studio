@@ -127,6 +127,7 @@ export default function PricingCalculator({ importData }) {
   const [sendFeedback, setSendFeedback] = useState(null); // { type, message }
 
   // Bulk send state: send all items at once, auto-merge by name
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkProjectId, setBulkProjectId] = useState('');
   const [bulkFeedback, setBulkFeedback] = useState(null); // { type, message, summary }
   const [bulkInProgress, setBulkInProgress] = useState(false);
@@ -134,7 +135,7 @@ export default function PricingCalculator({ importData }) {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: ProjectService.getAll,
-    enabled: !!sendItem || !!bulkProjectId,
+    enabled: !!sendItem || bulkOpen,
   });
 
   const sendMutation = useMutation({
@@ -319,15 +320,15 @@ export default function PricingCalculator({ importData }) {
   };
 
   const closeBulkSend = () => {
+    setBulkOpen(false);
     setBulkProjectId('');
     setBulkFeedback(null);
   };
 
   const openBulkSend = () => {
+    setBulkOpen(true);
     setBulkProjectId('');
     setBulkFeedback(null);
-    // Pre-select the first project if available
-    if (projects.length > 0) setBulkProjectId(projects[0].id);
   };
 
   // Persist to localStorage so values survive page switches and refreshes.
@@ -629,7 +630,7 @@ export default function PricingCalculator({ importData }) {
         </div>
       )}
 
-      {bulkProjectId && (
+      {bulkOpen && (
         <div className="modal-overlay" onClick={closeBulkSend}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
@@ -638,14 +639,30 @@ export default function PricingCalculator({ importData }) {
             </div>
 
             <div className="modal-form">
-              <div className="pricing-bulk-preview">
-                <div className="pricing-bulk-count">
-                  <FileBox size={16} className="pricing-file-icon" />
-                  <span><strong>{results.filter((r) => r.cost).length} item</strong> akan dikirim</span>
-                </div>
+              <div className="form-group">
+                <label className="form-label">Pilih Project</label>
+                <select
+                  className="form-input"
+                  value={bulkProjectId}
+                  onChange={(e) => { setBulkProjectId(e.target.value); setBulkFeedback(null); }}
+                >
+                  <option value="">-- Pilih Project --</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
               </div>
 
-              {!bulkFeedback && (
+              {bulkProjectId && (
+                <div className="pricing-bulk-preview">
+                  <div className="pricing-bulk-count">
+                    <FileBox size={16} className="pricing-file-icon" />
+                    <span><strong>{results.filter((r) => r.cost).length} item</strong> akan dikirim</span>
+                  </div>
+                </div>
+              )}
+
+              {!bulkFeedback && bulkProjectId && (
                 <div className="pricing-bulk-plan">
                   <div className="pricing-plan-label">Preview:</div>
                   {results
@@ -664,11 +681,11 @@ export default function PricingCalculator({ importData }) {
                           <span className="pricing-plan-name">{itemName}</span>
                           {match ? (
                             <span className="pricing-plan-action merge">
-                              ◆ merge qty (berat {Math.round(cost.weightPerUnit)}g)
+                              ◆ merge qty ({Math.round(cost.weightPerUnit)}g)
                             </span>
                           ) : (
                             <span className="pricing-plan-action new">
-                              + buat baru (berat {Math.round(cost.weightPerUnit)}g)
+                              + baru ({Math.round(cost.weightPerUnit)}g)
                             </span>
                           )}
                         </div>
@@ -707,7 +724,7 @@ export default function PricingCalculator({ importData }) {
                     type="button"
                     className="btn btn-primary"
                     onClick={handleSendAll}
-                    disabled={bulkInProgress}
+                    disabled={!bulkProjectId || bulkInProgress}
                   >
                     <Send size={14} />
                     {bulkInProgress ? 'Mengirim...' : 'Kirim Semua'}
@@ -1278,7 +1295,7 @@ export default function PricingCalculator({ importData }) {
                   disabled={results.filter((r) => r.cost).length === 0}
                 >
                   <Send size={16} />
-                  Kirim Semua ke Project
+                  Kirim ke Project
                 </button>
               </div>
             </div>
