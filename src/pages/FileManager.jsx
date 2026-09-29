@@ -26,6 +26,19 @@ const collectSubtreeParts = (node) => {
   return parts;
 };
 
+// A folder that holds printable files directly — the "file folder" (e.g. "STL").
+const isFileFolder = (node) => !!(node.parts && node.parts.length > 0);
+
+// A "project name" folder is the folder directly above a file folder: one of its
+// subfolders contains printable files (e.g. "Benchy" -> "STL" -> benchy.stl).
+const isProjectFolder = (node) =>
+  !!(node.children && node.children.some(isFileFolder));
+
+// True when a deeper project folder exists, so an outer folder never steals the button
+// from the projects nested inside it.
+const hasProjectFolderBelow = (node) =>
+  !!(node.children && node.children.some(child => isProjectFolder(child) || hasProjectFolderBelow(child)));
+
 // First image found in the folder or any of its subfolders, used as the project thumbnail.
 const collectThumbnail = (node) => {
   if (node.thumbnail) return node.thumbnail;
@@ -38,30 +51,20 @@ const collectThumbnail = (node) => {
   return null;
 };
 
-const FolderNode = ({ node, depth, onImport, isExpanded, expandedStates, onToggle, ancestorSuppresses }) => {
+const FolderNode = ({ node, depth, onImport, isExpanded, expandedStates, onToggle }) => {
   const hasSubfolders = node.children && node.children.length > 0;
   const hasFiles = node.parts && node.parts.length > 0;
 
-  // Files anywhere beneath this folder: its own plus every subfolder's.
-  const subtreeParts = collectSubtreeParts(node);
+  // The Import button belongs to the *project name* folder — the one sitting directly
+  // above the folder that holds the files (e.g. "Benchy / STL / benchy.stl"). It shows
+  // when one of this folder's subfolders contains printable files. A category/type
+  // folder higher up (whose subfolders are project folders, not file folders) is never
+  // treated as a project, and neither is the file folder itself.
+  const canImport = isProjectFolder(node) && !hasProjectFolderBelow(node);
 
-  // The Import button belongs to the *project* folder — the top-most folder under the
-  // library root that holds printable files, directly or in a subfolder. So "Benchy"
-  // shows the button even when its .stl files live in a nested "STL" folder, and that
-  // nested folder does not repeat it. The library root itself is never treated as a
-  // project: it only imports its own direct files, never the whole library.
-  const canImport = ancestorSuppresses
-    ? false
-    : (depth === 0 ? hasFiles : subtreeParts.length > 0);
-
-  // Once a folder offers the button, its descendants must not offer it again. The
-  // library root is the exception: it imports only its own direct files, so it never
-  // hides the project folders nested under it.
-  const childAncestorSuppresses = ancestorSuppresses || (depth > 0 && canImport);
-
-  // A project folder imports its whole subtree; the root imports only its own files.
-  const importParts = depth === 0 ? node.parts : subtreeParts;
-  const importThumbnail = depth === 0 ? node.thumbnail : collectThumbnail(node);
+  // A project folder imports its whole subtree (its own files plus every subfolder's).
+  const importParts = collectSubtreeParts(node);
+  const importThumbnail = collectThumbnail(node);
 
   return (
     <div className="folder-tree-node" style={{ marginLeft: depth > 0 ? '16px' : '0' }}>
@@ -85,7 +88,7 @@ const FolderNode = ({ node, depth, onImport, isExpanded, expandedStates, onToggl
         {canImport && (
           <button 
             className="btn btn-primary btn-xxs shadow-sm"
-            title={depth === 0 ? 'Import file langsung di folder ini sebagai project' : 'Import folder project ini (termasuk file di dalam subfolder)'}
+            title="Import folder project ini (termasuk file di dalam subfolder)"
             onClick={(e) => {
               e.stopPropagation();
               onImport({ ...node, parts: importParts, thumbnail: importThumbnail });
@@ -114,7 +117,6 @@ const FolderNode = ({ node, depth, onImport, isExpanded, expandedStates, onToggl
                 isExpanded={expandedStates[child.path]}
                 expandedStates={expandedStates}
                 onToggle={onToggle}
-                ancestorSuppresses={childAncestorSuppresses}
               />
             ))}
 
@@ -249,7 +251,7 @@ export default function FileManager({ fileManager, onImportProject }) {
         <div className="flex gap-3 items-center">
           <AlertCircle className="text-primary/50" size={18} />
           <p className="text-xs text-dim">
-            Klik folder untuk menelusuri subfolder. Tombol <strong>Import Project</strong> muncul di folder yang berisi file — baik file langsung di dalamnya maupun file yang tersimpan di subfolder (mis. <em>Project / STL / part.stl</em>) — dan akan mengimpor seluruh file di bawah folder tersebut.
+            Klik folder untuk menelusuri subfolder. Tombol <strong>Import Project</strong> muncul di folder <strong>nama project</strong> — folder yang berisi subfolder file (mis. <em>Project / STL / part.stl</em>) — dan akan mengimpor seluruh file di dalam subfolder tersebut. Tombol tidak muncul di folder jenis/kategori di atasnya maupun di folder file itu sendiri.
           </p>
         </div>
       </div>
