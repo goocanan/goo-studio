@@ -105,13 +105,14 @@ function MiniStat({ icon: Icon, tone, value, label }) {
   );
 }
 
-export default function PricingCalculator() {
+export default function PricingCalculator({ importData }) {
   const [items, setItems] = useState(loadItems);
   const [params, setParams] = useState(loadParams);
   const [isDragging, setIsDragging] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState({});
+  const [importNotice, setImportNotice] = useState(null);
   const inputRef = useRef(null);
 
   // "Kirim ke Project" — pick a project, then either update an existing
@@ -243,6 +244,23 @@ export default function PricingCalculator() {
       /* storage full / unavailable */
     }
   }, [items]);
+
+  // Items handed over from the File Manager ("Hitung Harga" on a project folder)
+  // already carry their parsed geometry, so they drop straight into the list.
+  // The token makes this apply exactly once per import, never on re-renders.
+  const appliedImportToken = useRef(null);
+  useEffect(() => {
+    if (!importData || !Array.isArray(importData.items) || importData.items.length === 0) return;
+    if (appliedImportToken.current === importData.token) return;
+    appliedImportToken.current = importData.token;
+
+    setItems((prev) => [...prev, ...importData.items]);
+    setImportNotice({
+      count: importData.items.length,
+      projectName: importData.projectName || 'folder project',
+      skipped: importData.skipped || 0,
+    });
+  }, [importData]);
 
   const setParam = (key, value) =>
     setParams((prev) => ({ ...prev, [key]: value }));
@@ -532,6 +550,21 @@ export default function PricingCalculator() {
           </button>
         </div>
       </div>
+
+      {importNotice && (
+        <div className={`pricing-import-notice ${importNotice.skipped > 0 ? 'warn' : ''}`}>
+          <Calculator size={16} />
+          <span>
+            <strong>{importNotice.count} file STL</strong> dari folder project{' '}
+            <strong>&quot;{importNotice.projectName}&quot;</strong> berhasil dimuat dari File Manager.
+            Harga jual sudah dihitung otomatis di bawah.
+            {importNotice.skipped > 0 && (
+              <> {importNotice.skipped} file lain gagal dibaca dan dilewati.</>
+            )}
+          </span>
+          <button className="btn-icon" onClick={() => setImportNotice(null)} title="Tutup">✕</button>
+        </div>
+      )}
 
       {/* Summary */}
       <div className="grid-stats mb-8 pricing-stats">

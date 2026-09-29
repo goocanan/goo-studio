@@ -2206,8 +2206,8 @@ textarea.form-input {
 
 /* Narrow screens: the "Import Project" button is wider than the space left over
    once a nested folder row is indented, which squeezed the folder name to zero
-   width. Let the row wrap so the name always stays visible and the button drops
-   onto its own line instead of overflowing. */
+   width. Let the row wrap so the name always stays visible and the buttons drop
+   onto their own line instead of overflowing. */
 @media (max-width: 640px) {
   .folder-row {
     flex-wrap: wrap;
@@ -2217,9 +2217,79 @@ textarea.form-input {
     flex: 1 1 100%;
     min-width: 0;
   }
-  .folder-row .btn {
-    margin-left: auto;
+  .folder-row .folder-row-actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
   }
+}
+
+.folder-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+/* Notice banner shown above the file tree after a "Hitung Harga" import. */
+.file-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.file-notice span { flex: 1; min-width: 0; }
+
+.file-notice.ok {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--accent-emerald);
+}
+
+.file-notice.warn {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--accent-amber);
+}
+
+.file-notice.err {
+  border-color: rgba(244, 63, 94, 0.35);
+  background: rgba(244, 63, 94, 0.08);
+  color: var(--accent-rose);
+}
+
+/* Banner in the pricing calculator confirming a File Manager import. */
+.pricing-import-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: rgba(139, 92, 246, 0.08);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  margin-bottom: 1.25rem;
+}
+
+.pricing-import-notice span { flex: 1; min-width: 0; }
+
+.pricing-import-notice.warn {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 

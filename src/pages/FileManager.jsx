@@ -11,9 +11,16 @@ import {
   AlertCircle,
   Search,
   Box,
-  Layers
+  Layers,
+  Calculator,
+  RefreshCw,
+  CheckCircle2,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { analyzeSTLFile } from '../lib/stl';
+import { MATERIALS } from '../lib/constants';
+import { DEFAULT_PRICING } from '../lib/pricing';
 
 // Recursively gather every printable file beneath a folder: its own files plus
 // everything inside its subfolders (e.g. "Project Name / STL / part.stl").
@@ -39,6 +46,11 @@ const isProjectFolder = (node) =>
 const hasProjectFolderBelow = (node) =>
   !!(node.children && node.children.some(child => isProjectFolder(child) || hasProjectFolderBelow(child)));
 
+// Only .stl files can be priced (the calculator parses STL geometry). Filter the
+// subtree down to those so we know whether the price button is worth showing.
+const isStlPart = (part) => /\.stl$/i.test(part?.name || '');
+const collectStlParts = (node) => collectSubtreeParts(node).filter(isStlPart);
+
 // First image found in the folder or any of its subfolders, used as the project thumbnail.
 const collectThumbnail = (node) => {
   if (node.thumbnail) return node.thumbnail;
@@ -51,7 +63,7 @@ const collectThumbnail = (node) => {
   return null;
 };
 
-const FolderNode = ({ node, depth, onImport, isExpanded, expandedStates, onToggle }) => {
+const FolderNode = ({ node, depth, onImport, onCalculate, busyPath, isExpanded, expandedStates, onToggle }) => {
   const hasSubfolders = node.children && node.children.length > 0;
   const hasFiles = node.parts && node.parts.length > 0;
 
@@ -65,6 +77,9 @@ const FolderNode = ({ node, depth, onImport, isExpanded, expandedStates, onToggl
   // A project folder imports its whole subtree (its own files plus every subfolder's).
   const importParts = collectSubtreeParts(node);
   const importThumbnail = collectThumbnail(node);
+  const stlParts = collectStlParts(node);
+  const canCalculate = canImport && stlParts.length > 0;
+  const isCalculating = busyPath === node.path;
 
   return (
     <div className="folder-tree-node" style={{ marginLeft: depth > 0 ? '16px' : '0' }}>
@@ -85,18 +100,34 @@ const FolderNode = ({ node, depth, onImport, isExpanded, expandedStates, onToggl
           {canImport && <span className="parts-count-badge">{importParts.length}</span>}
         </div>
         
-        {canImport && (
-          <button 
-            className="btn btn-primary btn-xxs shadow-sm"
-            title="Import folder project ini (termasuk file di dalam subfolder)"
-            onClick={(e) => {
-              e.stopPropagation();
-              onImport({ ...node, parts: importParts, thumbnail: importThumbnail });
-            }}
-          >
-            <Plus size={12} /> Import Project
-          </button>
-        )}
+        <div className="folder-row-actions">
+          {canCalculate && (
+            <button
+              className="btn btn-secondary btn-xxs shadow-sm"
+              title={`Hitung harga jual dari ${stlParts.length} file STL di folder ini (tanpa perlu upload ulang)`}
+              disabled={!!busyPath}
+              onClick={(e) => {
+                e.stopPropagation();
+                onCalculate(node);
+              }}
+            >
+              {isCalculating ? <RefreshCw size={12} className="spin" /> : <Calculator size={12} />}
+              {isCalculating ? 'Menghitung...' : 'Hitung Harga'}
+            </button>
+          )}
+          {canImport && (
+            <button
+              className="btn btn-primary btn-xxs shadow-sm"
+              title="Import folder project ini (termasuk file di dalam subfolder)"
+              onClick={(e) => {
+                e.stopPropagation();
+                onImport({ ...node, parts: importParts, thumbnail: importThumbnail });
+              }}
+            >
+              <Plus size={12} /> Import Project
+            </button>
+          )}
+        </div>
       </div>
       
       <AnimatePresence>
@@ -114,6 +145,8 @@ const FolderNode = ({ node, depth, onImport, isExpanded, expandedStates, onToggl
                 node={child} 
                 depth={depth + 1} 
                 onImport={onImport}
+                onCalculate={onCalculate}
+                busyPath={busyPath}
                 isExpanded={expandedStates[child.path]}
                 expandedStates={expandedStates}
                 onToggle={onToggle}
@@ -135,7 +168,7 @@ const FolderNode = ({ node, depth, onImport, isExpanded, expandedStates, onToggl
   );
 };
 
-export default function FileManager({ fileManager, onImportProject }) {
+export default function FileManager({ fileManager, onImportProject, onCalculateProject }) {
   const { 
     scannedProjects, // [rootNode]
     isScanning, 
@@ -146,12 +179,73 @@ export default function FileManager({ fileManager, onImportProject }) {
   
   const [expanded, setExpanded] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [busyPath, setBusyPath] = useState(null);
+  const [notice, setNotice] = useState(null); // { type, message }
 
   const toggleFolder = (path) => {
     setExpanded(prev => ({
       ...prev,
       [path]: !prev[path]
     }));
+  };
+
+  // Read every STL in the chosen project folder straight from the local disk
+  // (via the stored file handles), analyse the geometry, and hand the parsed
+  // items to the pricing calculator — no re-upload needed.
+  const handleCalculate = async (node) => {
+    const stls = collectStlParts(node);
+    if (stls.length === 0) return;
+
+    setBusyPath(node.path);
+    setNotice(null);
+
+    const { getFileData } = fileManager;
+    const parsed = [];
+    let unreadable = 0;
+    let noHandle = 0;
+
+    for (const part of stls) {
+      try {
+        const file = await getFileData(part.path);
+        if (!file) {
+          noHandle += 1;
+          continue;
+        }
+        const geo = await analyzeSTLFile(file);
+        parsed.push({
+          id: `stl-fm-${Date.now()}-${parsed.length}`,
+          name: part.name,
+          size: file.size,
+          quantity: 1,
+          material: MATERIALS[0],
+          printHours: DEFAULT_PRICING.printHours,
+          ...geo,
+          error: null,
+        });
+      } catch {
+        unreadable += 1;
+      }
+    }
+
+    setBusyPath(null);
+
+    if (parsed.length === 0) {
+      setNotice({
+        type: 'err',
+        message:
+          noHandle > 0
+            ? 'Akses file hilang setelah halaman dimuat ulang. Klik "Select Folder" lalu pilih folder library-nya sekali lagi.'
+            : 'File STL di folder ini tidak bisa dibaca (format tidak dikenal atau file rusak).',
+      });
+      return;
+    }
+
+    const detail =
+      unreadable > 0
+        ? `${parsed.length} file STL dikirim ke kalkulator (${unreadable} file gagal dibaca).`
+        : `${parsed.length} file STL dari "${node.name}" dikirim ke kalkulator harga jual.`;
+    setNotice({ type: unreadable > 0 ? 'warn' : 'ok', message: detail });
+    onCalculateProject?.(parsed, node.name, unreadable);
   };
 
   const calculateTotalParts = (node) => {
@@ -205,6 +299,16 @@ export default function FileManager({ fileManager, onImportProject }) {
         </div>
       </div>
 
+      {notice && (
+        <div className={`file-notice ${notice.type}`}>
+          {notice.type === 'ok' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+          <span>{notice.message}</span>
+          <button className="btn-icon" onClick={() => setNotice(null)} title="Tutup">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {scannedProjects.length === 0 ? (
         <div className="glass-card p-20 text-center bg-transparent border-dashed">
           <div className="mb-6 opacity-20">
@@ -237,6 +341,8 @@ export default function FileManager({ fileManager, onImportProject }) {
                 node={root} 
                 depth={0} 
                 onImport={onImportProject}
+                onCalculate={handleCalculate}
+                busyPath={busyPath}
                 isExpanded={expanded[root.path]}
                 expandedStates={expanded}
                 onToggle={toggleFolder}
@@ -251,7 +357,7 @@ export default function FileManager({ fileManager, onImportProject }) {
         <div className="flex gap-3 items-center">
           <AlertCircle className="text-primary/50" size={18} />
           <p className="text-xs text-dim">
-            Klik folder untuk menelusuri subfolder. Tombol <strong>Import Project</strong> muncul di folder <strong>nama project</strong> — folder yang berisi subfolder file (mis. <em>Project / STL / part.stl</em>) — dan akan mengimpor seluruh file di dalam subfolder tersebut. Tombol tidak muncul di folder jenis/kategori di atasnya maupun di folder file itu sendiri.
+            Klik folder untuk menelusuri subfolder. Tombol <strong>Import Project</strong> muncul di folder <strong>nama project</strong> — folder yang berisi subfolder file (mis. <em>Project / STL / part.stl</em>) — dan akan mengimpor seluruh file di dalam subfolder tersebut. Tombol tidak muncul di folder jenis/kategori di atasnya maupun di folder file itu sendiri. Tombol <strong>Hitung Harga</strong> (di sebelahnya) membaca semua file <strong>.stl</strong> di folder itu dan langsung mengirimnya ke <em>Kalkulator Harga Jual</em> — tanpa perlu upload ulang.
           </p>
         </div>
       </div>

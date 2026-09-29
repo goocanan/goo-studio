@@ -43,6 +43,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(() => localStorage.getItem('goo-currentPage') || 'dashboard');
   const [selectedProjectId, setSelectedProjectId] = useState(() => localStorage.getItem('goo-selectedProjectId') || null);
   const [fileImportData, setFileImportData] = useState(null);
+  const [pricingImport, setPricingImport] = useState(null);
 
   // Sync state with localStorage to survive refreshes
   useEffect(() => {
@@ -106,12 +107,20 @@ export default function App() {
     onNavigate: (page) => {
       setCurrentPage(page);
       if (page !== 'add-project') setFileImportData(null);
+      if (page !== 'pricing') setPricingImport(null);
     }
   };
 
   const handleImportProject = (data) => {
     setFileImportData(data);
     setCurrentPage('add-project');
+  };
+
+  // A project picked in the File Manager is analysed there (STL geometry read
+  // straight from disk) and handed to the pricing calculator as ready line items.
+  const handleCalculateProject = (items, projectName, skipped = 0) => {
+    setPricingImport({ items, projectName, skipped, token: Date.now() });
+    setCurrentPage('pricing');
   };
 
   const renderPage = () => {
@@ -181,10 +190,11 @@ export default function App() {
           <FileManager 
             fileManager={fileManager}
             onImportProject={handleImportProject} 
+            onCalculateProject={handleCalculateProject}
           />
         );
       case 'pricing':
-        return <PricingCalculator />;
+        return <PricingCalculator importData={pricingImport} />;
       case 'settings':
         return (
           <Settings 
