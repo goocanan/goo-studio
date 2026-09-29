@@ -2204,6 +2204,24 @@ textarea.form-input {
   text-transform: uppercase;
 }
 
+/* Narrow screens: the "Import Project" button is wider than the space left over
+   once a nested folder row is indented, which squeezed the folder name to zero
+   width. Let the row wrap so the name always stays visible and the button drops
+   onto its own line instead of overflowing. */
+@media (max-width: 640px) {
+  .folder-row {
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+  }
+  .folder-row .folder-row-main {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .folder-row .btn {
+    margin-left: auto;
+  }
+}
+
 
 /* ============================================================
    Project Cards & Visuals
