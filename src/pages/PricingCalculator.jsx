@@ -244,8 +244,8 @@ export default function PricingCalculator({ importData }) {
     if (!targetProject) { setBulkInProgress(false); return; }
 
     const existingParts = targetProject.parts || [];
-    // Normalise names for matching
-    const normalise = (s) => String(s).trim().toLowerCase();
+    // Normalise names for matching: trim, lowercase, strip non-alphanumeric
+    const normalise = (s) => String(s).trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 
     // Plan: for each result (item + cost), find matching part by name or mark as new
     const plan = results
@@ -673,8 +673,9 @@ export default function PricingCalculator({ importData }) {
                       const itemName = item.name.replace(/\.stl$/i, '');
                       const targetProject = projects.find((p) => p.id === bulkProjectId);
                       const existingParts = targetProject?.parts || [];
+                      const normalise = (s) => String(s).trim().toLowerCase().replace(/[^a-z0-9]/g, '');
                       const match = existingParts.find(
-                        (pt) => String(pt.name).trim().toLowerCase() === itemName.toLowerCase()
+                        (pt) => normalise(pt.name) === normalise(itemName)
                       );
                       return (
                         <div key={item.id} className="pricing-plan-item">
