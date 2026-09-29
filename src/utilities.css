@@ -8,9 +8,17 @@
    This file implements exactly the utilities the app references,
    plus a few app-specific classes that were referenced but undefined.
    Mobile-first; breakpoints sm=640 / md=768 / lg=1024 (min-width).
-   Imported BEFORE index.css in main.jsx so that the app's own design
-   system (index.css) always wins on specificity ties — this keeps the
-   sidebar collapse, detail-section padding, modal rules, etc. intact.
+
+   IMPORTANT — specificity: index.css also defines a handful of base
+   utilities (.flex-col, .gap-2, .gap-4, .items-center, .truncate,
+   .text-xxs, ...). Because main.jsx imports this file BEFORE index.css,
+   those base rules would win over our single-class responsive variants
+   (.sm\:flex-row, .sm\:gap-4, .md\:grid-cols-4, ...) on specificity
+   ties, freezing the desktop layout at its mobile value. To keep the
+   responsive upgrades authoritative, every rule inside the sm:/md:
+   media blocks below is written as a doubled selector (e.g.
+   `.sm\:flex-row.sm\:flex-row`), raising its specificity above the
+   index.css base utilities regardless of import order.
    ================================================================ */
 
 /* ================= base utilities ================= */
@@ -226,44 +234,44 @@
 
 /* ================= sm: >= 640px ================= */
 @media (min-width: 640px) {
-  .sm\:flex-row { flex-direction:row }
-  .sm\:gap-2 { gap:0.5rem }
-  .sm\:gap-2\.5 { gap:0.625rem }
-  .sm\:gap-3 { gap:0.75rem }
-  .sm\:gap-3\.5 { gap:0.875rem }
-  .sm\:gap-4 { gap:1rem }
-  .sm\:h-\[18px\] { height:18px }
-  .sm\:hidden { display:none }
-  .sm\:inline { display:inline }
-  .sm\:items-center { align-items:center }
-  .sm\:items-end { align-items:flex-end }
-  .sm\:justify-end { justify-content:flex-end }
-  .sm\:justify-start { justify-content:flex-start }
-  .sm\:max-w-\[220px\] { max-width:220px }
-  .sm\:mb-12 { margin-bottom:3rem }
-  .sm\:mb-6 { margin-bottom:1.5rem }
-  .sm\:ml-0 { margin-left:0 }
-  .sm\:mt-4 { margin-top:1rem }
-  .sm\:p-8 { padding:2rem }
-  .sm\:pl-2\.5 { padding-left:0.625rem }
-  .sm\:px-2\.5 { padding-left:0.625rem;padding-right:0.625rem }
-  .sm\:px-4 { padding-left:1rem;padding-right:1rem }
-  .sm\:text-2xl { font-size:1.5rem }
-  .sm\:text-base { font-size:1rem }
-  .sm\:text-lg { font-size:1.125rem }
-  .sm\:text-xs { font-size:0.75rem }
-  .sm\:text-xxs { font-size:0.7rem }
-  .sm\:w-48 { width:12rem }
-  .sm\:w-\[18px\] { width:18px }
-  .sm\:w-auto { width:auto }
+  .sm\:flex-row.sm\:flex-row { flex-direction:row }
+  .sm\:gap-2.sm\:gap-2 { gap:0.5rem }
+  .sm\:gap-2\.5.sm\:gap-2\.5 { gap:0.625rem }
+  .sm\:gap-3.sm\:gap-3 { gap:0.75rem }
+  .sm\:gap-3\.5.sm\:gap-3\.5 { gap:0.875rem }
+  .sm\:gap-4.sm\:gap-4 { gap:1rem }
+  .sm\:h-\[18px\].sm\:h-\[18px\] { height:18px }
+  .sm\:hidden.sm\:hidden { display:none }
+  .sm\:inline.sm\:inline { display:inline }
+  .sm\:items-center.sm\:items-center { align-items:center }
+  .sm\:items-end.sm\:items-end { align-items:flex-end }
+  .sm\:justify-end.sm\:justify-end { justify-content:flex-end }
+  .sm\:justify-start.sm\:justify-start { justify-content:flex-start }
+  .sm\:max-w-\[220px\].sm\:max-w-\[220px\] { max-width:220px }
+  .sm\:mb-12.sm\:mb-12 { margin-bottom:3rem }
+  .sm\:mb-6.sm\:mb-6 { margin-bottom:1.5rem }
+  .sm\:ml-0.sm\:ml-0 { margin-left:0 }
+  .sm\:mt-4.sm\:mt-4 { margin-top:1rem }
+  .sm\:p-8.sm\:p-8 { padding:2rem }
+  .sm\:pl-2\.5.sm\:pl-2\.5 { padding-left:0.625rem }
+  .sm\:px-2\.5.sm\:px-2\.5 { padding-left:0.625rem;padding-right:0.625rem }
+  .sm\:px-4.sm\:px-4 { padding-left:1rem;padding-right:1rem }
+  .sm\:text-2xl.sm\:text-2xl { font-size:1.5rem }
+  .sm\:text-base.sm\:text-base { font-size:1rem }
+  .sm\:text-lg.sm\:text-lg { font-size:1.125rem }
+  .sm\:text-xs.sm\:text-xs { font-size:0.75rem }
+  .sm\:text-xxs.sm\:text-xxs { font-size:0.7rem }
+  .sm\:w-48.sm\:w-48 { width:12rem }
+  .sm\:w-\[18px\].sm\:w-\[18px\] { width:18px }
+  .sm\:w-auto.sm\:w-auto { width:auto }
 }
 
 /* ================= md: >= 768px ================= */
 @media (min-width: 768px) {
-  .md\:flex-row { flex-direction:row }
-  .md\:gap-6 { gap:1.5rem }
-  .md\:grid-cols-4 { grid-template-columns:repeat(4,minmax(0,1fr)) }
-  .md\:text-3xl { font-size:1.875rem }
+  .md\:flex-row.md\:flex-row { flex-direction:row }
+  .md\:gap-6.md\:gap-6 { gap:1.5rem }
+  .md\:grid-cols-4.md\:grid-cols-4 { grid-template-columns:repeat(4,minmax(0,1fr)) }
+  .md\:text-3xl.md\:text-3xl { font-size:1.875rem }
 }
 
 /* ============ app-specific classes (previously undefined) ============ */
