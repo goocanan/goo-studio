@@ -163,9 +163,15 @@ export default function AddProject({ onAdd, onBack, initialData }) {
           </button>
           <h1 className="heading-xl gradient-text-hero">✨ Create New Project</h1>
         </div>
+        <div className="flex-end gap-3">
+          <button type="button" className="btn btn-ghost" onClick={onBack}>Cancel</button>
+          <button type="submit" form="project-form" className="btn btn-primary lg">
+            <Zap size={18} /> Launch Project
+          </button>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form id="project-form" onSubmit={handleSubmit}>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -453,13 +459,6 @@ export default function AddProject({ onAdd, onBack, initialData }) {
             )}
           </AnimatePresence>
         </motion.div>
-
-        <div className="flex-end gap-3 mt-4">
-          <button type="button" className="btn btn-ghost" onClick={onBack}>Cancel</button>
-          <button type="submit" className="btn btn-primary lg">
-            <Zap size={18} /> Launch Project
-          </button>
-        </div>
       </form>
     </div>
   );
