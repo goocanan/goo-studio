@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Plus, Trash2, Save, Package, Info, Zap, Droplet } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { ArrowLeft, Plus, Trash2, Save, Package, Info, Zap, Droplet, Palette, Wand2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MATERIALS } from '../lib/constants';
 import { optimizeImage, normalizeImageUrl } from '../lib/utils';
+import { groupPartsByColor, detectColorFromName, matchSpoolForColor, COLOR_DEFS_MAP } from '../lib/colors';
 import { useSpools } from '../hooks/useSpools';
 
 export default function AddProject({ onAdd, onBack, initialData }) {
@@ -37,6 +38,62 @@ export default function AddProject({ onAdd, onBack, initialData }) {
       quantity: 1
     }]);
   };
+
+  // --- Color grouping -------------------------------------------------------
+  // Read the color from each part name, group parts that share a color, and let
+  // one filament be chosen per color group instead of per part.
+  const [colorGroupSpools, setColorGroupSpools] = useState({});
+
+  const colorGroups = useMemo(() => groupPartsByColor(parts), [parts]);
+
+  // Only groups where the parts already carry a detected color are auto-assignable.
+  const assignableGroups = useMemo(
+    () => colorGroups.filter((g) => g.key !== 'unknown'),
+    [colorGroups]
+  );
+
+  const handleGroupSpoolSelect = (groupKey, spool) => {
+    setColorGroupSpools((prev) => ({ ...prev, [groupKey]: spool ? spool.id : '' }));
+    if (!spool) return;
+    // Apply the chosen filament to every part in this color group at once.
+    const group = colorGroups.find((g) => g.key === groupKey);
+    if (!group) return;
+    const ids = new Set(group.partIds);
+    setParts((prev) =>
+      prev.map((p) =>
+        ids.has(p.id) ? { ...p, material: spool.material, color: spool.colorName } : p
+      )
+    );
+  };
+
+  const handleAutoAssignAll = () => {
+    const nextSel = { ...colorGroupSpools };
+    setParts((prev) => {
+      const byId = new Map(prev.map((p) => [p.id, p]));
+      const updated = new Map();
+      colorGroups.forEach((group) => {
+        if (group.key === 'unknown') return;
+        // Prefer the material most common among this group's parts.
+        const matCount = {};
+        group.partIds.forEach((id) => {
+          const p = byId.get(id);
+          if (p && p.material) matCount[p.material] = (matCount[p.material] || 0) + 1;
+        });
+        const preferred = Object.keys(matCount).sort((a, b) => matCount[b] - matCount[a])[0];
+        const spool = matchSpoolForColor(group, spools, preferred);
+        if (spool) {
+          nextSel[group.key] = spool.id;
+          group.partIds.forEach((id) => {
+            const p = byId.get(id);
+            if (p) updated.set(id, { ...p, material: spool.material, color: spool.colorName });
+          });
+        }
+      });
+      return prev.map((p) => updated.get(p.id) || p);
+    });
+    setColorGroupSpools(nextSel);
+  };
+  // -------------------------------------------------------------------------
 
   const handleRemovePart = (id) => {
     setParts(parts.filter(p => p.id !== id));
@@ -208,6 +265,72 @@ export default function AddProject({ onAdd, onBack, initialData }) {
             </button>
           </div>
 
+          {assignableGroups.length > 0 && (
+            <div className="color-groups-panel">
+              <div className="color-groups-head">
+                <div>
+                  <div className="color-groups-title"><Palette size={16} /> Filament per warna</div>
+                  <p className="color-groups-hint">
+                    Warna dibaca otomatis dari nama part. Pilih satu filament untuk tiap warna —
+                    semua part dengan warna yang sama akan langsung terisi.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={handleAutoAssignAll}
+                  title="Pilih otomatis filament dari inventory untuk semua warna"
+                >
+                  <Wand2 size={14} /> Auto-pilih semua
+                </button>
+              </div>
+              <div className="color-groups-list">
+                {assignableGroups.map((group) => {
+                  const selectedId = colorGroupSpools[group.key]
+                    || spools.find(s => group.partIds.some(id => {
+                      const p = parts.find(x => x.id === id);
+                      return p && s.material === p.material && s.colorName === p.color;
+                    }))?.id
+                    || '';
+                  const aliases = (COLOR_DEFS_MAP[group.key]?.aliases) || [];
+                  const noMatch = spools.length > 0 && !spools.some(s => {
+                    const cn = (s.colorName || '').toLowerCase();
+                    return aliases.some(a => cn.includes(a)) || cn.includes(group.label.toLowerCase());
+                  });
+                  return (
+                    <div className="color-group-row" key={group.key}>
+                      <span className="color-swatch" style={{ background: group.hex }} />
+                      <div className="color-group-info">
+                        <span className="color-group-label">{group.label}</span>
+                        <span className="color-group-count">{group.count} part</span>
+                      </div>
+                      <select
+                        className="form-input"
+                        value={selectedId}
+                        onChange={(e) => {
+                          const spool = spools.find(s => s.id === e.target.value);
+                          handleGroupSpoolSelect(group.key, spool || null);
+                        }}
+                      >
+                        <option value="">-- Pilih Filament untuk warna ini --</option>
+                        {spools.map(s => (
+                          <option key={s.id} value={s.id}>
+                            {s.brand} {s.material} - {s.colorName}
+                          </option>
+                        ))}
+                      </select>
+                      {noMatch && (
+                        <span className="color-group-empty" title="Tidak ada filament dengan warna ini di inventory">
+                          ⚠ tidak ada di inventory
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <AnimatePresence>
             {parts.length === 0 ? (
               <div className="empty-state py-4">
@@ -224,7 +347,19 @@ export default function AddProject({ onAdd, onBack, initialData }) {
                     className="glass-card p-4 border-subtle"
                   >
                     <div className="flex-between mb-3">
-                      <span className="text-xs text-muted font-bold uppercase tracking-wider">Part #{index + 1}</span>
+                      <span className="text-xs text-muted font-bold uppercase tracking-wider">
+                        Part #{index + 1}
+                        {(() => {
+                          const det = detectColorFromName(part.name);
+                          if (!det) return null;
+                          return (
+                            <span className="text-xs text-dim" style={{ marginLeft: '0.5rem', textTransform: 'none' }}>
+                              <span className="color-swatch" style={{ background: det.hex, width: 12, height: 12, display: 'inline-block', verticalAlign: '-2px', marginRight: '0.3rem' }} />
+                              {det.label}
+                            </span>
+                          );
+                        })()}
+                      </span>
                       <button type="button" className="btn-icon text-error" onClick={() => handleRemovePart(part.id)}>
                         <Trash2 size={14} />
                       </button>

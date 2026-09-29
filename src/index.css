@@ -4051,4 +4051,116 @@ textarea.form-input {
   }
 }
 
+/* ============================================================
+   Color Groups (Create Project → Initial Parts)
+   Reads the color from each part name, groups parts by color and
+   lets one filament be picked per color instead of per part.
+   ============================================================ */
+.color-groups-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--accent-primary-soft);
+  padding: 0.9rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.color-groups-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.color-groups-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.color-groups-hint {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin: 0.2rem 0 0;
+  line-height: 1.4;
+  max-width: 46ch;
+}
+
+.color-groups-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.color-group-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+}
+
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  border: 2px solid var(--border-hover);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4) inset;
+}
+
+.color-group-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 0 0 auto;
+  width: 7.5rem;
+}
+
+.color-group-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.color-group-count {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.color-group-row .form-input {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.color-group-empty {
+  font-size: 0.75rem;
+  color: var(--accent-amber);
+}
+
+@media (max-width: 640px) {
+  .color-group-row {
+    flex-wrap: wrap;
+  }
+
+  .color-group-info {
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  .color-group-row .form-input {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
+
 
