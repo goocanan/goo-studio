@@ -618,10 +618,10 @@ export default function ProjectDetail({
                             {part.status?.toUpperCase()}
                           </button>
 
-                          <button className="btn-icon xs hover:text-primary transition-colors" onClick={() => openEditPartModal(part)} title="Edit Component">
+                          <button className="btn-icon btn-xs hover:text-primary transition-colors" onClick={() => openEditPartModal(part)} title="Edit Component">
                             <Edit3 size={12} />
                           </button>
-                          <button className="btn-icon xs hover:text-error transition-colors" onClick={() => onDeletePart(project.id, part.id)} title="Hapus Component">
+                          <button className="btn-icon btn-xs hover:text-error transition-colors" onClick={() => onDeletePart(project.id, part.id)} title="Hapus Component">
                             <Trash2 size={12} />
                           </button>
                         </div>

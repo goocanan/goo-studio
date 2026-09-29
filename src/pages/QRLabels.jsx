@@ -132,7 +132,7 @@ export default function QRLabels({ spools }) {
                     {entry.count} label · {entry.spoolIds.join(', ')}
                   </div>
                 </div>
-                <button className="btn btn-ghost" style={{ fontSize: '0.78rem' }}>
+                <button className="btn btn-ghost btn-xs">
                   Reprint
                 </button>
               </div>

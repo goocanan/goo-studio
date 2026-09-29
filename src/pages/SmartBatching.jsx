@@ -145,10 +145,10 @@ export default function SmartBatching({ spools }) {
                       <div className="progress-bar-fill" style={{ width: `${pct}%`, background: getWeightColor(pct) }} />
                     </div>
                     <div className="picklist-actions">
-                      <button className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '0.5rem 0.85rem' }}>
+                      <button className="btn btn-secondary btn-xs">
                         <SearchIcon style={{ width: 14, height: 14 }} /> Scan QR
                       </button>
-                      <button className="btn btn-primary" style={{ fontSize: '0.8rem', padding: '0.5rem 0.85rem' }}>
+                      <button className="btn btn-primary btn-xs">
                         <CheckCircle style={{ width: 14, height: 14 }} /> Confirm
                       </button>
                     </div>

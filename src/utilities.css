@@ -31,6 +31,21 @@
 .bg-purple-500\/10 { background:rgba(168,85,247,0.1) }
 .bg-surface { background:#0f0f14 }
 .bg-transparent { background:transparent }
+
+/* ================= button size modifiers (canonical) =================
+   Used as .btn .btn-sm / .btn .btn-lg / .btn .btn-full / .btn .btn-xxs
+   on top of any .btn-* variant. .btn-icon.xs also exists for icon-only. */
+.btn-full { width:100%; justify-content:center }
+.btn-xxs  { padding:.35rem .6rem; font-size:.72rem; gap:.35rem }
+.btn-xs   { padding:.4rem .7rem; font-size:.78rem; gap:.4rem }
+.btn-sm   { padding:.5rem .9rem; font-size:.8rem; gap:.45rem }
+.btn-md   { padding:.65rem 1.15rem; font-size:.85rem; gap:.5rem }
+.btn-lg   { padding:.85rem 1.5rem; font-size:.95rem; gap:.55rem }
+.btn-xl   { padding:1rem 1.85rem; font-size:1rem; gap:.6rem }
+
+.btn-icon.btn-xxs { padding:.25rem; border-radius:var(--radius-sm) }
+.btn-icon.btn-xs  { padding:.3rem;  border-radius:var(--radius-sm) }
+.btn-icon.btn-sm  { padding:.4rem;  border-radius:var(--radius-md) }
 .block { display:block }
 .border { border:1px solid var(--border) }
 .border-amber-500\/20 { border-color:rgba(245,158,11,0.2) }
