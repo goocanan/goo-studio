@@ -2292,6 +2292,98 @@ textarea.form-input {
   to { transform: rotate(360deg); }
 }
 
+/* Bulk send to project */
+.pricing-summary-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.pricing-summary-actions .btn {
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+}
+
+.pricing-bulk-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius-md);
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.pricing-bulk-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.pricing-plan-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.pricing-plan-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+}
+
+.pricing-plan-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.pricing-plan-action { white-space: nowrap; font-size: 0.75rem; }
+.pricing-plan-action.merge { color: var(--accent-cyan); }
+.pricing-plan-action.new { color: var(--accent-lime); }
+
+.pricing-plan-more {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.pricing-bulk-feedback {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  margin-bottom: 1rem;
+}
+
+.pricing-bulk-feedback.ok {
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.pricing-bulk-feedback.err {
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.08);
+}
+
+.pricing-feedback-detail {
+  margin-top: 0.25rem;
+  color: var(--text-dim);
+}
+
 
 /* ============================================================
    Project Cards & Visuals

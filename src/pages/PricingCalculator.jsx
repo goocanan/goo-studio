@@ -126,10 +126,15 @@ export default function PricingCalculator({ importData }) {
   const [sendNewName, setSendNewName] = useState('');
   const [sendFeedback, setSendFeedback] = useState(null); // { type, message }
 
+  // Bulk send state: send all items at once, auto-merge by name
+  const [bulkProjectId, setBulkProjectId] = useState('');
+  const [bulkFeedback, setBulkFeedback] = useState(null); // { type, message, summary }
+  const [bulkInProgress, setBulkInProgress] = useState(false);
+
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: ProjectService.getAll,
-    enabled: !!sendItem,
+    enabled: !!sendItem || !!bulkProjectId,
   });
 
   const sendMutation = useMutation({
@@ -226,6 +231,103 @@ export default function PricingCalculator({ importData }) {
     } catch (e) {
       setSendFeedback({ type: 'err', message: e?.message || 'Gagal mengirim ke project.' });
     }
+  };
+
+  // ── Bulk Send: all items at once, auto-merge by part name ──
+  const handleSendAll = async () => {
+    if (!bulkProjectId || results.length === 0) return;
+    setBulkInProgress(true);
+    setBulkFeedback(null);
+
+    const targetProject = projects.find((p) => p.id === bulkProjectId);
+    if (!targetProject) { setBulkInProgress(false); return; }
+
+    const existingParts = targetProject.parts || [];
+    // Normalise names for matching
+    const normalise = (s) => String(s).trim().toLowerCase();
+
+    // Plan: for each result (item + cost), find matching part by name or mark as new
+    const plan = results
+      .filter((r) => r.cost)
+      .map((r) => {
+        const { item, cost } = r;
+        if (!cost) return null;
+      const itemName = item.name.replace(/\.stl$/i, '');
+      const match = existingParts.find(
+        (pt) => normalise(pt.name) === normalise(itemName)
+      );
+      const weight = Math.max(0, Math.round(cost.weightPerUnit));
+      const minutes = Math.max(0, Math.round(cost.printHoursPerUnit * 60));
+      const size = item.bbox?.size;
+      const dims = Array.isArray(size)
+        ? {
+            dimX: Math.round(Number(size[0]) || 0),
+            dimY: Math.round(Number(size[1]) || 0),
+            dimZ: Math.round(Number(size[2]) || 0),
+          }
+        : { dimX: 0, dimY: 0, dimZ: 0 };
+      return { item, cost, match, weight, minutes, dims, name: itemName };
+    }).filter(Boolean);
+
+    let created = 0, updated = 0, errors = [];
+
+    for (const entry of plan) {
+      try {
+        if (entry.match) {
+          // Merge: update weight/time/dims; keep existing quantity + add incoming qty
+          const oldQty = Number(entry.match.quantity) || 1;
+          await sendMutation.mutateAsync({
+            projectId: bulkProjectId,
+            partId: entry.match.id,
+            updates: {
+              weight: entry.weight,
+              printDurationMinutes: entry.minutes,
+              ...entry.dims,
+              quantity: oldQty + (entry.item.quantity || 1),
+            },
+          });
+          updated++;
+        } else {
+          await sendCreateMutation.mutateAsync({
+            projectId: bulkProjectId,
+            part: {
+              name: entry.name,
+              material: MATERIALS[0],
+              color: 'Unknown',
+              weight: entry.weight,
+              printDurationMinutes: entry.minutes,
+              quantity: entry.item.quantity || 1,
+              ...entry.dims,
+            },
+          });
+          created++;
+        }
+      } catch (e) {
+        errors.push(`${entry.item.name}: ${e?.message || 'gagal'}`);
+      }
+    }
+
+    setBulkInProgress(false);
+    setBulkFeedback({
+      type: errors.length > 0 ? 'warn' : 'ok',
+      message:
+        errors.length > 0
+          ? `${updated} diperbarui, ${created} dibuat (${errors.length} gagal)`
+          : `${updated} component diperbarui, ${created} component baru dibuat`,
+      summary: errors.length > 0 ? errors.join('\n') : undefined,
+    });
+  };
+
+  const closeBulkSend = () => {
+    setBulkProjectId('');
+    setBulkFeedback(null);
+  };
+
+  const openBulkSend = () => {
+    setBulkProjectId('');
+    setBulkFeedback(null);
+    // Pre-select the first project if available
+    if (projects.length > 0) setBulkProjectId(projects[0].id);
   };
 
   // Persist to localStorage so values survive page switches and refreshes.
@@ -521,6 +623,96 @@ export default function PricingCalculator({ importData }) {
                       ? 'Buat'
                       : 'Kirim'}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bulkProjectId && (
+        <div className="modal-overlay" onClick={closeBulkSend}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Kirim Semua ke Project</h2>
+              <button className="btn-icon" onClick={closeBulkSend} type="button">✕</button>
+            </div>
+
+            <div className="modal-form">
+              <div className="pricing-bulk-preview">
+                <div className="pricing-bulk-count">
+                  <FileBox size={16} className="pricing-file-icon" />
+                  <span><strong>{results.filter((r) => r.cost).length} item</strong> akan dikirim</span>
+                </div>
+              </div>
+
+              {!bulkFeedback && (
+                <div className="pricing-bulk-plan">
+                  <div className="pricing-plan-label">Preview:</div>
+                  {results
+                    .filter((r) => r.cost)
+                    .slice(0, 5)
+                    .map((r) => {
+                      const { item, cost } = r;
+                      const itemName = item.name.replace(/\.stl$/i, '');
+                      const targetProject = projects.find((p) => p.id === bulkProjectId);
+                      const existingParts = targetProject?.parts || [];
+                      const match = existingParts.find(
+                        (pt) => String(pt.name).trim().toLowerCase() === itemName.toLowerCase()
+                      );
+                      return (
+                        <div key={item.id} className="pricing-plan-item">
+                          <span className="pricing-plan-name">{itemName}</span>
+                          {match ? (
+                            <span className="pricing-plan-action merge">
+                              ◆ merge qty (berat {Math.round(cost.weightPerUnit)}g)
+                            </span>
+                          ) : (
+                            <span className="pricing-plan-action new">
+                              + buat baru (berat {Math.round(cost.weightPerUnit)}g)
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  {results.filter((r) => r.cost).length > 5 && (
+                    <div className="pricing-plan-more">
+                      ... dan {results.filter((r) => r.cost).length - 5} item lain
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {bulkFeedback && (
+                <div className={`pricing-bulk-feedback ${bulkFeedback.type}`}>
+                  {bulkFeedback.type === 'ok' ? (
+                    <Check size={16} className="pricing-feedback-icon" />
+                  ) : (
+                    <AlertCircle size={16} className="pricing-feedback-icon" />
+                  )}
+                  <div className="pricing-feedback-text">
+                    <div className="pricing-feedback-message">{bulkFeedback.message}</div>
+                    {bulkFeedback.summary && (
+                      <div className="pricing-feedback-detail">{bulkFeedback.summary}</div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="modal-actions">
+                <button type="button" className="btn btn-ghost" onClick={closeBulkSend}>
+                  {bulkFeedback?.type === 'ok' ? 'Selesai' : 'Batal'}
+                </button>
+                {!bulkFeedback && (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSendAll}
+                    disabled={bulkInProgress}
+                  >
+                    <Send size={14} />
+                    {bulkInProgress ? 'Mengirim...' : 'Kirim Semua'}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -1071,14 +1263,24 @@ export default function PricingCalculator({ importData }) {
                 <span>Total harga jual</span>
                 <span>{formatRupiah(summary.sellTotal)}</span>
               </div>
-              <button
-                className="btn btn-secondary pricing-reset"
-                onClick={copySummary}
-                disabled={summary.count === 0}
-              >
-                {copied ? <Check size={16} /> : <Copy size={16} />}
-                {copied ? 'Tersalin!' : 'Salin Ringkasan'}
-              </button>
+              <div className="pricing-summary-actions">
+                <button
+                  className="btn btn-secondary"
+                  onClick={copySummary}
+                  disabled={summary.count === 0}
+                >
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                  {copied ? 'Tersalin!' : 'Salin Ringkasan'}
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={openBulkSend}
+                  disabled={results.filter((r) => r.cost).length === 0}
+                >
+                  <Send size={16} />
+                  Kirim Semua ke Project
+                </button>
+              </div>
             </div>
           </section>
 
