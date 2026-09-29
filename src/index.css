@@ -2293,6 +2293,33 @@ textarea.form-input {
   color: var(--text-dim);
 }
 
+/* Attach a project photo by pasting an image link */
+.image-url-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.image-url-row .form-input {
+  width: auto;
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.78rem;
+}
+
+.image-url-row .btn {
+  flex: 0 0 auto;
+}
+
+.image-url-error {
+  font-size: 0.7rem;
+  color: var(--accent-rose);
+  margin-top: 0.35rem;
+}
+
 /* ============================================================
    Aesthetic Project Detail
    ============================================================ */

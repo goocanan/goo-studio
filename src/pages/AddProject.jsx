@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { ArrowLeft, Plus, Trash2, Save, Package, Info, Zap, Droplet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MATERIALS } from '../lib/constants';
-import { optimizeImage } from '../lib/utils';
+import { optimizeImage, normalizeImageUrl } from '../lib/utils';
 import { useSpools } from '../hooks/useSpools';
 
 export default function AddProject({ onAdd, onBack, initialData }) {
   const { spools } = useSpools();
   const [name, setName] = useState(initialData?.name || '');
   const [image, setImage] = useState(initialData?.thumbnail || null);
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrlError, setImageUrlError] = useState('');
   const [notes, setNotes] = useState('');
   const [priority, setPriority] = useState('medium');
   const [parts, setParts] = useState(initialData?.parts?.map(p => ({
@@ -54,7 +56,19 @@ export default function AddProject({ onAdd, onBack, initialData }) {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
+      setImageUrlError('');
     }
+  };
+
+  const handleImageUrlApply = () => {
+    const url = normalizeImageUrl(imageUrl);
+    if (!url) {
+      setImageUrlError('Link tidak valid. Contoh: https://contoh.com/gambar.jpg');
+      return;
+    }
+    setImageUrlError('');
+    setImage(url);
+    setImageUrl('');
   };
 
   const handleSubmit = async (e) => {
@@ -112,7 +126,7 @@ export default function AddProject({ onAdd, onBack, initialData }) {
                       className="image-preview" 
                       alt="Project Preview" 
                     />
-                    <button type="button" className="image-remove-btn" onClick={() => setImage(null)}>×</button>
+                    <button type="button" className="image-remove-btn" onClick={() => { setImage(null); setImageUrlError(''); }}>×</button>
                   </div>
                 ) : (
                   <label className="image-upload-placeholder">
@@ -121,6 +135,25 @@ export default function AddProject({ onAdd, onBack, initialData }) {
                     <input type="file" accept="image/*" onChange={handleImageChange} hidden />
                   </label>
                 )}
+                <div className="image-url-row">
+                  <input
+                    type="url"
+                    className="form-input"
+                    placeholder="atau tempel link gambar (https://...)"
+                    value={imageUrl}
+                    onChange={(e) => { setImageUrl(e.target.value); if (imageUrlError) setImageUrlError(''); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleImageUrlApply(); } }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={handleImageUrlApply}
+                    disabled={!imageUrl.trim()}
+                  >
+                    Pakai
+                  </button>
+                </div>
+                {imageUrlError && <p className="image-url-error">{imageUrlError}</p>}
               </div>
             </div>
             <div className="flex-col gap-4">

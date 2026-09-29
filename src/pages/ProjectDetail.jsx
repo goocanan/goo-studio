@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { ArrowLeft, Plus, Trash2, CheckCircle, Clock, Save, Package, Scale, Settings, MoreVertical, Edit3, Box, Layers, Palette, Ruler } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PROJECT_STATUSES, PART_STATUSES, MATERIALS } from '../lib/constants';
-import { formatWeight, formatDuration, optimizeImage } from '../lib/utils';
+import { formatWeight, formatDuration, optimizeImage, normalizeImageUrl } from '../lib/utils';
 import { useSpools } from '../hooks/useSpools';
 
 export default function ProjectDetail({ 
@@ -14,6 +14,8 @@ export default function ProjectDetail({
   const [showPartModal, setShowPartModal] = useState(false);
   const [editingPart, setEditingPart] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrlError, setImageUrlError] = useState('');
 
   // Calculate project stats & breakdown
   const stats = useMemo(() => {
@@ -88,6 +90,25 @@ export default function ProjectDetail({
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleImageUrlApply = () => {
+    const url = normalizeImageUrl(imageUrl);
+    if (!url) {
+      setImageUrlError('Link tidak valid. Contoh: https://contoh.com/gambar.jpg');
+      return;
+    }
+    setImageUrlError('');
+    onUpdate(project.id, { image: url });
+    setEditForm(prev => ({ ...prev, image: url }));
+    setImageUrl('');
+  };
+
+  const handleImageClear = () => {
+    onUpdate(project.id, { image: null });
+    setEditForm(prev => ({ ...prev, image: null }));
+    setImageUrl('');
+    setImageUrlError('');
   };
 
   const [formState, setFormState] = useState({ 
@@ -640,7 +661,7 @@ export default function ProjectDetail({
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1.5 flex-1 min-w-0">
                       <input 
                         type="file" 
                         id="project-image-upload" 
@@ -648,12 +669,38 @@ export default function ProjectDetail({
                         accept="image/*"
                         onChange={handleImageUpload}
                       />
-                      <label 
-                        htmlFor="project-image-upload" 
-                        className={`btn btn-secondary btn-sm ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
-                      >
-                        {isUploading ? 'Mengunggah...' : 'Ubah Foto Proyek'}
-                      </label>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <label 
+                          htmlFor="project-image-upload" 
+                          className={`btn btn-secondary btn-sm ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                        >
+                          {isUploading ? 'Mengunggah...' : 'Ubah Foto Proyek'}
+                        </label>
+                        {project.image && (
+                          <button type="button" className="btn btn-danger btn-sm" onClick={handleImageClear}>
+                            Hapus
+                          </button>
+                        )}
+                      </div>
+                      <div className="image-url-row">
+                        <input
+                          type="url"
+                          className="form-input"
+                          placeholder="atau tempel link gambar (https://...)"
+                          value={imageUrl}
+                          onChange={(e) => { setImageUrl(e.target.value); if (imageUrlError) setImageUrlError(''); }}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleImageUrlApply(); } }}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={handleImageUrlApply}
+                          disabled={!imageUrl.trim()}
+                        >
+                          Pakai
+                        </button>
+                      </div>
+                      {imageUrlError && <p className="image-url-error">{imageUrlError}</p>}
                       <p className="text-xxs text-dim">Rekomendasi: Format 16:9 atau 1:1 (PNG/JPG)</p>
                     </div>
                   </div>

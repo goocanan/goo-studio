@@ -333,3 +333,28 @@ export async function optimizeImage(fileOrBase64, maxWidth = 1000, maxHeight = 1
     }
   });
 }
+
+/**
+ * True when the value is a usable remote image link (http/https).
+ * Lets users attach a project photo by pasting a URL instead of uploading a file.
+ */
+export function isRemoteImageUrl(value) {
+  if (typeof value !== 'string') return false;
+  return /^https?:\/\/\S+$/i.test(value.trim());
+}
+
+/**
+ * Normalise a pasted image link. Adds a missing https:// scheme so
+ * "example.com/pic.jpg" works, and returns null when it is not a usable link.
+ */
+export function normalizeImageUrl(value) {
+  if (typeof value !== 'string') return null;
+  let url = value.trim();
+  if (!url) return null;
+  if (!/^https?:\/\//i.test(url)) {
+    // Only auto-prefix something that looks like a host (has a dot before any slash)
+    if (!/^[\w.-]+\.[a-z]{2,}([/?#]|$)/i.test(url)) return null;
+    url = 'https://' + url;
+  }
+  return /^https?:\/\/\S+$/i.test(url) ? url : null;
+}
