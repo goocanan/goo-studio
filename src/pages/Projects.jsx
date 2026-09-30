@@ -4,10 +4,20 @@ import { motion } from 'framer-motion';
 import ProjectCard from '../components/project/ProjectCard';
 
 export default function Projects({ 
-  projects, onAddProject, onViewDetail 
+  projects, socialPosts = [], onAddProject, onViewDetail 
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('grid');
+
+  const postsByProject = useMemo(() => {
+    const m = new Map();
+    for (const p of socialPosts) {
+      const arr = m.get(p.projectId) || [];
+      arr.push(p);
+      m.set(p.projectId, arr);
+    }
+    return m;
+  }, [socialPosts]);
 
   // Statistics
   const stats = useMemo(() => ({
@@ -128,6 +138,7 @@ export default function Projects({
             >
               <ProjectCard 
                 project={project} 
+                socialPosts={postsByProject.get(project.id) || []}
                 onClick={() => onViewDetail(project.id)}
               />
             </motion.div>

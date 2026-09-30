@@ -521,6 +521,14 @@ export default function ProjectDetail({
           </div>
         )}
 
+        {/* Social Media Tracking — atas, setelah hero */}
+        <SocialTrackingCard
+          posts={socialPosts}
+          onCreate={createPost}
+          onUpdate={updatePost}
+          onDelete={deletePost}
+        />
+
         {/* Components Section (Responsive Mobile Rows) */}
         <div className="detail-section mb-8 sm:mb-12">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
@@ -644,13 +652,6 @@ export default function ProjectDetail({
         {/* Configuration & Notes Section */}
         <div className="grid grid-cols-1 gap-6 mb-12 border-t border-subtle pt-8">
 
-          {/* Social Media Tracking */}
-          <SocialTrackingCard
-            posts={socialPosts}
-            onCreate={createPost}
-            onUpdate={updatePost}
-            onDelete={deletePost}
-          />
            <div className="glass-card p-5 rounded-2xl border border-subtle flex flex-col justify-between">
             <div>
               <h3 className="heading-sm mb-4 flex items-center gap-2 text-white">

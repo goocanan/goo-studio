@@ -150,6 +150,7 @@ export default function App() {
         return (
           <Projects 
             projects={projects}
+            socialPosts={allSocialPosts}
             onAddProject={() => setCurrentPage('add-project')}
             onViewDetail={(id) => {
               setSelectedProjectId(id);

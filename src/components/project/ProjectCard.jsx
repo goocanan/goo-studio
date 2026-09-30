@@ -1,9 +1,23 @@
-import React from 'react';
-import { Package, MoreVertical, ExternalLink, Calendar } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Package, MoreVertical, ExternalLink, Calendar, Video, Eye, Heart, BarChart3, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PART_STATUSES } from '../../lib/constants';
 
-export default function ProjectCard({ project, onClick }) {
+function fmtCompact(n) {
+  if (n == null || n === 0) return '0';
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return String(n);
+}
+
+const PLATFORM_DOT = {
+  youtube_shorts: '#ff0033',
+  instagram_reels: '#e4405f',
+  facebook_reels: '#1877f2',
+  tiktok: '#ffffff',
+};
+
+export default function ProjectCard({ project, socialPosts = [], onClick }) {
   const totalParts = project.parts?.length || 0;
   const totalUnits = project.parts?.reduce((sum, p) => sum + (parseInt(p.quantity) || 1), 0) || 0;
   const doneParts = project.parts?.filter(p => p.status === PART_STATUSES.DONE).length || 0;
@@ -17,6 +31,23 @@ export default function ProjectCard({ project, onClick }) {
     day: 'numeric',
     month: 'short',
   }) : 'No date';
+
+  const socialSummary = useMemo(() => {
+    if (!socialPosts || socialPosts.length === 0) return null;
+    let views = 0, likes = 0, topScore = 0, erSum = 0, erN = 0;
+    const platCounts = {};
+    for (const p of socialPosts) {
+      views += Number(p.views) || 0;
+      likes += Number(p.likes) || 0;
+      const sc = Number(p.contentScore) || 0;
+      if (sc > topScore) topScore = sc;
+      const er = Number(p.engagementRate) || 0;
+      if (Number(p.views) > 0) { erSum += er; erN++; }
+      platCounts[p.platform] = (platCounts[p.platform] || 0) + 1;
+    }
+    const avgEr = erN > 0 ? Math.round(erSum / erN) : 0;
+    return { count: socialPosts.length, views, likes, topScore, avgEr, platCounts };
+  }, [socialPosts]);
 
   return (
     <motion.div 
@@ -89,6 +120,57 @@ export default function ProjectCard({ project, onClick }) {
           />
         </div>
       </div>
+
+      {socialSummary && (
+        <div
+          className="project-card-social"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            flexWrap: 'wrap',
+            padding: '0.55rem 0.85rem',
+            margin: '0.6rem 0.85rem 0',
+            borderRadius: '10px',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            fontSize: '0.7rem',
+            lineHeight: 1,
+          }}
+        >
+          <span className="flex items-center gap-1 font-semibold" style={{ color: 'var(--text)' }}>
+            <Video size={11} className="opacity-80" /> {socialSummary.count} post{socialSummary.count > 1 ? 's' : ''}
+          </span>
+          <span style={{ opacity: 0.25 }}>·</span>
+          <span className="flex items-center gap-1 text-dim">
+            <Eye size={11} /> {fmtCompact(socialSummary.views)}
+          </span>
+          <span className="flex items-center gap-1 text-dim">
+            <Heart size={11} /> {fmtCompact(socialSummary.likes)}
+          </span>
+          <span className="flex items-center gap-1" style={{ color: socialSummary.avgEr >= 700 ? 'var(--success, #22c55e)' : 'var(--text-dim)' }}>
+            <TrendingUp size={11} /> {(socialSummary.avgEr / 100).toFixed(1)}% ER
+          </span>
+          <span className="flex items-center gap-1" style={{ color: socialSummary.topScore >= 10000 ? 'var(--success, #22c55e)' : 'var(--text-dim)' }}>
+            <BarChart3 size={11} /> {fmtCompact(socialSummary.topScore)}
+          </span>
+          <span className="flex items-center gap-1 ml-auto">
+            {Object.entries(socialSummary.platCounts).map(([plat, n]) => (
+              <span
+                key={plat}
+                title={`${plat}: ${n} post`}
+                style={{
+                  width: 7, height: 7, borderRadius: 999,
+                  background: PLATFORM_DOT[plat] || 'var(--text-dim)',
+                  display: 'inline-block',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  boxShadow: '0 0 0 1px rgba(0,0,0,0.25)',
+                }}
+              />
+            ))}
+          </span>
+        </div>
+      )}
 
       <div className="project-card-footer">
         <div className="project-colors">
