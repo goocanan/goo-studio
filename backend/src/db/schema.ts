@@ -139,3 +139,29 @@ export const contents = pgTable("contents", {
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
+
+// --- Social Media Posts Table ---
+export const socialPosts = pgTable("social_posts", {
+  id: text("id").primaryKey(),
+  userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade" }),
+  projectId: text("projectId").references(() => projects.id, { onDelete: "cascade" }),
+  platform: text("platform").notNull(), // youtube_shorts, instagram_reels, facebook_reels, tiktok
+  title: text("title").notNull(),
+  postUrl: text("post_url"),
+  publishedAt: timestamp("published_at"),
+  // Analytics metrics
+  views: integer("views").notNull().default(0),
+  likes: integer("likes").notNull().default(0),
+  comments: integer("comments").notNull().default(0),
+  shares: integer("shares").notNull().default(0),
+  saves: integer("saves").notNull().default(0),
+  clicks: integer("clicks").notNull().default(0),
+  // Computed scores (stored for history)
+  contentScore: integer("content_score").notNull().default(0),
+  engagementRate: integer("engagement_rate").notNull().default(0), // stored as bps*100 (e.g., 875 => 8.75%)
+  // Status
+  status: text("status").notNull().default("draft"), // draft, scheduled, published
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});

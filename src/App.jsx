@@ -5,6 +5,7 @@ import { useSpools } from './hooks/useSpools';
 import { useProjects } from './hooks/useProjects';
 import { useFileManager } from './hooks/useFileManager';
 import { useSession } from './lib/auth-client';
+import { useSocialPosts } from './hooks/useSocialPosts';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -73,6 +74,16 @@ export default function App() {
     isLoading: isLoadingProjects
   } = useProjects();
 
+  const { posts: allSocialPosts, fetchPosts: fetchAllSocialPosts } = useSocialPosts(null);
+
+  useEffect(() => {
+    fetchAllSocialPosts();
+  }, [fetchAllSocialPosts]);
+
+  useEffect(() => {
+    if (currentPage === 'dashboard') fetchAllSocialPosts();
+  }, [currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Only show the global loading screen if we have NO data at all (Initial boot)
   // Subsequent background refetches should NOT trigger the full-page loader
   const isInitialLoading = isPending || 
@@ -131,6 +142,7 @@ export default function App() {
             spoolStats={spoolStats} 
             projectStats={projectStats}
             activity={activity} 
+            socialPosts={allSocialPosts}
             onNavigate={navProps.onNavigate}
           />
         );

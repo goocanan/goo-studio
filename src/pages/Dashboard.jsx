@@ -4,8 +4,9 @@ import {
   Activity, Package
 } from 'lucide-react';
 import { formatWeight, formatRelativeDate } from '../lib/utils';
+import { SocialAnalyticsSection } from '../components/SocialTracking';
 
-export default function Dashboard({ spoolStats, projectStats, activity, onNavigate }) {
+export default function Dashboard({ spoolStats, projectStats, activity, onNavigate, socialPosts = [] }) {
 
   return (
     <div className="animate-in">
@@ -68,7 +69,8 @@ export default function Dashboard({ spoolStats, projectStats, activity, onNaviga
 
       <div className="layout-split">
         <div className="layout-main">
-          <section className="section mb-6">
+          <SocialAnalyticsSection posts={socialPosts} />
+          <section className="section mb-6 mt-6">
             <div className="section-header">
               <Folder size={16} /> Project Progress
             </div>

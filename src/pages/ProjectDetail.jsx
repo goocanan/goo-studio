@@ -4,11 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PROJECT_STATUSES, PART_STATUSES, MATERIALS } from '../lib/constants';
 import { formatWeight, formatDuration, optimizeImage, normalizeImageUrl } from '../lib/utils';
 import { useSpools } from '../hooks/useSpools';
+import { useSocialPosts } from '../hooks/useSocialPosts';
+import { SocialTrackingCard } from '../components/SocialTracking';
 
 export default function ProjectDetail({ 
   project, onUpdate, onDelete, onAddPart, onUpdatePart, onDeletePart, onBack 
 }) {
   const { spools } = useSpools();
+  const { posts: socialPosts, fetchPosts, createPost, updatePost, deletePost } = useSocialPosts(project.id);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ ...project });
   const [showPartModal, setShowPartModal] = useState(false);
@@ -16,6 +19,10 @@ export default function ProjectDetail({
   const [isUploading, setIsUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [imageUrlError, setImageUrlError] = useState('');
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   // Calculate project stats & breakdown
   const stats = useMemo(() => {
@@ -636,8 +643,15 @@ export default function ProjectDetail({
 
         {/* Configuration & Notes Section */}
         <div className="grid grid-cols-1 gap-6 mb-12 border-t border-subtle pt-8">
-          {/* Left Column: Photo Configuration & Notes */}
-          <div className="glass-card p-5 rounded-2xl border border-subtle flex flex-col justify-between">
+
+          {/* Social Media Tracking */}
+          <SocialTrackingCard
+            posts={socialPosts}
+            onCreate={createPost}
+            onUpdate={updatePost}
+            onDelete={deletePost}
+          />
+           <div className="glass-card p-5 rounded-2xl border border-subtle flex flex-col justify-between">
             <div>
               <h3 className="heading-sm mb-4 flex items-center gap-2 text-white">
                 <Settings size={18} className="text-primary" /> Catatan & Foto Proyek
