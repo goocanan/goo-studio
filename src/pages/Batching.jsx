@@ -469,7 +469,7 @@ export default function Batching({
                       <button 
                         className="btn btn-ghost btn-sm text-error"
                         onClick={() => {
-                          if (window.confirm('Batalkan batch ini? Komponen akan kembali ke status pending.')) {
+                          if (window.confirm('Batalkan batch ini? Parts akan dikembalikan ke status pending.')) {
                             deleteBatch(batch.id);
                           }
                         }}

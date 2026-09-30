@@ -81,13 +81,20 @@ export class BatchService {
     const [batch] = await db.select().from(batches).where(eq(batches.id, id));
     if (!batch) throw new Error("Batch not found");
 
-    await db.delete(batches).where(eq(batches.id, id));
+    return await db.transaction(async (tx) => {
+      // Restore parts to pending and unbind from batch
+      await tx.update(parts)
+        .set({ batchId: null, status: "pending", updatedAt: new Date() })
+        .where(eq(parts.batchId, id));
 
-    await db.insert(activityLog).values({
-      userId,
-      message: `Batch ${id} dihapus dari riwayat.`
+      await tx.delete(batches).where(eq(batches.id, id));
+
+      await tx.insert(activityLog).values({
+        userId,
+        message: `Batch ${id} dibatalkan, parts kembali ke pending.`
+      });
+
+      return { success: true };
     });
-
-    return { success: true };
   }
 }
