@@ -465,12 +465,25 @@ export default function Batching({
                         <span className="batching-spool-id">{batch.spoolId?.substring(0, 10)}...</span>
                       )}
                     </div>
-                    <button 
-                      className="btn btn-primary btn-sm"
-                      onClick={() => completeBatch(batch.id)}
-                    >
-                      <CheckCircle size={14} /> Mark Done
-                    </button>
+                    <div className="flex gap-2">
+                      <button 
+                        className="btn btn-ghost btn-sm text-error"
+                        onClick={() => {
+                          if (window.confirm('Batalkan batch ini? Komponen akan kembali ke status pending.')) {
+                            deleteBatch(batch.id);
+                          }
+                        }}
+                        title="Batalkan batch"
+                      >
+                        <XCircle size={14} /> Cancel
+                      </button>
+                      <button 
+                        className="btn btn-primary btn-sm"
+                        onClick={() => completeBatch(batch.id)}
+                      >
+                        <CheckCircle size={14} /> Mark Done
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
                 );
