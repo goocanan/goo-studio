@@ -8,6 +8,7 @@ import { spoolRouter } from "./routes/spool.routes";
 import { batchRouter } from "./routes/batch.routes";
 import { userRouter } from "./routes/user.routes";
 import { socialPostRouter } from "./routes/social-post.routes";
+import { flowSyncRouter } from "./routes/flow-sync.routes";
 import { toNodeHandler } from "better-auth/node";
 
 dotenv.config();
@@ -63,6 +64,7 @@ app.use("/api/spools", spoolRouter);
 app.use("/api/batches", batchRouter);
 app.use("/api/user", userRouter);
 app.use("/api/social-posts", socialPostRouter);
+app.use("/api/flow-sync", flowSyncRouter);
 
 // Error handler
 app.use((err: any, req: any, res: any, next: any) => {

@@ -73,6 +73,8 @@ export const inventory = pgTable("inventory", {
   productLink: text("product_link"),
   colorHex: text("color_hex"),
   purchaseDate: timestamp("purchase_date"),
+  currentWeight: integer("current_weight"),
+  initialWeight: integer("initial_weight"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -164,4 +166,15 @@ export const socialPosts = pgTable("social_posts", {
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// --- Inventory Transactions Table (sync with 3DFlow) ---
+export const inventoryTransactions = pgTable("inventory_transactions", {
+  id: text("id").primaryKey(),
+  inventoryId: text("inventory_id").notNull().references(() => inventory.id, { onDelete: "cascade" }),
+  transactionType: text("transaction_type").notNull(), // restock, usage, adjustment, waste
+  weightChange: integer("weight_change").notNull(), // positive for restock/add, negative for usage/waste
+  referenceId: text("reference_id"), // batchId, orderId, sync job id
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
