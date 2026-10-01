@@ -5,8 +5,9 @@ import { MATERIALS } from '../lib/constants';
 import { optimizeImage, normalizeImageUrl } from '../lib/utils';
 import { groupPartsByColor, detectColorFromName, matchSpoolForColor, COLOR_DEFS_MAP } from '../lib/colors';
 import { useSpools } from '../hooks/useSpools';
+import { analyzeSTLFile } from '../lib/stl';
 
-export default function AddProject({ onAdd, onBack, initialData }) {
+export default function AddProject({ onAdd, onBack, initialData, fileManager, onLaunchToPricing }) {
   const { spools } = useSpools();
   const [name, setName] = useState(initialData?.name || '');
   const [image, setImage] = useState(initialData?.thumbnail || null);
@@ -141,7 +142,7 @@ export default function AddProject({ onAdd, onBack, initialData }) {
       }
     }
 
-    onAdd({
+    const projectData = {
       name,
       image: finalImage,
       notes,
@@ -151,7 +152,49 @@ export default function AddProject({ onAdd, onBack, initialData }) {
         ...rest,
         printDurationMinutes: (hours || 0) * 60 + (minutes || 0)
       }))
-    });
+    };
+
+    const proj = await onAdd(projectData);
+    
+    // Launch to pricing: read STL files from disk, parse, and send to pricing calculator
+    if (proj && fileManager && onLaunchToPricing) {
+      const stlParts = parts.filter(p => p.path && /\.stl$/i.test(p.name));
+      
+      if (stlParts.length > 0 && fileManager.getFileData) {
+        const { getFileData } = fileManager;
+        const parsed = [];
+        let unreadable = 0;
+        
+        for (const part of stlParts) {
+          try {
+            const file = await getFileData(part.path);
+            if (!file) continue;
+            
+            const geo = await analyzeSTLFile(file);
+            parsed.push({
+              id: `stl-launch-${Date.now()}-${parsed.length}`,
+              name: part.name,
+              size: file.size,
+              quantity: part.quantity || 1,
+              material: part.material || MATERIALS[0],
+              printHours: part.hours || 0,
+              ...geo,
+              error: null
+            });
+          } catch {
+            unreadable += 1;
+          }
+        }
+        
+        if (parsed.length > 0) {
+          onLaunchToPricing({
+            items: parsed,
+            projectName: name,
+            skipped: unreadable
+          });
+        }
+      }
+    }
   };
 
   return (

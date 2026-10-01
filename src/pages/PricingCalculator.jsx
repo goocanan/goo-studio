@@ -349,15 +349,22 @@ export default function PricingCalculator({ importData }) {
   }, [items]);
 
   // Items handed over from the File Manager ("Hitung Harga" on a project folder)
-  // already carry their parsed geometry, so they drop straight into the list.
-  // The token makes this apply exactly once per import, never on re-renders.
+  // or from AddProject ("Launch Project") already carry their parsed geometry, so they
+  // drop straight into the list. The token makes this apply exactly once per import,
+  // never on re-renders. If clear=true, wipe the existing items first.
   const appliedImportToken = useRef(null);
   useEffect(() => {
     if (!importData || !Array.isArray(importData.items) || importData.items.length === 0) return;
     if (appliedImportToken.current === importData.token) return;
     appliedImportToken.current = importData.token;
 
-    setItems((prev) => [...prev, ...importData.items]);
+    if (importData.clear) {
+      // Launch from AddProject: clear old items, then add new ones
+      setItems([...importData.items]);
+    } else {
+      // Append from File Manager Hitung Harga: merge with existing
+      setItems((prev) => [...prev, ...importData.items]);
+    }
     setImportNotice({
       count: importData.items.length,
       projectName: importData.projectName || 'folder project',

@@ -160,14 +160,21 @@ export default function App() {
         );
       case 'add-project':
         return (
-          <AddProject 
+          <AddProject
             initialData={fileImportData}
+            fileManager={fileManager}
             onAdd={async (newProj) => {
               const proj = await addProject(newProj);
               if (proj) {
                 setSelectedProjectId(proj.id);
                 setCurrentPage('project-detail');
               }
+              return proj;
+            }}
+            onLaunchToPricing={({ items, projectName, skipped }) => {
+              // Clear old pricing calculator files, then push the newly launched project's STL files.
+              setPricingImport({ items, projectName, skipped, token: Date.now(), clear: true });
+              setCurrentPage('pricing');
             }}
             onBack={() => setCurrentPage('projects')}
           />
