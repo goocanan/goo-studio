@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Box, Check, XCircle, Trash2, Ruler, Grid3x3, RotateCcw } from 'lucide-react';
+import { Zap, Package, CheckCircle, AlertCircle, ChevronRight, Layers, Printer, Box, Check, XCircle, Trash2, Ruler, Grid3x3, RotateCcw, ShieldOff } from 'lucide-react';
 import { formatWeight, packBed, partFootprint } from '../lib/utils';
 import { BED_PLATES } from '../lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,6 +13,8 @@ export default function Batching({
   const [selectedParts, setSelectedParts] = useState({});
   // State for selected bed plate per group: { [groupKey]: bedId }
   const [selectedBeds, setSelectedBeds] = useState({});
+  // State for bed override per group: { [groupKey]: boolean }
+  const [bedOverrides, setBedOverrides] = useState({});
 
   const bedById = (id) => BED_PLATES.find(b => b.id === id);
 
@@ -42,11 +44,12 @@ export default function Batching({
   // while it still fits the plate — otherwise the freed space must be used first.
   const togglePart = (group, key, part) => {
     const bedId = selectedBeds[key];
+    const isOverridden = bedOverrides[key];
     if (isPartSelected(part.id)) {
       setSelectedParts(prev => ({ ...prev, [part.id]: false }));
       return;
     }
-    if (bedId) {
+    if (bedId && !isOverridden) {
       const bed = bedById(bedId);
       const current = getSelectedIds(group);
       const trial = [...current, part.id];
@@ -63,8 +66,9 @@ export default function Batching({
 
   const toggleGroupSelection = (group, selectAll = true) => {
     const key = `${group.material}-${group.color}`;
-    if (selectAll && selectedBeds[key]) {
-      // With a bed chosen, "All" fills the plate with only what fits.
+    const isOverridden = bedOverrides[key];
+    if (selectAll && selectedBeds[key] && !isOverridden) {
+      // With a bed chosen and no override, "All" fills the plate with only what fits.
       autoFit(group, key);
       return;
     }
@@ -84,6 +88,7 @@ export default function Batching({
 
     // Filter parts based on selection. If not explicitly in selectedParts, assume selected.
     const bed = bedById(selectedBeds[key]);
+    const isOverridden = bedOverrides[key];
     let selectedGroupParts = group.parts.filter(p => isPartSelected(p.id));
 
     if (selectedGroupParts.length === 0) {
@@ -91,8 +96,8 @@ export default function Batching({
       return;
     }
 
-    // Safety net: with a bed chosen, never send parts that don't fit the plate.
-    if (bed) {
+    // Safety net: with a bed chosen and NO override, never send parts that don't fit.
+    if (bed && !isOverridden) {
       const fit = packBed(group.parts, bed.width, bed.depth, {
         priorityIds: selectedGroupParts.map(p => p.id),
       });
@@ -270,7 +275,7 @@ export default function Batching({
                             </option>
                           ))}
                         </select>
-                        {bed && (
+                        {bed && !bedOverrides[key] && (
                           <button
                             type="button"
                             className="btn btn-ghost btn-sm batching-refit-btn"
@@ -287,14 +292,17 @@ export default function Batching({
                           <div className="batching-fill-track">
                             <div
                               className="batching-fill-bar"
-                              style={{ width: `${Math.min(100, fillPercent)}%` }}
+                              style={{
+                                width: `${Math.min(100, fillPercent)}%`,
+                                ...(bedOverrides[key] && fillPercent > 100 ? { background: 'var(--accent-amber)' } : {})
+                              }}
                             />
                           </div>
                           <div className="batching-fill-meta">
                             <span><strong>{fillPercent}%</strong> terisi</span>
                             <span>{groupSelectedParts.length}/{group.parts.length} komponen dipilih</span>
                           </div>
-                          {overflowSet.size > 0 && (
+                          {overflowSet.size > 0 && !bedOverrides[key] && (
                             <div className="batching-warning">
                               <AlertCircle size={12} /> {overflowSet.size} komponen terpilih tidak muat di bed ini.
                             </div>
@@ -302,6 +310,25 @@ export default function Batching({
                           {unknownCount > 0 && (
                             <div className="batching-hint">
                               <Ruler size={12} /> {unknownCount} komponen belum punya ukuran (tidak bisa dihitung otomatis).
+                            </div>
+                          )}
+
+                          {/* Bed Override Toggle */}
+                          <div
+                            className={`batching-override-toggle ${bedOverrides[key] ? 'active' : ''}`}
+                            onClick={() => setBedOverrides(prev => ({ ...prev, [key]: !prev[key] }))}
+                          >
+                            <div className="batching-override-switch">
+                              <div className="batching-override-knob" />
+                            </div>
+                            <ShieldOff size={13} />
+                            <span>Override Bed Constraint</span>
+                          </div>
+
+                          {bedOverrides[key] && (
+                            <div className="batching-override-warning">
+                              <AlertCircle size={13} />
+                              <span>Bed constraint dimatikan — semua komponen bisa dipilih meskipun melebihi ukuran bed plate. Pastikan Anda tahu apa yang Anda lakukan.</span>
                             </div>
                           )}
                         </div>

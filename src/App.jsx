@@ -74,15 +74,8 @@ export default function App() {
     isLoading: isLoadingProjects
   } = useProjects();
 
-  const { posts: allSocialPosts, fetchPosts: fetchAllSocialPosts } = useSocialPosts(null);
+  const { posts: allSocialPosts } = useSocialPosts(null);
 
-  useEffect(() => {
-    fetchAllSocialPosts();
-  }, [fetchAllSocialPosts]);
-
-  useEffect(() => {
-    if (currentPage === 'dashboard') fetchAllSocialPosts();
-  }, [currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Only show the global loading screen if we have NO data at all (Initial boot)
   // Subsequent background refetches should NOT trigger the full-page loader

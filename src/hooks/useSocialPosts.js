@@ -1,41 +1,70 @@
-import { useState, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SocialPostService } from "../api/social-posts.service.js";
+import { useCallback } from "react";
 
 export function useSocialPosts(projectId) {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
 
-  const fetchPosts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = projectId
-        ? await SocialPostService.getByProject(projectId)
-        : await SocialPostService.getAll();
-      setPosts(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError(err?.response?.data?.error || err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId]);
+  const queryKey = projectId
+    ? ["socialPosts", projectId]
+    : ["socialPosts", "all"];
 
-  const createPost = async (payload) => {
-    const created = await SocialPostService.create(projectId, payload);
-    setPosts((prev) => [...prev, created]);
-    return created;
-  };
+  const {
+    data: posts = [],
+    isLoading: loading,
+    error: queryError,
+    refetch: fetchPosts,
+  } = useQuery({
+    queryKey,
+    queryFn: () =>
+      projectId
+        ? SocialPostService.getByProject(projectId)
+        : SocialPostService.getAll(),
+    select: (data) => (Array.isArray(data) ? data : []),
+  });
 
-  const updatePost = async (postId, payload) => {
-    const updated = await SocialPostService.update(projectId, postId, payload);
-    setPosts((prev) => prev.map((p) => (p.id === postId ? updated : p)));
-    return updated;
-  };
+  const error = queryError?.response?.data?.error || queryError?.message || null;
 
-  const deletePost = async (postId) => {
-    await SocialPostService.delete(projectId, postId);
-    setPosts((prev) => prev.filter((p) => p.id !== postId));
-  };
+  const createPostMutation = useMutation({
+    mutationFn: (payload) => SocialPostService.create(projectId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["socialPosts", "all"] });
+    },
+  });
+
+  const updatePostMutation = useMutation({
+    mutationFn: ({ postId, payload }) =>
+      SocialPostService.update(projectId, postId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["socialPosts", "all"] });
+    },
+  });
+
+  const deletePostMutation = useMutation({
+    mutationFn: (postId) => SocialPostService.delete(projectId, postId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["socialPosts", "all"] });
+    },
+  });
+
+  const createPost = useCallback(
+    async (payload) => createPostMutation.mutateAsync(payload),
+    [createPostMutation]
+  );
+
+  const updatePost = useCallback(
+    async (postId, payload) =>
+      updatePostMutation.mutateAsync({ postId, payload }),
+    [updatePostMutation]
+  );
+
+  const deletePost = useCallback(
+    async (postId) => deletePostMutation.mutateAsync(postId),
+    [deletePostMutation]
+  );
 
   return { posts, loading, error, fetchPosts, createPost, updatePost, deletePost };
 }
