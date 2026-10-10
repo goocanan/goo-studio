@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/layout/Sidebar';
 import BottomNav from './components/layout/BottomNav';
 import { useSpools } from './hooks/useSpools';
@@ -41,6 +41,14 @@ class ErrorBoundary extends React.Component {
 export default function App() {
   const { data: session, isPending } = useSession();
   
+  // Track whether session has been resolved at least once.
+  // After the first resolution, never show the full-page loader for session again.
+  const sessionResolved = useRef(false);
+  if (!isPending && !sessionResolved.current) {
+    sessionResolved.current = true;
+  }
+  const isSessionPending = isPending && !sessionResolved.current;
+
   const [currentPage, setCurrentPage] = useState(() => localStorage.getItem('goo-currentPage') || 'dashboard');
   const [selectedProjectId, setSelectedProjectId] = useState(() => localStorage.getItem('goo-selectedProjectId') || null);
   const [fileImportData, setFileImportData] = useState(null);
@@ -79,7 +87,7 @@ export default function App() {
 
   // Only show the global loading screen if we have NO data at all (Initial boot)
   // Subsequent background refetches should NOT trigger the full-page loader
-  const isInitialLoading = isPending || 
+  const isInitialLoading = isSessionPending || 
     (isLoadingProjects && projects.length === 0) || 
     (isLoadingSpools && spools.length === 0);
 
