@@ -7,7 +7,8 @@
 // Aliases are matched as whole words inside the part name (case-insensitive).
 const COLOR_DEFS = [
   { key: 'black',      label: 'Hitam',      hex: '#1c1c1e', aliases: ['black', 'hitam', 'noir', 'blk'] },
-  { key: 'white',      label: 'Putih',      hex: '#f5f5f7', aliases: ['white', 'putih', 'wht', 'bone', 'ivory', 'beige', 'cream'] },
+  { key: 'white',      label: 'Putih',      hex: '#f5f5f7', aliases: ['white', 'putih', 'wht', 'bone', 'ivory'] },
+  { key: 'beige',      label: 'Beige',      hex: '#d4c5a9', aliases: ['beige', 'cream', 'krem'] },
   { key: 'grey',       label: 'Abu-abu',    hex: '#8e8e93', aliases: ['grey', 'gray', 'abu', 'silver', 'perak', 'steel'] },
   { key: 'red',        label: 'Merah',      hex: '#e23b3b', aliases: ['red', 'merah', 'maroon', 'merah tua'] },
   { key: 'orange',     label: 'Oranye',     hex: '#f08a24', aliases: ['orange', 'oranye', 'jingga'] },

@@ -1,4 +1,5 @@
 import { DEFAULT_LOW_STOCK_THRESHOLD, BED_MARGIN_MM } from './constants';
+import { detectColorFromName } from './colors';
 
 /**
  * Generate a spool ID based on material type and existing spools.
@@ -155,11 +156,23 @@ export function groupPartsByColorMaterial(projects) {
       // Only batch parts that are 'pending' or 'ready'
       if (part.status === 'done' || part.status === 'printing') return;
 
-      const key = `${part.material || part.materialType}|${part.color || part.colorName}`;
+      const rawColor = part.color || part.colorName || '';
+      const material = part.material || part.materialType || '';
+
+      // Normalise the color through the canonical color detector so that
+      // spool names like "Lite WHITE" and "Bone White" resolve to 'white',
+      // while "Beige" resolves to 'beige' — keeping them in separate groups.
+      let normalizedColor = rawColor;
+      const detected = detectColorFromName(rawColor);
+      if (detected) {
+        normalizedColor = detected.label;   // e.g. "Putih", "Beige", "Hitam"
+      }
+
+      const key = `${material}|${normalizedColor}`;
       if (!groups[key]) {
         groups[key] = {
-          material: part.material || part.materialType,
-          color: part.color || part.colorName,
+          material,
+          color: normalizedColor,
           totalQuantity: 0,
           parts: [],
         };
